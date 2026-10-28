@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Buscar donación · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <h1>Buscar donación</h1>
+
+  <% if (mensaje) { %>
+    <p class="error" role="alert"><%= mensaje %></p>
+  <% } %>
+
+  <form method="get" action="/buscar">
+    <label for="codigo">Código de la donación (ej. D-0012)</label>
+    <input id="codigo" name="codigo" type="text" value="<%= codigo %>" required autocomplete="off">
+    <button type="submit">Buscar</button>
+  </form>
+
+  <p><a href="/">Volver al inicio</a></p>
+</body>
+</html>

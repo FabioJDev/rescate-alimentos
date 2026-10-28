@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Donación <%= donacion.codigo %> · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <h1>Donación <%= donacion.codigo %></h1>
+  <p class="estado <%= donacion.vencida ? 'estado-vencida' : 'estado-' + donacion.estado %>">Estado: <strong><%= estadoTexto %></strong></p>
+
+  <div class="tarjeta">
+    <p class="tarjeta-titulo"><%= donacion.tipo_alimento %> · <%= donacion.cantidad %> <%= donacion.unidad %></p>
+    <p>Donante: <%= donacion.donante_nombre %></p>
+    <p>Recoger en: <%= donacion.punto_recogida %> (zona <%= donacion.zona %>)</p>
+    <p>Hora límite: <%= horaLimite %></p>
+  </div>
+
+  <h2>Historial</h2>
+  <ol class="historial">
+    <% historial.forEach((paso) => { %>
+      <li><strong><%= paso.cuando %></strong><br><%= paso.texto %></li>
+    <% }) %>
+  </ol>
+
+  <p><a href="/buscar">Buscar otra donación</a></p>
+  <p><a href="/">Volver al inicio</a></p>
+</body>
+</html>
