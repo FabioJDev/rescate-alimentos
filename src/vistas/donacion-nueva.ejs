@@ -9,30 +9,39 @@
 <body>
   <h1>Publicar donación</h1>
 
-  <form method="post" action="/donaciones">
+  <% if (Object.keys(errores).length > 0) { %>
+    <p class="error" role="alert">No se registró la donación. Revisa los campos marcados.</p>
+  <% } %>
+
+  <form method="post" action="/donaciones" novalidate>
     <label for="tipo_alimento">Tipo de alimento</label>
     <select id="tipo_alimento" name="tipo_alimento" required>
       <option value="">Elige una opción</option>
       <% tipos.forEach((tipo) => { %>
-        <option value="<%= tipo %>"><%= tipo %></option>
+        <option value="<%= tipo %>" <%= valores.tipo_alimento === tipo ? 'selected' : '' %>><%= tipo %></option>
       <% }) %>
     </select>
+    <% if (errores.tipo_alimento) { %><p class="error-campo" role="alert"><%= errores.tipo_alimento %></p><% } %>
 
     <label for="cantidad">Cantidad aproximada</label>
-    <input id="cantidad" name="cantidad" type="number" inputmode="decimal" step="any" required>
+    <input id="cantidad" name="cantidad" type="text" inputmode="decimal" value="<%= valores.cantidad %>" required>
+    <% if (errores.cantidad) { %><p class="error-campo" role="alert"><%= errores.cantidad %></p><% } %>
 
     <label for="unidad">Unidad</label>
     <select id="unidad" name="unidad" required>
       <% unidades.forEach((unidad) => { %>
-        <option value="<%= unidad %>"><%= unidad %></option>
+        <option value="<%= unidad %>" <%= valores.unidad === unidad ? 'selected' : '' %>><%= unidad %></option>
       <% }) %>
     </select>
+    <% if (errores.unidad) { %><p class="error-campo" role="alert"><%= errores.unidad %></p><% } %>
 
     <label for="punto_recogida">Punto de recogida</label>
-    <input id="punto_recogida" name="punto_recogida" type="text" value="<%= puntoRecogida %>" required>
+    <input id="punto_recogida" name="punto_recogida" type="text" value="<%= valores.punto_recogida %>" required>
+    <% if (errores.punto_recogida) { %><p class="error-campo" role="alert"><%= errores.punto_recogida %></p><% } %>
 
     <label for="hora_limite">Hora límite para recoger</label>
-    <input id="hora_limite" name="hora_limite" type="datetime-local" required>
+    <input id="hora_limite" name="hora_limite" type="datetime-local" value="<%= valores.hora_limite %>" required>
+    <% if (errores.hora_limite) { %><p class="error-campo" role="alert"><%= errores.hora_limite %></p><% } %>
 
     <button type="submit">Publicar donación</button>
   </form>
