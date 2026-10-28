@@ -3,6 +3,7 @@ const express = require('express');
 const { requerirSesion } = require('../middleware/autenticacion');
 const { obtenerDetalle } = require('../servicios/donaciones');
 const { formatearFechaHora } = require('../utilidades/fechas');
+const { etiquetaDeEstado } = require('../utilidades/estados');
 
 const router = express.Router();
 
@@ -13,12 +14,6 @@ function normalizarCodigo(texto) {
   const limpio = (texto || '').trim().toUpperCase();
   const soloNumero = /^(?:D-?)?(\d{1,9})$/.exec(limpio);
   return soloNumero ? `D-${soloNumero[1].padStart(4, '0')}` : limpio;
-}
-
-// Texto del estado para mostrar (CA-05.3): una disponible con la hora límite cumplida es «Vencida».
-function etiquetaDeEstado(donacion) {
-  if (donacion.vencida) return 'Vencida (no recogida)';
-  return { disponible: 'Disponible', asignada: 'Asignada', entregada: 'Entregada' }[donacion.estado];
 }
 
 // CA-05.2: cada paso del historial como una frase, en el orden en que ocurrió.

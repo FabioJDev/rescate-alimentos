@@ -12,11 +12,16 @@
 
   <% if (usuario.rol === 'donante') { %>
     <p><a class="boton" href="/donaciones/nueva">Publicar donación</a></p>
+    <p><a class="boton" href="/mis-donaciones">Mis donaciones</a></p>
   <% } %>
 
   <% if (usuario.rol === 'voluntario') { %>
     <p><a class="boton" href="/disponibles">Donaciones disponibles</a></p>
     <p><a class="boton" href="/mis-recogidas">Mis recogidas</a></p>
+  <% } %>
+
+  <% if (usuario.rol === 'coordinadora') { %>
+    <p><a class="boton" href="/todas">Todas las donaciones</a></p>
   <% } %>
 
   <p><a class="boton" href="/buscar">Buscar donación por código</a></p>

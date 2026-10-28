@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mis donaciones · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <h1>Mis donaciones</h1>
+
+  <% if (donaciones.length === 0) { %>
+    <p class="vacio">Todavía no has publicado donaciones.</p>
+  <% } else { %>
+    <ul class="lista-donaciones">
+      <% donaciones.forEach((d) => { %>
+        <li class="tarjeta">
+          <p class="tarjeta-titulo"><%= d.codigo %> · <%= d.tipo_alimento %> · <%= d.cantidad %> <%= d.unidad %></p>
+          <p class="estado <%= d.estadoClase %>"><strong><%= d.estadoTexto %></strong></p>
+          <p>Hora límite: <%= d.horaLimiteTexto %></p>
+          <p><a href="/donaciones/<%= d.codigo %>">Ver estado e historial</a></p>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+
+  <p><a class="boton" href="/donaciones/nueva">Publicar otra donación</a></p>
+  <p><a href="/">Volver al inicio</a></p>
+</body>
+</html>
