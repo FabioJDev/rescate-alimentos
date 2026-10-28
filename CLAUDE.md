@@ -28,7 +28,7 @@ texto en inglés y qué significa.
   `feat(CMP-03): bloquear la segunda toma [CA-03.2]`, `docs(spec): agregar CMP-04`,
   `test(CMP-03): prueba de toma simultánea [CA-03.2]`, `ci: agregar pruebas en cada PR`.
 - **Título del PR:** `[CMP-03] Tomar una donación con bloqueo de segunda toma`.
-- **Cuerpo del PR:** usa la plantilla `.github/pull_request_template.md`. Incluye `Cierra #<issue>`
+- **Cuerpo del PR:** usa la plantilla `.github/pull_request_template.md`. Incluye `Closes #<issue>` (en inglés: es la única palabra que GitHub entiende para cerrar el issue)
   para enlazar la tarjeta.
 - **Pruebas:** un archivo por comportamiento (`tests/cmp-03.test.js`) y cada caso de prueba empieza
   con su ID: `test('CA-03.2 · dos voluntarios toman al mismo tiempo: solo uno queda asignado', ...)`.
