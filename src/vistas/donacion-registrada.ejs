@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Donación registrada · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <h1>Donación registrada</h1>
+  <p class="exito">El código de tu donación es <strong><%= donacion.codigo %></strong>.</p>
+
+  <ul>
+    <li>Alimento: <%= donacion.tipo_alimento %></li>
+    <li>Cantidad aproximada: <%= Number(donacion.cantidad) %> <%= donacion.unidad %></li>
+    <li>Punto de recogida: <%= donacion.punto_recogida %></li>
+    <li>Hora límite: <%= horaLimite %></li>
+    <li>Estado: <%= donacion.estado %></li>
+  </ul>
+
+  <p><a href="/">Volver al inicio</a></p>
+</body>
+</html>

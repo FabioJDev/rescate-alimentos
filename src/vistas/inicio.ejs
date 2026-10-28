@@ -10,6 +10,10 @@
   <h1>Rescate de Alimentos</h1>
   <p>Hola, <strong><%= usuario.nombre %></strong> (<%= usuario.rol %>).</p>
 
+  <% if (usuario.rol === 'donante') { %>
+    <p><a class="boton" href="/donaciones/nueva">Publicar donación</a></p>
+  <% } %>
+
   <form method="post" action="/salir">
     <button type="submit">Salir</button>
   </form>

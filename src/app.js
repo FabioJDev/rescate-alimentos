@@ -7,6 +7,7 @@ const PgStore = require('connect-pg-simple')(session);
 const { pool } = require('./db/conexion');
 const { requerirSesion } = require('./middleware/autenticacion');
 const rutasAutenticacion = require('./rutas/autenticacion');
+const rutasDonaciones = require('./rutas/donaciones');
 
 const app = express();
 const enProduccion = process.env.NODE_ENV === 'production';
@@ -52,6 +53,7 @@ app.get('/salud', (req, res) => {
 });
 
 app.use(rutasAutenticacion);
+app.use(rutasDonaciones);
 
 // Pantalla de inicio: por ahora solo saluda; cada comportamiento agrega aquí su enlace.
 app.get('/', requerirSesion, (req, res) => {

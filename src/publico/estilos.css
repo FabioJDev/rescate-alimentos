@@ -32,6 +32,25 @@ button {
   width: 100%;
 }
 
+.boton {
+  display: block;
+  box-sizing: border-box;
+  margin-top: 1.25rem;
+  padding: 0.85rem 1.25rem;
+  min-height: 3rem;
+  background: #1b6e3c;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.exito {
+  background: #e6f4ea;
+  border: 1px solid #1b6e3c;
+  padding: 0.75rem;
+}
+
 .error {
   background: #fde8e8;
   border: 1px solid #c0392b;
