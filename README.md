@@ -37,7 +37,20 @@ Necesitas Node.js 20 o superior y una base de datos PostgreSQL (local o en Neon)
 | Panadería La Espiga | donante | Norte | 4444 |
 | Plaza de Mercado Puesto 12 | donante | Sur | 5555 |
 
-*La URL desplegada se agrega cuando exista el despliegue (T-00.5).*
+### Dónde verlo
+
+**URL desplegada:** *(se agrega aquí cuando termine el despliegue, T-00.5)*
+
+Está en Render (plan gratis). Si nadie la visita en unos 15 minutos, Render la «duerme» y la primera visita tarda
+(ver [ADR-002](docs/decisiones/ADR-002-hosting-render-neon.md)): ábrela unos minutos antes de usarla.
+
+### Despliegue en Render + Neon
+
+1. **Base de datos:** crear un proyecto PostgreSQL gratis en [Neon](https://neon.tech) y copiar su cadena de conexión.
+2. **Aplicación:** en [Render](https://render.com), «New +» → «Blueprint», elegir este repositorio. Render lee `render.yaml`.
+3. Cuando Render pida `DATABASE_URL`, pegar la cadena de Neon en esa página (nunca en el repositorio ni en un chat).
+   `SESSION_SECRET` lo genera Render solo.
+4. Al arrancar, la aplicación aplica las migraciones y, solo la primera vez, carga los datos de demostración.
 
 ## Documentación
 
