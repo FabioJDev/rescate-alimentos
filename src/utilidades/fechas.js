@@ -16,4 +16,13 @@ function formatearFechaHora(fecha) {
   return new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short', timeZone: ZONA }).format(fecha);
 }
 
-module.exports = { ZONA, horaBogotaAIso, formatearFechaHora };
+// Texto del tiempo que falta hasta una hora límite: «35 min», «1 h 25 min», «27 h».
+function tiempoRestante(horaLimite, ahora = new Date()) {
+  const minutos = Math.max(0, Math.floor((new Date(horaLimite) - ahora) / 60000));
+  if (minutos < 60) return `${minutos} min`;
+  const horas = Math.floor(minutos / 60);
+  const resto = minutos % 60;
+  return resto === 0 ? `${horas} h` : `${horas} h ${resto} min`;
+}
+
+module.exports = { ZONA, horaBogotaAIso, formatearFechaHora, tiempoRestante };

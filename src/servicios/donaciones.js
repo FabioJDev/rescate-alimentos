@@ -48,4 +48,20 @@ async function buscarPorCodigo(codigo) {
   return r.rows[0] || null;
 }
 
-module.exports = { TIPOS_ALIMENTO, UNIDADES, registrarDonacion, buscarPorCodigo };
+// CA-02.1 y CA-02.2: solo las donaciones «disponibles» cuya hora límite no se ha cumplido,
+// de la más urgente a la menos urgente. Las asignadas, entregadas y vencidas no salen.
+// Si se indica una zona, solo las de esa zona (CA-02.3).
+async function listarDisponibles({ zona = null } = {}) {
+  const r = await consultar(
+    `SELECT codigo, tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite
+       FROM donaciones
+      WHERE estado = 'disponible'
+        AND hora_limite > now()
+        AND ($1::text IS NULL OR zona = $1)
+      ORDER BY hora_limite ASC, id ASC`,
+    [zona]
+  );
+  return r.rows;
+}
+
+module.exports = { TIPOS_ALIMENTO, UNIDADES, registrarDonacion, buscarPorCodigo, listarDisponibles };

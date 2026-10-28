@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Donaciones disponibles · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <h1>Donaciones disponibles</h1>
+
+  <% if (zonaVoluntario) { %>
+    <p class="filtro">
+      <% if (verTodas) { %>
+        Mostrando todas las zonas · <a href="/disponibles">Ver solo mi zona (<%= zonaVoluntario %>)</a>
+      <% } else { %>
+        Mostrando tu zona (<%= zonaVoluntario %>) · <a href="/disponibles?zona=todas">Ver todas las zonas</a>
+      <% } %>
+    </p>
+  <% } %>
+
+  <% if (donaciones.length === 0) { %>
+    <p class="vacio">No hay donaciones disponibles en este momento</p>
+  <% } else { %>
+    <ul class="lista-donaciones">
+      <% donaciones.forEach((d) => { %>
+        <li class="tarjeta">
+          <p class="tarjeta-titulo"><%= d.tipo_alimento %> · <%= d.cantidad %> <%= d.unidad %></p>
+          <p>Recoger en: <%= d.punto_recogida %> (zona <%= d.zona %>)</p>
+          <p>Hora límite: <%= d.horaLimiteTexto %></p>
+          <p class="restante">Quedan <%= d.restante %></p>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+
+  <p><a href="/">Volver al inicio</a></p>
+</body>
+</html>
