@@ -47,7 +47,9 @@ async function crearDonacion({ minutosLimite = 120, estado = 'disponible', dueno
     estado,
     donante_id: dueno.id,
     registrada_por_id: dueno.id,
-    creada_en: hace(0),
+    // La fecha de registro de la donación es «ahora», para que las listas (que muestran las más recientes
+    // primero y hasta 200) la incluyan aunque la base de datos tenga muchas donaciones de otras pruebas.
+    creada_en: new Date(),
   };
   if (estado !== 'disponible') Object.assign(campos, { voluntario_id: voluntario.id, tomada_en: hace(30) });
   if (estado === 'entregada') {
