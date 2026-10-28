@@ -62,3 +62,41 @@ button {
   border: 1px solid #c0392b;
   padding: 0.75rem;
 }
+
+/* Lista de donaciones disponibles (CMP-02) */
+.lista-donaciones {
+  list-style: none;
+  margin: 1rem 0;
+  padding: 0;
+}
+
+.tarjeta {
+  border: 1px solid #999;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.tarjeta p {
+  margin: 0.25rem 0;
+}
+
+.tarjeta-titulo {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.restante {
+  color: #a8281c;
+  font-weight: 700;
+}
+
+.vacio {
+  background: #f1f1f1;
+  padding: 1rem;
+  border-radius: 6px;
+}
+
+.filtro {
+  font-size: 1rem;
+}

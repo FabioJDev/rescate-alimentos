@@ -8,6 +8,7 @@ const { pool } = require('./db/conexion');
 const { requerirSesion } = require('./middleware/autenticacion');
 const rutasAutenticacion = require('./rutas/autenticacion');
 const rutasDonaciones = require('./rutas/donaciones');
+const rutasDisponibles = require('./rutas/disponibles');
 
 const app = express();
 const enProduccion = process.env.NODE_ENV === 'production';
@@ -54,6 +55,7 @@ app.get('/salud', (req, res) => {
 
 app.use(rutasAutenticacion);
 app.use(rutasDonaciones);
+app.use(rutasDisponibles);
 
 // Pantalla de inicio: por ahora solo saluda; cada comportamiento agrega aquí su enlace.
 app.get('/', requerirSesion, (req, res) => {
