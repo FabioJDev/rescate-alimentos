@@ -8,6 +8,9 @@ const { migrar } = require('../src/db/migrar');
 const sufijo = Date.now();
 const donante = { nombre: `Panadería de prueba ${sufijo}`, pin: '5678', direccion: 'Calle 10 # 5-20, Norte', zona: 'Norte' };
 const voluntario = { nombre: `Voluntario de prueba ${sufijo}`, pin: '8765' };
+const coordinadora = { nombre: `Coordinadora de prueba ${sufijo}`, pin: '4321' };
+// Comercio con teléfono básico: avisa por llamada y la coordinadora registra por él.
+const comercioTelefono = { nombre: `Tienda de barrio ${sufijo}`, pin: '9090', direccion: 'Carrera 3 # 7-15, Sur', zona: 'Sur' };
 
 // Hora de Colombia dentro de dos horas, con el formato del campo datetime-local ("2026-10-29T18:30").
 function horaLimiteFutura() {
@@ -29,6 +32,19 @@ beforeAll(async () => {
     [donante.nombre, hashDonante, donante.zona, donante.direccion]
   );
   donante.id = r.rows[0].id;
+
+  const hashComercio = await bcrypt.hash(comercioTelefono.pin, 4);
+  const rc = await consultar(
+    "INSERT INTO usuarios (nombre, rol, pin_hash, zona, direccion) VALUES ($1, 'donante', $2, $3, $4) RETURNING id",
+    [comercioTelefono.nombre, hashComercio, comercioTelefono.zona, comercioTelefono.direccion]
+  );
+  comercioTelefono.id = rc.rows[0].id;
+  const hashCoordinadora = await bcrypt.hash(coordinadora.pin, 4);
+  const rcoord = await consultar("INSERT INTO usuarios (nombre, rol, pin_hash) VALUES ($1, 'coordinadora', $2) RETURNING id", [
+    coordinadora.nombre,
+    hashCoordinadora,
+  ]);
+  coordinadora.id = rcoord.rows[0].id;
 
   const hashVoluntario = await bcrypt.hash(voluntario.pin, 4);
   await consultar("INSERT INTO usuarios (nombre, rol, pin_hash, zona) VALUES ($1, 'voluntario', $2, 'Norte')", [
@@ -233,5 +249,113 @@ describe('CMP-01 · Rechazos al registrar', () => {
     const codigo = envio.headers.location.split('/')[2];
     const guardada = (await consultar('SELECT cantidad FROM donaciones WHERE codigo = $1', [codigo])).rows[0];
     expect(Number(guardada.cantidad)).toBe(5.5);
+  });
+});
+
+describe('CMP-01 · La coordinadora registra a nombre de un comercio', () => {
+  function datos(cambios = {}) {
+    return {
+      donante_id: String(comercioTelefono.id),
+      tipo_alimento: 'Frutas y verduras',
+      cantidad: '30',
+      unidad: 'kg',
+      punto_recogida: 'Esquina de la tienda',
+      hora_limite: horaLimiteFutura(),
+      ...cambios,
+    };
+  }
+
+  test('CA-01.5 · la donación queda a nombre del comercio y con la coordinadora como «registrada por»', async () => {
+    const agente = await ingresar(coordinadora);
+
+    const envio = await agente.post('/donaciones').type('form').send(datos());
+
+    expect(envio.status).toBe(302);
+    const codigo = envio.headers.location.split('/')[2];
+    const guardada = (await consultar('SELECT * FROM donaciones WHERE codigo = $1', [codigo])).rows[0];
+    expect(guardada.estado).toBe('disponible');
+    expect(guardada.donante_id).toBe(comercioTelefono.id);
+    expect(guardada.registrada_por_id).toBe(coordinadora.id);
+    expect(guardada.zona).toBe(comercioTelefono.zona);
+
+    const movimientos = (await consultar('SELECT tipo, usuario_id FROM movimientos WHERE donacion_id = $1', [guardada.id])).rows;
+    expect(movimientos).toEqual([{ tipo: 'registro', usuario_id: coordinadora.id }]);
+  });
+
+  test('CA-01.5 · la confirmación dice a nombre de quién quedó y muestra el código', async () => {
+    const agente = await ingresar(coordinadora);
+
+    const envio = await agente.post('/donaciones').type('form').send(datos());
+    const confirmacion = await agente.get(envio.headers.location);
+
+    expect(confirmacion.status).toBe(200);
+    expect(confirmacion.text).toContain(`Quedó registrada a nombre de <strong>${comercioTelefono.nombre}</strong>`);
+    expect(confirmacion.text).toContain(envio.headers.location.split('/')[2]);
+  });
+
+  test('CA-01.5 · el comercio ve la donación en «Mis donaciones» y el historial dice que la registró la coordinadora', async () => {
+    const agenteCoordinadora = await ingresar(coordinadora);
+    const envio = await agenteCoordinadora.post('/donaciones').type('form').send(datos());
+    const codigo = envio.headers.location.split('/')[2];
+
+    const agenteComercio = await ingresar(comercioTelefono);
+    const misDonaciones = await agenteComercio.get('/mis-donaciones');
+    const detalle = await agenteComercio.get(`/donaciones/${codigo}`);
+
+    expect(misDonaciones.text).toContain(codigo);
+    expect(detalle.text).toContain(`Registrada por ${coordinadora.nombre}`);
+    expect(detalle.text).toContain(`Donante: ${comercioTelefono.nombre}`);
+  });
+
+  test('CA-01.5 · si deja vacío el punto de recogida se usa la dirección del comercio', async () => {
+    const agente = await ingresar(coordinadora);
+
+    const envio = await agente.post('/donaciones').type('form').send(datos({ punto_recogida: '' }));
+
+    expect(envio.status).toBe(302);
+    const codigo = envio.headers.location.split('/')[2];
+    const guardada = (await consultar('SELECT punto_recogida FROM donaciones WHERE codigo = $1', [codigo])).rows[0];
+    expect(guardada.punto_recogida).toBe(comercioTelefono.direccion);
+  });
+
+  test.each([
+    ['sin elegir comercio', { donante_id: '' }, 'Falta elegir el comercio que dona.'],
+    ['con un comercio que no existe', { donante_id: '99999999' }, 'Elige un comercio de la lista.'],
+    ['eligiendo a alguien que no es un comercio (un voluntario)', { donante_id: 'voluntario' }, 'Elige un comercio de la lista.'],
+  ])('CA-01.5 · %s se rechaza y no se registra nada', async (_nombre, cambios, mensaje) => {
+    const agente = await ingresar(coordinadora);
+    const antes = (await consultar('SELECT count(*)::int AS n FROM donaciones')).rows[0].n;
+    const voluntarioId = (await consultar('SELECT id FROM usuarios WHERE nombre = $1', [voluntario.nombre])).rows[0].id;
+    const cuerpo = datos(cambios.donante_id === 'voluntario' ? { donante_id: String(voluntarioId) } : cambios);
+
+    const envio = await agente.post('/donaciones').type('form').send(cuerpo);
+
+    expect(envio.status).toBe(400);
+    expect(envio.text).toContain(mensaje);
+    expect((await consultar('SELECT count(*)::int AS n FROM donaciones')).rows[0].n).toBe(antes);
+  });
+
+  test('CA-01.5 · el formulario de la coordinadora ofrece los comercios, y el del donante no', async () => {
+    const agenteCoordinadora = await ingresar(coordinadora);
+    const agenteDonante = await ingresar(donante);
+
+    const deCoordinadora = await agenteCoordinadora.get('/donaciones/nueva');
+    const deDonante = await agenteDonante.get('/donaciones/nueva');
+
+    expect(deCoordinadora.status).toBe(200);
+    expect(deCoordinadora.text).toContain(comercioTelefono.nombre);
+    expect(deDonante.text).not.toContain('name="donante_id"');
+  });
+
+  test('CA-01.5 · un donante no puede registrar a nombre de otro: se ignora el comercio que mande en el formulario', async () => {
+    const agente = await ingresar(donante);
+
+    const envio = await agente.post('/donaciones').type('form').send(datos({ punto_recogida: 'Calle 10 # 5-20, Norte' }));
+
+    expect(envio.status).toBe(302);
+    const codigo = envio.headers.location.split('/')[2];
+    const guardada = (await consultar('SELECT donante_id, registrada_por_id FROM donaciones WHERE codigo = $1', [codigo])).rows[0];
+    expect(guardada.donante_id).toBe(donante.id);
+    expect(guardada.registrada_por_id).toBe(donante.id);
   });
 });

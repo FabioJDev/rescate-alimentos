@@ -3,12 +3,15 @@
 const { TIPOS_ALIMENTO, UNIDADES } = require('./donaciones');
 const { horaBogotaAIso } = require('../utilidades/fechas');
 
-function validarDonacion(cuerpo, ahora = new Date()) {
+// Cuando la coordinadora registra a nombre de un comercio (CA-01.5), se pasa la lista de `comercios` y se
+// exige elegir uno. Si no se pasa (el donante registra lo suyo), no hay nada que elegir.
+function validarDonacion(cuerpo, ahora = new Date(), { comercios = null } = {}) {
   const errores = {};
 
   const tipoAlimento = (cuerpo.tipo_alimento || '').trim();
   const unidad = (cuerpo.unidad || '').trim();
-  const puntoRecogida = (cuerpo.punto_recogida || '').trim();
+  const puntoEscrito = (cuerpo.punto_recogida || '').trim();
+  const comercioTexto = (cuerpo.donante_id || '').trim();
   const cantidadTexto = (cuerpo.cantidad || '').trim();
   const horaLimiteTexto = (cuerpo.hora_limite || '').trim();
 
@@ -19,6 +22,20 @@ function validarDonacion(cuerpo, ahora = new Date()) {
   if (!unidad) errores.unidad = 'Falta elegir la unidad.';
   else if (!UNIDADES.includes(unidad)) errores.unidad = 'Elige una unidad de la lista.';
 
+  // CA-01.5: la coordinadora elige el comercio de la lista.
+  let comercio = null;
+  if (comercios) {
+    if (!comercioTexto) {
+      errores.donante_id = 'Falta elegir el comercio que dona.';
+    } else {
+      comercio = comercios.find((c) => String(c.id) === comercioTexto) || null;
+      if (!comercio) errores.donante_id = 'Elige un comercio de la lista.';
+    }
+  }
+
+  // Por defecto el punto de recogida es la dirección del comercio: si la coordinadora lo deja vacío, se usa esa.
+  let puntoRecogida = puntoEscrito;
+  if (!puntoRecogida && comercio && comercio.direccion) puntoRecogida = comercio.direccion;
   if (!puntoRecogida) errores.punto_recogida = 'Falta el punto de recogida.';
 
   // CA-01.4: la cantidad no puede estar vacía, ser cero, negativa ni dejar de ser un número.
@@ -52,11 +69,12 @@ function validarDonacion(cuerpo, ahora = new Date()) {
       tipo_alimento: tipoAlimento,
       cantidad: cantidadTexto,
       unidad,
-      punto_recogida: puntoRecogida,
+      punto_recogida: puntoEscrito,
       hora_limite: horaLimiteTexto,
+      donante_id: comercioTexto,
     },
     // Lo que se guarda cuando no hay errores.
-    datos: { tipoAlimento, cantidad, unidad, puntoRecogida, horaLimite },
+    datos: { tipoAlimento, cantidad, unidad, puntoRecogida, horaLimite, comercio },
   };
 }
 

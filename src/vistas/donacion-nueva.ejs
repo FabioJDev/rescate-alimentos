@@ -14,6 +14,17 @@
   <% } %>
 
   <form method="post" action="/donaciones" novalidate>
+    <% if (comercios) { %>
+      <label for="donante_id">Comercio que avisó la donación</label>
+      <select id="donante_id" name="donante_id" required>
+        <option value="">Elige un comercio</option>
+        <% comercios.forEach((c) => { %>
+          <option value="<%= c.id %>" <%= String(c.id) === valores.donante_id ? 'selected' : '' %>><%= c.nombre %></option>
+        <% }) %>
+      </select>
+      <% if (errores.donante_id) { %><p class="error-campo" role="alert"><%= errores.donante_id %></p><% } %>
+    <% } %>
+
     <label for="tipo_alimento">Tipo de alimento</label>
     <select id="tipo_alimento" name="tipo_alimento" required>
       <option value="">Elige una opción</option>
@@ -35,8 +46,8 @@
     </select>
     <% if (errores.unidad) { %><p class="error-campo" role="alert"><%= errores.unidad %></p><% } %>
 
-    <label for="punto_recogida">Punto de recogida</label>
-    <input id="punto_recogida" name="punto_recogida" type="text" value="<%= valores.punto_recogida %>" required>
+    <label for="punto_recogida">Punto de recogida<% if (comercios) { %> (si lo dejas vacío, se usa la dirección del comercio)<% } %></label>
+    <input id="punto_recogida" name="punto_recogida" type="text" value="<%= valores.punto_recogida %>" <%= comercios ? '' : 'required' %>>
     <% if (errores.punto_recogida) { %><p class="error-campo" role="alert"><%= errores.punto_recogida %></p><% } %>
 
     <label for="hora_limite">Hora límite para recoger</label>
