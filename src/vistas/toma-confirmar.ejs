@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confirmar toma · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <h1>¿Tomar esta donación?</h1>
+
+  <div class="tarjeta">
+    <p class="tarjeta-titulo"><%= donacion.tipo_alimento %> · <%= donacion.cantidad %> <%= donacion.unidad %></p>
+    <p>Recoger en: <%= donacion.punto_recogida %> (zona <%= donacion.zona %>)</p>
+    <p>Hora límite: <%= horaLimite %></p>
+  </div>
+
+  <p>Si la tomas, nadie más podrá tomarla y te comprometes a recogerla.</p>
+
+  <form method="post" action="/donaciones/<%= donacion.codigo %>/tomar">
+    <button type="submit">Sí, tomar esta donación</button>
+  </form>
+
+  <p><a href="/disponibles">No, volver a la lista</a></p>
+</body>
+</html>
