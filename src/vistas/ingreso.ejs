@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ingresar · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <h1>Rescate de Alimentos</h1>
+  <h2>Ingresar</h2>
+
+  <% if (error) { %>
+    <p class="error" role="alert"><%= error %></p>
+  <% } %>
+
+  <form method="post" action="/ingreso">
+    <label for="nombre">Tu nombre</label>
+    <input id="nombre" name="nombre" type="text" value="<%= nombre %>" required autocomplete="username">
+
+    <label for="pin">Tu PIN (4 números)</label>
+    <input id="pin" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required autocomplete="current-password">
+
+    <button type="submit">Ingresar</button>
+  </form>
+</body>
+</html>
