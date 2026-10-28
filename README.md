@@ -52,8 +52,39 @@ Está en Render (plan gratis). Si nadie la visita en unos 15 minutos, Render la 
    `SESSION_SECRET` lo genera Render solo.
 4. Al arrancar, la aplicación aplica las migraciones y, solo la primera vez, carga los datos de demostración.
 
+### Cómo retomar el proyecto
+
+Para quien reciba el proyecto y quiera seguir construyéndolo.
+
+1. **Lee en este orden** (unos 30 minutos): este README → [constitución](docs/spec/constitucion.md) →
+   [especificación](docs/spec/comportamientos.md) → [plan técnico](docs/spec/plan-tecnico.md) → los tres
+   [ADR](docs/decisiones/). La especificación es la fuente de verdad: si algo cambia, se cambia primero ahí, con su razón.
+2. **Levántalo en tu computador** con los pasos de arriba y corre `npm test` (las pruebas necesitan un PostgreSQL real).
+3. **Ubícate en el código.** Cada petición va de una ruta (`src/rutas/`) a un servicio (`src/servicios/`, donde viven las reglas y
+   el SQL) y de ahí a una vista (`src/vistas/`). Hay un archivo de pruebas por comportamiento en `tests/` (`cmp-01.test.js` …
+   `cmp-05.test.js`), y el nombre de cada prueba empieza con el ID de su criterio de aceptación (por ejemplo, `CA-03.2`).
+4. **Trabaja así:** una tarea por rama, un pull request con la plantilla de `.github/`, el check «pruebas» en verde y la
+   aprobación de **otra persona** que nombre los criterios que verificó. Los commits van en español con el ID
+   (`feat(CMP-03): … [CA-03.2]`). Más detalle en `CLAUDE.md` y en la constitución.
+5. **Qué sigue:** en el [tablero](https://github.com/users/FabioJDev/projects/1), las tarjetas con la etiqueta `3C`: modo sin
+   conexión (RNF-01), liberar una donación tomada (CMP-06) y el reporte del periodo (RF-07). Limitaciones conocidas: no hay
+   pantalla para crear usuarios, el PIN no tiene límite de intentos y una donación registrada no se puede editar.
+6. **Cuentas que necesitas:** el repositorio en GitHub, un servicio en [Render](https://render.com) y una base de datos en
+   [Neon](https://neon.tech). Las variables de entorno son `DATABASE_URL` y `SESSION_SECRET` (ver `.env.example`).
+
+**Cosas que sorprenden la primera vez**
+- «Vencida» **no se guarda**: se calcula (donación disponible con la hora límite cumplida).
+- Tomar y entregar una donación son **una sola actualización atómica** en la base de datos (ver
+  [ADR-001](docs/decisiones/ADR-001-toma-atomica.md)). No la separes en «leer y luego escribir»: reaparecería el problema de los
+  dos voluntarios. `tests/cmp-03-concurrencia.test.js` lo vigila.
+- `npm run db:semilla -- --reiniciar` **borra todos los datos**. Sin esa opción, la semilla se niega a correr si ya hay usuarios.
+- Las horas son de Colombia (UTC-5, sin horario de verano). Los mensajes de error los da el servidor, no el navegador.
+- El plan gratis de Render «duerme» la aplicación tras unos 15 minutos sin visitas.
+
 ## Documentación
 
+- [Manual de operación](docs/manual-operacion.md): para la coordinadora, los comercios y los voluntarios (sin términos técnicos).
+- [Pantallas del MVP](docs/ux/pantallas.md): cada pantalla con su comportamiento y capturas.
 - [Constitución del proyecto](docs/spec/constitucion.md): equipo, convenciones, uso de IA y definiciones de Listo y Terminado.
 - [Especificación del MVP](docs/spec/comportamientos.md): comportamientos y criterios de aceptación.
 - [Plan técnico](docs/spec/plan-tecnico.md): arquitectura, modelo de datos y despliegue.
