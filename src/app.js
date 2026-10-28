@@ -11,6 +11,7 @@ const rutasDonaciones = require('./rutas/donaciones');
 const rutasDisponibles = require('./rutas/disponibles');
 const rutasTomar = require('./rutas/tomar');
 const rutasConsulta = require('./rutas/consulta');
+const rutasListas = require('./rutas/listas');
 const rutasEntregar = require('./rutas/entregar');
 
 const app = express();
@@ -61,6 +62,7 @@ app.use(rutasDonaciones);
 app.use(rutasDisponibles);
 app.use(rutasTomar);
 app.use(rutasConsulta);
+app.use(rutasListas);
 app.use(rutasEntregar);
 
 // Pantalla de inicio: por ahora solo saluda; cada comportamiento agrega aquí su enlace.

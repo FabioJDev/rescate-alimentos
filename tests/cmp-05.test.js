@@ -10,6 +10,7 @@ const marca = `CMP05-${Date.now()}`;
 const zona = `Zona-${marca}`;
 
 const donante = { nombre: `Panadería ${marca}`, pin: '1100' };
+const otroDonante = { nombre: `Plaza ${marca}`, pin: '4400' };
 const voluntario = { nombre: `Voluntaria ${marca}`, pin: '2200' };
 const coordinadora = { nombre: `Coordinadora ${marca}`, pin: '3300' };
 let organizacion;
@@ -32,7 +33,7 @@ async function ingresar(usuario) {
 }
 
 // Crea una donación con su historial según el estado pedido, con horas distintas y ordenadas.
-async function crearDonacion({ minutosLimite = 120, estado = 'disponible' } = {}) {
+async function crearDonacion({ minutosLimite = 120, estado = 'disponible', dueno = donante } = {}) {
   const base = Date.now() - 3 * 60 * 60 * 1000; // hace 3 horas
   const hace = (minutos) => new Date(base + minutos * 60 * 1000);
 
@@ -44,9 +45,11 @@ async function crearDonacion({ minutosLimite = 120, estado = 'disponible' } = {}
     zona,
     hora_limite: new Date(Date.now() + minutosLimite * 60000),
     estado,
-    donante_id: donante.id,
-    registrada_por_id: donante.id,
-    creada_en: hace(0),
+    donante_id: dueno.id,
+    registrada_por_id: dueno.id,
+    // La fecha de registro de la donación es «ahora», para que las listas (que muestran las más recientes
+    // primero y hasta 200) la incluyan aunque la base de datos tenga muchas donaciones de otras pruebas.
+    creada_en: new Date(),
   };
   if (estado !== 'disponible') Object.assign(campos, { voluntario_id: voluntario.id, tomada_en: hace(30) });
   if (estado === 'entregada') {
@@ -62,7 +65,7 @@ async function crearDonacion({ minutosLimite = 120, estado = 'disponible' } = {}
 
   const mov = (tipo, usuarioId, cuando) =>
     consultar('INSERT INTO movimientos (donacion_id, tipo, usuario_id, ocurrido_en) VALUES ($1, $2, $3, $4)', [id, tipo, usuarioId, cuando]);
-  await mov('registro', donante.id, hace(0));
+  await mov('registro', dueno.id, hace(0));
   if (estado !== 'disponible') await mov('toma', voluntario.id, hace(30));
   if (estado === 'entregada') await mov('entrega', voluntario.id, hace(90));
 
@@ -72,6 +75,7 @@ async function crearDonacion({ minutosLimite = 120, estado = 'disponible' } = {}
 beforeAll(async () => {
   await migrar();
   await crearUsuario(donante, 'donante');
+  await crearUsuario(otroDonante, 'donante');
   await crearUsuario(voluntario, 'voluntario');
   await crearUsuario(coordinadora, 'coordinadora');
   const org = await consultar("INSERT INTO organizaciones (nombre, direccion, zona) VALUES ($1, 'Calle 5', $2) RETURNING id", [
@@ -207,5 +211,116 @@ describe('CMP-05 · Consultar el estado de una donación', () => {
     expect(detalle.headers.location).toBe('/ingreso');
     expect(busqueda.status).toBe(302);
     expect(busqueda.headers.location).toBe('/ingreso');
+  });
+});
+
+describe('CMP-05 · Listas de la coordinadora y del donante', () => {
+  // Una donación en cada estado, para comprobar qué lista y qué filtro deja ver cada una.
+  let vigente;
+  let asignada;
+  let entregada;
+  let vencida;
+  let deOtroDonante;
+
+  beforeAll(async () => {
+    vigente = await crearDonacion({ minutosLimite: 120 });
+    asignada = await crearDonacion({ estado: 'asignada' });
+    entregada = await crearDonacion({ estado: 'entregada' });
+    vencida = await crearDonacion({ minutosLimite: -30 });
+    deOtroDonante = await crearDonacion({ dueno: otroDonante });
+  });
+
+  test('CA-05.5 · la coordinadora ve la lista de todas las donaciones, con el estado de cada una', async () => {
+    const agente = await ingresar(coordinadora);
+
+    const lista = await agente.get('/todas');
+
+    expect(lista.status).toBe(200);
+    for (const d of [vigente, asignada, entregada, vencida, deOtroDonante]) expect(lista.text).toContain(d.codigo);
+    expect(lista.text).toContain(`Donante: ${donante.nombre}`);
+    expect(lista.text).toContain(`Donante: ${otroDonante.nombre}`);
+    expect(lista.text).toContain('Vencida (no recogida)');
+  });
+
+  test.each([
+    ['disponible', () => [vigente, deOtroDonante], () => [asignada, entregada, vencida]],
+    ['asignada', () => [asignada], () => [vigente, entregada, vencida]],
+    ['entregada', () => [entregada], () => [vigente, asignada, vencida]],
+    ['vencida', () => [vencida], () => [vigente, asignada, entregada]],
+  ])('CA-05.5 · la coordinadora filtra la lista por estado «%s»', async (estado, deberianVerse, noDeberianVerse) => {
+    const agente = await ingresar(coordinadora);
+
+    const lista = await agente.get('/todas').query({ estado });
+
+    expect(lista.status).toBe(200);
+    for (const d of deberianVerse()) expect(lista.text).toContain(d.codigo);
+    for (const d of noDeberianVerse()) expect(lista.text).not.toContain(d.codigo);
+  });
+
+  test('CA-05.5 · un filtro desconocido no rompe la lista: muestra todas', async () => {
+    const agente = await ingresar(coordinadora);
+
+    const lista = await agente.get('/todas').query({ estado: 'cualquier-cosa' });
+
+    expect(lista.status).toBe(200);
+    expect(lista.text).toContain(vigente.codigo);
+    expect(lista.text).toContain(entregada.codigo);
+  });
+
+  test.each([
+    ['un voluntario', voluntario],
+    ['un donante', donante],
+  ])('CA-05.5 · %s no puede ver la lista de todas las donaciones', async (_nombre, usuario) => {
+    const agente = await ingresar(usuario);
+    const lista = await agente.get('/todas');
+    expect(lista.status).toBe(403);
+  });
+
+  test('CA-05.6 · el donante ve «Mis donaciones» con el estado de cada una', async () => {
+    const agente = await ingresar(donante);
+
+    const lista = await agente.get('/mis-donaciones');
+
+    expect(lista.status).toBe(200);
+    for (const d of [vigente, asignada, entregada, vencida]) expect(lista.text).toContain(d.codigo);
+    expect(lista.text).toContain('Disponible');
+    expect(lista.text).toContain('Asignada');
+    expect(lista.text).toContain('Entregada');
+    expect(lista.text).toContain('Vencida (no recogida)');
+  });
+
+  test('CA-05.6 · el donante solo ve sus propias donaciones, no las de otro donante', async () => {
+    const agente = await ingresar(donante);
+
+    const lista = await agente.get('/mis-donaciones');
+
+    expect(lista.text).not.toContain(deOtroDonante.codigo);
+  });
+
+  test('CA-05.6 · un donante sin donaciones ve un mensaje y no una lista vacía', async () => {
+    const sinDonaciones = { nombre: `Sin donaciones ${marca}`, pin: '5500' };
+    await crearUsuario(sinDonaciones, 'donante');
+    const agente = await ingresar(sinDonaciones);
+
+    const lista = await agente.get('/mis-donaciones');
+
+    expect(lista.status).toBe(200);
+    expect(lista.text).toContain('Todavía no has publicado donaciones.');
+  });
+
+  test.each([
+    ['un voluntario', voluntario],
+    ['la coordinadora', coordinadora],
+  ])('CA-05.6 · %s no tiene «Mis donaciones»', async (_nombre, usuario) => {
+    const agente = await ingresar(usuario);
+    const lista = await agente.get('/mis-donaciones');
+    expect(lista.status).toBe(403);
+  });
+
+  test('Acceso · sin sesión, las listas llevan a la pantalla de ingreso', async () => {
+    const todas = await request(app).get('/todas');
+    const mias = await request(app).get('/mis-donaciones');
+    expect(todas.headers.location).toBe('/ingreso');
+    expect(mias.headers.location).toBe('/ingreso');
   });
 });

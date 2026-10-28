@@ -8,7 +8,11 @@
 </head>
 <body>
   <h1>Donación registrada</h1>
-  <p class="exito">El código de tu donación es <strong><%= donacion.codigo %></strong>.</p>
+  <% if (aNombreDeOtro) { %>
+    <p class="exito">Quedó registrada a nombre de <strong><%= donanteNombre %></strong>. Su código es <strong><%= donacion.codigo %></strong>.</p>
+  <% } else { %>
+    <p class="exito">El código de tu donación es <strong><%= donacion.codigo %></strong>.</p>
+  <% } %>
 
   <ul>
     <li>Alimento: <%= donacion.tipo_alimento %></li>

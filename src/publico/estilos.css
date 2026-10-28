@@ -140,3 +140,9 @@ button {
 .historial li {
   margin-bottom: 0.75rem;
 }
+
+.filtro-activo {
+  font-weight: 700;
+  text-decoration: none;
+  color: #1b6e3c;
+}
