@@ -70,6 +70,8 @@ async function listarDisponibles({ zona = null } = {}) {
 // de datos los pone en fila: el primero cambia el estado y el segundo ya no cumple la condición,
 // así que su actualización no toca nada. No se lee primero y se escribe después: así no hay carrera.
 async function tomarDonacion(codigo, voluntarioId) {
+  let donacionTomada = null;
+
   const cliente = await pool.connect();
   try {
     await cliente.query('BEGIN');
@@ -83,25 +85,30 @@ async function tomarDonacion(codigo, voluntarioId) {
     );
 
     if (actualizada.rows.length === 0) {
-      // Nadie ganó esta vez: no se cambió nada. Se averigua por qué para dar el mensaje correcto.
+      // Nadie ganó esta vez: no se cambió nada.
       await cliente.query('ROLLBACK');
-      return { tomada: false, ...(await motivoNoDisponible(codigo, voluntarioId)) };
+    } else {
+      // El movimiento de la toma va en la misma transacción: o quedan los dos cambios o ninguno (RNF-05).
+      await cliente.query("INSERT INTO movimientos (donacion_id, tipo, usuario_id) VALUES ($1, 'toma', $2)", [
+        actualizada.rows[0].id,
+        voluntarioId,
+      ]);
+      await cliente.query('COMMIT');
+      donacionTomada = actualizada.rows[0];
     }
-
-    // El movimiento de la toma va en la misma transacción: o quedan los dos cambios o ninguno (RNF-05).
-    await cliente.query("INSERT INTO movimientos (donacion_id, tipo, usuario_id) VALUES ($1, 'toma', $2)", [
-      actualizada.rows[0].id,
-      voluntarioId,
-    ]);
-
-    await cliente.query('COMMIT');
-    return { tomada: true, donacion: actualizada.rows[0] };
   } catch (error) {
     await cliente.query('ROLLBACK');
     throw error;
   } finally {
+    // Se devuelve la conexión ANTES de consultar el motivo: si cada petición retuviera una conexión
+    // mientras pide otra, con muchas tomas simultáneas el conjunto de conexiones se agotaría y se colgaría.
     cliente.release();
   }
+
+  if (donacionTomada) return { tomada: true, donacion: donacionTomada };
+
+  // Se averigua por qué no se pudo para dar el mensaje correcto (ya tomada, vencida, reintento...).
+  return { tomada: false, ...(await motivoNoDisponible(codigo, voluntarioId)) };
 }
 
 // Explica por qué una donación no se puede tomar (o si todavía se puede). No modifica nada.
