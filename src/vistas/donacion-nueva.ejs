@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Publicar donación · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <h1>Publicar donación</h1>
+
+  <form method="post" action="/donaciones">
+    <label for="tipo_alimento">Tipo de alimento</label>
+    <select id="tipo_alimento" name="tipo_alimento" required>
+      <option value="">Elige una opción</option>
+      <% tipos.forEach((tipo) => { %>
+        <option value="<%= tipo %>"><%= tipo %></option>
+      <% }) %>
+    </select>
+
+    <label for="cantidad">Cantidad aproximada</label>
+    <input id="cantidad" name="cantidad" type="number" inputmode="decimal" step="any" required>
+
+    <label for="unidad">Unidad</label>
+    <select id="unidad" name="unidad" required>
+      <% unidades.forEach((unidad) => { %>
+        <option value="<%= unidad %>"><%= unidad %></option>
+      <% }) %>
+    </select>
+
+    <label for="punto_recogida">Punto de recogida</label>
+    <input id="punto_recogida" name="punto_recogida" type="text" value="<%= puntoRecogida %>" required>
+
+    <label for="hora_limite">Hora límite para recoger</label>
+    <input id="hora_limite" name="hora_limite" type="datetime-local" required>
+
+    <button type="submit">Publicar donación</button>
+  </form>
+
+  <p><a href="/">Volver al inicio</a></p>
+</body>
+</html>
