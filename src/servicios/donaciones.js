@@ -133,6 +133,37 @@ async function motivoNoDisponible(codigo, voluntarioId) {
   return { motivo: 'disponible', donacion };
 }
 
+// CMP-05 · Detalle de una donación: sus datos, su estado actual y su historial en orden cronológico.
+// «Vencida» no se guarda: se calcula aquí (disponible + hora límite cumplida), con la hora de la base de datos.
+async function obtenerDetalle(codigo) {
+  const r = await consultar(
+    `SELECT d.*,
+            donante.nombre AS donante_nombre,
+            voluntario.nombre AS voluntario_nombre,
+            org.nombre AS organizacion_nombre,
+            (d.estado = 'disponible' AND d.hora_limite <= now()) AS vencida
+       FROM donaciones d
+       JOIN usuarios donante ON donante.id = d.donante_id
+       LEFT JOIN usuarios voluntario ON voluntario.id = d.voluntario_id
+       LEFT JOIN organizaciones org ON org.id = d.organizacion_id
+      WHERE d.codigo = $1`,
+    [codigo]
+  );
+  const donacion = r.rows[0];
+  if (!donacion) return null;
+
+  const movimientos = await consultar(
+    `SELECT m.tipo, m.ocurrido_en, u.nombre AS usuario_nombre
+       FROM movimientos m
+       JOIN usuarios u ON u.id = m.usuario_id
+      WHERE m.donacion_id = $1
+      ORDER BY m.ocurrido_en ASC, m.id ASC`,
+    [donacion.id]
+  );
+
+  return { donacion, historial: movimientos.rows };
+}
+
 // «Mis recogidas»: las donaciones que este voluntario tomó y todavía no entregó.
 async function listarRecogidasDe(voluntarioId) {
   const r = await consultar(
@@ -154,4 +185,5 @@ module.exports = {
   tomarDonacion,
   motivoNoDisponible,
   listarRecogidasDe,
+  obtenerDetalle,
 };

@@ -100,3 +100,34 @@ button {
 .filtro {
   font-size: 1rem;
 }
+
+/* Detalle de una donación (CMP-05) */
+.estado {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: #f1f1f1;
+}
+
+.estado-disponible {
+  background: #e6f4ea;
+}
+
+.estado-asignada {
+  background: #fff4d6;
+}
+
+.estado-entregada {
+  background: #e3edff;
+}
+
+.estado-vencida {
+  background: #fde8e8;
+}
+
+.historial {
+  padding-left: 1.25rem;
+}
+
+.historial li {
+  margin-bottom: 0.75rem;
+}
