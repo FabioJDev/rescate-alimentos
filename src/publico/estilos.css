@@ -51,6 +51,12 @@ button {
   padding: 0.75rem;
 }
 
+.error-campo {
+  margin: 0.25rem 0 0;
+  color: #a8281c;
+  font-weight: 600;
+}
+
 .error {
   background: #fde8e8;
   border: 1px solid #c0392b;
