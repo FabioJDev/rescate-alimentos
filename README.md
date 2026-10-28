@@ -39,7 +39,7 @@ Necesitas Node.js 20 o superior y una base de datos PostgreSQL (local o en Neon)
 
 ### Dónde verlo
 
-**URL desplegada:** *(se agrega aquí cuando termine el despliegue, T-00.5)*
+**URL desplegada:** https://rescate-alimentos.onrender.com
 
 Está en Render (plan gratis). Si nadie la visita en unos 15 minutos, Render la «duerme» y la primera visita tarda
 (ver [ADR-002](docs/decisiones/ADR-002-hosting-render-neon.md)): ábrela unos minutos antes de usarla.
