@@ -124,3 +124,114 @@ describe('CMP-01 · Registrar una donación', () => {
     expect(formulario.headers.location).toBe('/ingreso');
   });
 });
+
+// ---- Validaciones y rechazos (T-01.2) ----
+
+async function contarDonaciones() {
+  const r = await consultar('SELECT count(*)::int AS total FROM donaciones WHERE donante_id = $1', [donante.id]);
+  return r.rows[0].total;
+}
+
+function datosValidos(cambios = {}) {
+  return {
+    tipo_alimento: 'Frutas y verduras',
+    cantidad: '12',
+    unidad: 'kg',
+    punto_recogida: 'Plaza de Mercado, puesto 3',
+    hora_limite: horaLimiteFutura(),
+    ...cambios,
+  };
+}
+
+describe('CMP-01 · Rechazos al registrar', () => {
+  const camposObligatorios = [
+    ['tipo_alimento', 'Falta elegir el tipo de alimento.'],
+    ['cantidad', 'Falta la cantidad aproximada.'],
+    ['unidad', 'Falta elegir la unidad.'],
+    ['punto_recogida', 'Falta el punto de recogida.'],
+    ['hora_limite', 'Falta la hora límite.'],
+  ];
+
+  test.each(camposObligatorios)(
+    'CA-01.2 · con el campo «%s» vacío no se registra nada y se indica qué falta',
+    async (campo, mensaje) => {
+      const agente = await ingresar(donante);
+      const antes = await contarDonaciones();
+
+      const envio = await agente.post('/donaciones').type('form').send(datosValidos({ [campo]: '' }));
+
+      expect(envio.status).toBe(400);
+      expect(envio.text).toContain(mensaje);
+      expect(await contarDonaciones()).toBe(antes);
+    }
+  );
+
+  test('CA-01.2 · al rechazar se conservan los datos que ya se habían escrito', async () => {
+    const agente = await ingresar(donante);
+
+    const envio = await agente
+      .post('/donaciones')
+      .type('form')
+      .send(datosValidos({ tipo_alimento: 'Cárnicos', cantidad: '7', punto_recogida: '' }));
+
+    expect(envio.status).toBe(400);
+    expect(envio.text).toContain('value="7"');
+    expect(envio.text).toMatch(/<option value="Cárnicos" selected>/);
+    expect(envio.text).toContain('Falta el punto de recogida.');
+  });
+
+  test('CA-01.3 · una hora límite anterior a la actual se rechaza con su mensaje', async () => {
+    const agente = await ingresar(donante);
+    const antes = await contarDonaciones();
+    const haceUnaHora = new Date(Date.now() - 60 * 60 * 1000)
+      .toLocaleString('sv-SE', { timeZone: 'America/Bogota' })
+      .replace(' ', 'T')
+      .slice(0, 16);
+
+    const envio = await agente.post('/donaciones').type('form').send(datosValidos({ hora_limite: haceUnaHora }));
+
+    expect(envio.status).toBe(400);
+    expect(envio.text).toContain('La hora límite debe ser posterior a la hora actual');
+    expect(await contarDonaciones()).toBe(antes);
+  });
+
+  test('CA-01.3 · una hora límite igual a la actual (este mismo minuto) también se rechaza', async () => {
+    const agente = await ingresar(donante);
+    const antes = await contarDonaciones();
+    // El campo solo llega hasta el minuto, así que «este minuto» ya no es posterior a ahora.
+    const esteMinuto = new Date().toLocaleString('sv-SE', { timeZone: 'America/Bogota' }).replace(' ', 'T').slice(0, 16);
+
+    const envio = await agente.post('/donaciones').type('form').send(datosValidos({ hora_limite: esteMinuto }));
+
+    expect(envio.status).toBe(400);
+    expect(envio.text).toContain('La hora límite debe ser posterior a la hora actual');
+    expect(await contarDonaciones()).toBe(antes);
+  });
+
+  test.each([
+    ['vacía', '', 'Falta la cantidad aproximada.'],
+    ['cero', '0', 'La cantidad debe ser mayor que cero.'],
+    ['negativa', '-3', 'La cantidad debe ser mayor que cero.'],
+    ['no numérica', 'muchas', 'La cantidad debe ser un número.'],
+  ])('CA-01.4 · una cantidad %s se rechaza con un mensaje claro', async (_nombre, cantidad, mensaje) => {
+    const agente = await ingresar(donante);
+    const antes = await contarDonaciones();
+
+    const envio = await agente.post('/donaciones').type('form').send(datosValidos({ cantidad }));
+
+    expect(envio.status).toBe(400);
+    expect(envio.text).toContain(mensaje);
+    expect(await contarDonaciones()).toBe(antes);
+  });
+
+  test('CA-01.4 · una cantidad con coma decimal («5,5») se acepta', async () => {
+    const agente = await ingresar(donante);
+
+    const envio = await agente.post('/donaciones').type('form').send(datosValidos({ cantidad: '5,5' }));
+
+    expect(envio.status).toBe(302);
+    const codigo = envio.headers.location.split('/')[2];
+    const guardada = (await consultar('SELECT cantidad FROM donaciones WHERE codigo = $1', [codigo])).rows[0];
+    expect(Number(guardada.cantidad)).toBe(5.5);
+  });
+});

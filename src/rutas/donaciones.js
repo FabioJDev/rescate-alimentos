@@ -3,40 +3,59 @@ const express = require('express');
 const { requerirRol } = require('../middleware/autenticacion');
 const { consultar } = require('../db/conexion');
 const { TIPOS_ALIMENTO, UNIDADES, registrarDonacion, buscarPorCodigo } = require('../servicios/donaciones');
-const { horaBogotaAIso, formatearFechaHora } = require('../utilidades/fechas');
+const { validarDonacion } = require('../servicios/validar-donacion');
+const { formatearFechaHora } = require('../utilidades/fechas');
 
 const router = express.Router();
+
+function mostrarFormulario(res, estado, valores, errores) {
+  res.status(estado).render('donacion-nueva', {
+    tipos: TIPOS_ALIMENTO,
+    unidades: UNIDADES,
+    valores,
+    errores,
+  });
+}
 
 // CA-01.6: el registro es una sola pantalla con 4 campos obligatorios (abrir, llenar, enviar).
 router.get('/donaciones/nueva', requerirRol('donante'), async (req, res, next) => {
   try {
     // El punto de recogida viene por defecto con la dirección del comercio, y se puede editar.
     const r = await consultar('SELECT direccion FROM usuarios WHERE id = $1', [req.session.usuario.id]);
-    res.render('donacion-nueva', {
-      tipos: TIPOS_ALIMENTO,
-      unidades: UNIDADES,
-      puntoRecogida: r.rows[0] ? r.rows[0].direccion || '' : '',
-    });
+    const valores = {
+      tipo_alimento: '',
+      cantidad: '',
+      unidad: UNIDADES[0],
+      punto_recogida: r.rows[0] ? r.rows[0].direccion || '' : '',
+      hora_limite: '',
+    };
+    mostrarFormulario(res, 200, valores, {});
   } catch (error) {
     next(error);
   }
 });
 
 // CA-01.1: se guarda la donación «disponible» con su autor y fecha de registro, y se muestra su código.
+// CA-01.2 a CA-01.4: si algo está mal no se guarda nada, se dice qué falla y se conserva lo escrito.
 router.post('/donaciones', requerirRol('donante'), async (req, res, next) => {
   try {
     const usuario = req.session.usuario;
-    const datos = await consultar('SELECT zona FROM usuarios WHERE id = $1', [usuario.id]);
+    const { errores, valores, datos } = validarDonacion(req.body);
 
+    if (Object.keys(errores).length > 0) {
+      return mostrarFormulario(res, 400, valores, errores);
+    }
+
+    const zona = (await consultar('SELECT zona FROM usuarios WHERE id = $1', [usuario.id])).rows[0].zona;
     const donacion = await registrarDonacion({
       donanteId: usuario.id,
       registradaPorId: usuario.id,
-      tipoAlimento: req.body.tipo_alimento,
-      cantidad: req.body.cantidad,
-      unidad: req.body.unidad,
-      puntoRecogida: (req.body.punto_recogida || '').trim(),
-      zona: datos.rows[0].zona,
-      horaLimite: horaBogotaAIso(req.body.hora_limite),
+      tipoAlimento: datos.tipoAlimento,
+      cantidad: datos.cantidad,
+      unidad: datos.unidad,
+      puntoRecogida: datos.puntoRecogida,
+      zona,
+      horaLimite: datos.horaLimite,
     });
 
     // Se redirige para que recargar la página de confirmación no registre la donación otra vez.
