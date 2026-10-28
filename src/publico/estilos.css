@@ -795,6 +795,12 @@ body:has(> h1.hero)::after {
     width: 17rem;
     height: 14rem;
   }
+
+  /* El texto se detiene antes de la canasta para que nunca se encime con las imágenes. */
+  .portada .hero,
+  .portada .saludo {
+    max-width: calc(100% - 15rem);
+  }
 }
 
 /* Quien tiene activado «reducir movimiento» no ve ninguna animación ni transición. */
