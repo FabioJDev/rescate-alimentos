@@ -29,6 +29,7 @@
           <p>Recoger en: <%= d.punto_recogida %> (zona <%= d.zona %>)</p>
           <p>Hora límite: <%= d.horaLimiteTexto %></p>
           <p class="restante">Quedan <%= d.restante %></p>
+          <a class="boton" href="/donaciones/<%= d.codigo %>/tomar">Tomar</a>
         </li>
       <% }) %>
     </ul>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mis recogidas · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <h1>Mis recogidas</h1>
+
+  <% if (recogidas.length === 0) { %>
+    <p class="vacio">No tienes recogidas pendientes.</p>
+  <% } else { %>
+    <ul class="lista-donaciones">
+      <% recogidas.forEach((d) => { %>
+        <li class="tarjeta">
+          <p class="tarjeta-titulo"><%= d.tipo_alimento %> · <%= d.cantidad %> <%= d.unidad %></p>
+          <p>Código: <%= d.codigo %></p>
+          <p>Recoger en: <%= d.punto_recogida %> (zona <%= d.zona %>)</p>
+          <p>Hora límite: <%= d.horaLimiteTexto %></p>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+
+  <p><a href="/">Volver al inicio</a></p>
+</body>
+</html>

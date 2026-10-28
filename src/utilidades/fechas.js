@@ -16,6 +16,11 @@ function formatearFechaHora(fecha) {
   return new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short', timeZone: ZONA }).format(fecha);
 }
 
+// Muestra solo la hora en formato de 24 horas, en hora de Colombia: «14:35».
+function formatearHora(fecha) {
+  return new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: ZONA }).format(fecha);
+}
+
 // Texto del tiempo que falta hasta una hora límite: «35 min», «1 h 25 min», «27 h».
 function tiempoRestante(horaLimite, ahora = new Date()) {
   const minutos = Math.max(0, Math.floor((new Date(horaLimite) - ahora) / 60000));
@@ -25,4 +30,4 @@ function tiempoRestante(horaLimite, ahora = new Date()) {
   return resto === 0 ? `${horas} h` : `${horas} h ${resto} min`;
 }
 
-module.exports = { ZONA, horaBogotaAIso, formatearFechaHora, tiempoRestante };
+module.exports = { ZONA, horaBogotaAIso, formatearFechaHora, formatearHora, tiempoRestante };
