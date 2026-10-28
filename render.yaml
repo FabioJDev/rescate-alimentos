@@ -1,0 +1,25 @@
+# Despliegue en Render (plan gratis). Se usa como «Blueprint»: ver la sección «Despliegue» del README.
+# La base de datos vive aparte, en Neon (ADR-002).
+services:
+  - type: web
+    name: rescate-alimentos
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    # Cada arranque aplica las migraciones pendientes. La semilla solo carga los datos de demostración
+    # la primera vez: si ya hay usuarios se niega y el servidor arranca igual.
+    startCommand: npm run db:migrar && (npm run db:semilla || true) && npm start
+    healthCheckPath: /salud
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NODE_ENV
+        value: production
+      - key: TZ
+        value: America/Bogota
+      # La cadena de conexión de Neon la pegas tú en la página de Render; nunca va en el repositorio.
+      - key: DATABASE_URL
+        sync: false
+      # Render la genera sola: no hay que inventarla ni verla.
+      - key: SESSION_SECRET
+        generateValue: true
