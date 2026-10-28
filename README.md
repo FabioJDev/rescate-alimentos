@@ -16,7 +16,28 @@ cada donación y quién hizo qué.
 
 ## Cómo levantarlo
 
-*Se completa cuando exista la aplicación (Fase 5).*
+Necesitas Node.js 20 o superior y una base de datos PostgreSQL (local o en Neon).
+
+1. Instalar dependencias: `npm ci`
+2. Copiar `.env.example` como `.env` y poner en `DATABASE_URL` la cadena de conexión a tu PostgreSQL.
+3. Crear las tablas: `npm run db:migrar`
+4. Cargar los datos de demostración: `npm run db:semilla`
+   (para borrar todo y volver a cargarlos: `npm run db:semilla -- --reiniciar`)
+5. Arrancar: `npm start` y abrir http://localhost:3000
+6. Pruebas automáticas: `npm test` (necesitan la base de datos del paso 2)
+
+**Usuarios de demostración** (los PIN son solo para demostración):
+
+| Usuario | Rol | Zona | PIN |
+|---|---|---|---|
+| Marcela | coordinadora | — | 0000 |
+| Ana | voluntario | Norte | 1111 |
+| Bruno | voluntario | Norte | 2222 |
+| Carlos | voluntario | Sur | 3333 |
+| Panadería La Espiga | donante | Norte | 4444 |
+| Plaza de Mercado Puesto 12 | donante | Sur | 5555 |
+
+*La URL desplegada se agrega cuando exista el despliegue (T-00.5).*
 
 ## Documentación
 
