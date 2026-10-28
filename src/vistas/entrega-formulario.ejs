@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registrar entrega · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+</head>
+<body>
+  <h1>Registrar entrega</h1>
+
+  <div class="tarjeta">
+    <p class="tarjeta-titulo"><%= donacion.codigo %> · <%= donacion.tipo_alimento %> · <%= donacion.cantidad %> <%= donacion.unidad %></p>
+  </div>
+
+  <% if (Object.keys(errores).length > 0) { %>
+    <p class="error" role="alert">No se registró la entrega. Revisa los campos marcados.</p>
+  <% } %>
+
+  <form method="post" action="/donaciones/<%= donacion.codigo %>/entregar" novalidate>
+    <label for="organizacion_id">Organización que recibe</label>
+    <select id="organizacion_id" name="organizacion_id" required>
+      <option value="">Elige una organización</option>
+      <% organizaciones.forEach((o) => { %>
+        <option value="<%= o.id %>" <%= String(o.id) === valores.organizacion_id ? 'selected' : '' %>><%= o.nombre %></option>
+      <% }) %>
+    </select>
+    <% if (errores.organizacion_id) { %><p class="error-campo" role="alert"><%= errores.organizacion_id %></p><% } %>
+
+    <label for="recibido_por">Nombre de quien recibe</label>
+    <input id="recibido_por" name="recibido_por" type="text" value="<%= valores.recibido_por %>" required>
+    <% if (errores.recibido_por) { %><p class="error-campo" role="alert"><%= errores.recibido_por %></p><% } %>
+
+    <button type="submit">Confirmar entrega</button>
+  </form>
+
+  <p><a href="/mis-recogidas">Volver a mis recogidas</a></p>
+</body>
+</html>
