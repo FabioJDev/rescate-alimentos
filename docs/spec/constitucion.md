@@ -31,7 +31,7 @@ La justificación de cada elección está en `docs/spec/plan-tecnico.md` y en lo
   `feat(CMP-03): bloquear la segunda toma [CA-03.2]`, `docs(spec): agregar CMP-04`,
   `test(CMP-03): prueba de toma simultánea [CA-03.2]`, `ci: agregar pruebas en cada PR`.
 - **Título del PR:** `[CMP-03] Tomar una donación con bloqueo de segunda toma`.
-- **Cuerpo del PR:** la plantilla `.github/pull_request_template.md`, con `Cierra #<issue>` para enlazar la tarjeta.
+- **Cuerpo del PR:** la plantilla `.github/pull_request_template.md`, con `Closes #<issue>` para enlazar y cerrar la tarjeta (GitHub solo entiende la palabra en inglés).
 - **Pruebas:** un archivo por comportamiento (`tests/cmp-03.test.js`); cada caso empieza con su ID:
   `test('CA-03.2 · dos voluntarios toman al mismo tiempo: solo uno queda asignado', ...)`.
 - **IDs estables:** CMP-01…CMP-05 y CA-0X.Y nunca se renumeran. Si un CA se elimina, se marca «(retirado)»

@@ -1,0 +1,45 @@
+name: CI
+
+# Corre las pruebas en cada pull request y en cada push a main.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  pruebas:
+    name: pruebas
+    runs-on: ubuntu-latest
+
+    # PostgreSQL real: la prueba de concurrencia de CMP-03 lo necesita.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: rescate_alimentos
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rescate_alimentos
+      SESSION_SECRET: clave-solo-para-pruebas
+      TZ: America/Bogota
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run db:migrar
+      - run: npm test

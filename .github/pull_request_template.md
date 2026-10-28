@@ -16,4 +16,4 @@ CMP-0X · <nombre>
 - [ ] CA-0X.2
 - [ ] El check de CI está en verde
 
-Cierra #<issue>
+Closes #<issue>
