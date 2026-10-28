@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Donaciones disponibles · Rescate de Alimentos</title>
   <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
 </head>
 <body>
+  <%- include('_marca') %>
   <h1>Donaciones disponibles</h1>
 
   <% if (zonaVoluntario) { %>
@@ -36,6 +38,5 @@
     </ul>
   <% } %>
 
-  <p><a href="/">Volver al inicio</a></p>
 </body>
 </html>

@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Registrar entrega · Rescate de Alimentos</title>
   <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
 </head>
 <body>
+  <%- include('_marca', { volverA: '/mis-recogidas', volverNombre: 'Mis recogidas' }) %>
   <h1>Registrar entrega</h1>
 
-  <div class="tarjeta">
+  <div class="tarjeta tarjeta-estado-asignada">
     <p class="tarjeta-titulo"><%= donacion.codigo %> · <%= donacion.tipo_alimento %> · <%= donacion.cantidad %> <%= donacion.unidad %></p>
   </div>
 
@@ -34,6 +36,5 @@
     <button type="submit">Confirmar entrega</button>
   </form>
 
-  <p><a href="/mis-recogidas">Volver a mis recogidas</a></p>
 </body>
 </html>

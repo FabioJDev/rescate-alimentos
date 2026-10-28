@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Confirmar toma · Rescate de Alimentos</title>
   <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
 </head>
 <body>
+  <%- include('_marca', { volverA: '/disponibles', volverNombre: 'Donaciones' }) %>
   <h1>¿Tomar esta donación?</h1>
 
   <div class="tarjeta">
@@ -21,6 +23,6 @@
     <button type="submit">Sí, tomar esta donación</button>
   </form>
 
-  <p><a href="/disponibles">No, volver a la lista</a></p>
+  <p><a class="boton boton-secundario" href="/disponibles">No, volver a la lista</a></p>
 </body>
 </html>

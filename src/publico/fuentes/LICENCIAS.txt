@@ -1,0 +1,9 @@
+Fuentes incluidas en esta carpeta (archivos woff2, subconjunto latino):
+
+- Bricolage Grotesque (bricolage-700.woff2), autor: Mathieu Triay. Licencia SIL Open Font License 1.1.
+- Atkinson Hyperlegible (atkinson-400.woff2, atkinson-700.woff2), autor: Braille Institute of America.
+  Licencia SIL Open Font License 1.1.
+
+La licencia SIL OFL 1.1 permite usar, copiar y redistribuir las fuentes (también en sitios web) siempre
+que se conserve este aviso. Texto completo: https://openfontlicense.org
+Se descargaron de los paquetes de Fontsource (https://fontsource.org).
