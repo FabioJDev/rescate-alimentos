@@ -130,3 +130,6 @@ public
 # OS files
 .DS_Store
 Thumbs.db
+
+# Entregables del curso (PDF, guiones): no se suben al repositorio
+entregables/
