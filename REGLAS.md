@@ -1,5 +1,4 @@
-# Reglas permanentes del proyecto (para Claude Code)
-
+# Reglas permanentes del proyecto
 Proyecto: Rescate de Alimentos · Fundación Mesa Común · Equipo Overflow (Proyecto Informático 2, UAO).
 
 **Idioma.** El usuario no sabe inglés. Todo va en español: documentos, commits, pull requests, issues,
@@ -43,9 +42,6 @@ Dos integrantes cubren los cinco roles:
   aprobación de cada PR nombrando los CA verificados, verificación manual en la URL desplegada, y su firma
   en `docs/qa/plan-de-pruebas.md`.
 
-## 4. Uso de IA
-- Claude (chat) para planear, redactar la especificación, el plan técnico y los documentos.
-- Claude Code para generar código, pruebas, configuración de CI y despliegue.
-- Regla operativa: todo lo generado lo revisa el equipo; ningún PR se integra sin que otra persona lo
-  verifique contra sus CA; cualquier integrante debe poder explicarlo. La reflexión final del módulo
-  se escribe sin IA.
+## 4. Revisión del trabajo
+- Regla operativa: todo lo que se escribe lo revisa el equipo; ningún PR se integra sin que otra persona lo
+  verifique contra sus CA; cualquier integrante debe poder explicarlo.
