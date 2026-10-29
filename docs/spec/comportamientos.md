@@ -11,6 +11,8 @@ el código. Los IDs (CMP-0X y CA-0X.Y) son estables: nunca se renumeran. Se escr
 disponible ──(un voluntario la toma)──► asignada ──(se registra la entrega)──► entregada
      │
      └──(llega la hora límite sin que nadie la tome)──► vencida
+
+asignada ──(el voluntario que la tomó la suelta, CMP-06)──► disponible
 ```
 
 Relación con RF-08: «publicada» = disponible; «no recogida» = vencida. En el MVP la «recogida» no es un paso
@@ -90,7 +92,7 @@ Donante (comercio), Voluntario y Coordinadora (Marcela y su equipo). Las organiz
   (RNF-04: solo roles autorizados).
 
 **Decisión de alcance:** en el MVP un voluntario no puede «soltar» una donación tomada. Si no puede ir, avisa
-a la coordinadora por el canal actual. Liberar una donación queda como CMP-06 en el backlog de la 3C.
+a la coordinadora por el canal actual. Liberar una donación se agregó después como CMP-06 (3C).
 
 **Cómo se garantiza:** ver [ADR-001](../decisiones/).
 
@@ -130,13 +132,94 @@ a la coordinadora por el canal actual. Liberar una donación queda como CMP-06 e
 - **CA-05.6** Dado un donante con sesión iniciada, cuando abre «Mis donaciones», entonces ve el estado de
   cada una (le da confianza de que alguien va).
 
+## CMP-06 · Soltar una donación tomada
+
+**Origen:** RF-03, RF-08, RNF-05 · Épica 2 · Agregado en la 3C (en el MVP quedó fuera por alcance, ver CMP-03).
+Resuelve el caso del voluntario que tomó una donación y no puede recogerla: sin esto la donación queda
+«asignada» a alguien que no va, nadie más la ve y se desperdicia el alimento.
+
+- **CA-06.1** Dado el voluntario que tomó una donación asignada, cuando en «Mis recogidas» pulsa «Soltar» y
+  confirma, entonces la donación vuelve a «disponible» sin voluntario ni hora de toma, deja de aparecer en
+  «Mis recogidas», queda registrado el movimiento «liberación» (quién y cuándo) y, si su hora límite no se ha
+  cumplido, vuelve a aparecer en «Donaciones disponibles».
+- **CA-06.2** Dado un voluntario distinto del que la tomó, cuando intenta soltarla, entonces se rechaza y la
+  donación no cambia.
+- **CA-06.3** Dada una donación que no está asignada, cuando se intenta soltar, entonces se rechaza: si está
+  disponible, con «Esta donación no está asignada a nadie»; si ya fue entregada, con «Esta donación ya fue
+  entregada el [fecha] a [organización]; no se puede soltar».
+- **CA-06.4** Dado un reintento (doble clic o mala señal) tras soltarla, entonces no se duplica ningún
+  movimiento y se ve el mensaje de CA-06.3 (ya no está asignada a nadie).
+- **CA-06.5** Dada una donación asignada cuya hora límite ya pasó, cuando el voluntario la suelta, entonces se
+  acepta y queda «Vencida (no recogida)»: no vuelve a la lista de disponibles (CA-02.4).
+- **CA-06.6** Dada una donación soltada, cuando se consulta su detalle, entonces el historial muestra la
+  liberación («Soltada por [nombre]») en su orden cronológico, y una nueva toma por otro voluntario sigue
+  cumpliendo CA-03.1 a CA-03.5.
+- **CA-06.7** Dados un voluntario que suelta y otro movimiento sobre la misma donación al mismo tiempo (la
+  entrega, o la toma de otro tras otra liberación), entonces exactamente una acción gana y la otra recibe el
+  rechazo que corresponde; la donación nunca queda en un estado inconsistente (misma garantía que ADR-001).
+- **CA-06.8** Dado un usuario que no es voluntario, cuando intenta soltar una donación, entonces se rechaza
+  (RNF-04).
+
+## CMP-07 · Reporte del periodo
+
+**Origen:** RF-07, RNF-05 · Épica 5 · Agregado en la 3C (fuera del MVP). Es lo que Marcela necesita para rendir
+cuentas a la fundación: cuánto se rescató, a quién llegó y qué no se recogió.
+
+El periodo se elige por **fecha de registro** de la donación (hora de Colombia): de «desde» a «hasta», ambos
+días incluidos. Si no se elige, son los últimos 30 días. Las cantidades son **declaradas** (nadie pesa el
+alimento) y por eso se dice así en el reporte y no se suman unidades distintas entre sí.
+
+- **CA-07.1** Dada la coordinadora con sesión iniciada, cuando abre «Reporte del periodo», entonces ve, para el
+  periodo, cuántas donaciones se registraron y cuántas están disponibles, asignadas, entregadas y vencidas.
+- **CA-07.2** Dado un periodo con donaciones entregadas, cuando se abre el reporte, entonces ve la cantidad
+  rescatada (solo las entregadas) separada por unidad: nunca se suman kg con cajas.
+- **CA-07.3** Dado un periodo con donaciones entregadas, cuando se abre el reporte, entonces ve cuántas
+  entregas recibió cada organización y cuántas donaciones hubo por tipo de alimento.
+- **CA-07.4** Dadas fechas inválidas, o un «hasta» anterior al «desde», cuando la coordinadora pide el
+  reporte, entonces se rechaza con un mensaje claro y no se muestran datos del periodo.
+- **CA-07.5** Dado un periodo sin donaciones, cuando se abre el reporte, entonces se muestra «No hay
+  donaciones en este periodo».
+- **CA-07.6** Dado un usuario que no es coordinadora, cuando intenta abrir el reporte o descargarlo, entonces
+  se rechaza (RNF-04).
+- **CA-07.7** Dada la coordinadora, cuando pulsa «Descargar CSV», entonces recibe un archivo con una fila por
+  donación del periodo (código, estado, tipo, cantidad, unidad, zona, donante, voluntario, organización,
+  quién recibió y las fechas de registro, toma y entrega) que se abre bien en Excel, con tildes y ñ.
+
+## CMP-08 · Registrar una donación sin conexión
+
+**Origen:** RNF-01 · Épica 1 · Agregado en la 3C (fuera del MVP). Es el riesgo técnico del Módulo 2: sin señal no
+se podía registrar nada. Ver [ADR-004](../decisiones/ADR-004-modo-sin-conexion.md).
+
+**Alcance:** solo **registrar** una donación (CMP-01), por el donante o por la coordinadora. **Tomar** y
+**entregar** siguen necesitando conexión a propósito: tomar solo es seguro si el servidor decide quién gana
+(CMP-03); un teléfono sin señal no puede saberlo.
+
+- **CA-08.1** Dado un usuario que ya abrió «Publicar donación» con conexión y se queda sin señal, cuando
+  completa el formulario y envía, entonces la donación se guarda en su teléfono como pendiente y ve «Guardada
+  en tu teléfono. Se enviará cuando haya señal», con cuántas pendientes tiene.
+- **CA-08.2** Dada una donación pendiente, cuando vuelve la conexión (o el usuario abre la aplicación con
+  conexión), entonces se envía sola, queda registrada «disponible» a nombre de su autor, con su código y su
+  fecha de registro, y el aviso de pendiente desaparece.
+- **CA-08.3** Dado un envío repetido de la misma donación pendiente (reintento por mala señal o dos pestañas),
+  entonces se registra una sola vez y no se duplica.
+- **CA-08.4** Dada una donación pendiente que al sincronizar es inválida (por ejemplo, su hora límite ya
+  pasó), entonces no se registra, se le dice al usuario cuál es y por qué, y queda visible hasta que la
+  descarte. Aplican las mismas reglas de CA-01.2 a CA-01.4.
+- **CA-08.5** Dado que la sesión venció o ingresó otra persona en ese teléfono, cuando se intenta sincronizar,
+  entonces la donación sigue pendiente (no se pierde) y no se registra a nombre de otro usuario.
+- **CA-08.6** Dado un usuario sin conexión que abre cualquier pantalla distinta de «Publicar donación», cuando
+  la abre, entonces ve «Sin conexión» explicando que solo puede publicar donaciones (se enviarán al volver la
+  señal) y que tomar y entregar necesitan conexión.
+- **CA-08.7** Dado un usuario que no es donante ni coordinadora, cuando intenta sincronizar donaciones,
+  entonces se rechaza (RNF-04).
+
 ---
 
 ## Fuera del alcance del MVP
 
-Reportes de impacto y exportación, panel de indicadores, notificaciones automáticas (RF-10), asignación
-automática de destino y gestión avanzada de usuarios. También el modo sin conexión (RNF-01): ver
-[plan técnico](plan-tecnico.md).
+Panel de indicadores, notificaciones automáticas (RF-10), asignación automática de destino y gestión avanzada de
+usuarios. Soltar una donación, el reporte del periodo (RF-07) y el modo sin conexión para registrar (RNF-01)
+quedaron fuera del MVP y se agregaron en la 3C como CMP-06, CMP-07 y CMP-08: ver [plan técnico](plan-tecnico.md).
 
 ## Tabla de trazabilidad
 
@@ -147,3 +230,6 @@ automática de destino y gestión avanzada de usuarios. También el modo sin con
 | CMP-03 | CA-03.1 a CA-03.6 | RF-03, RF-08, RNF-05 | 2 · Coordinación de recogida | `tests/cmp-03.test.js` |
 | CMP-04 | CA-04.1 a CA-04.6 | RF-06, RF-08, RF-09, RNF-05 | 4 y 5 · Trazabilidad / Responsabilidad sanitaria | `tests/cmp-04.test.js` |
 | CMP-05 | CA-05.1 a CA-05.6 | RF-08, RF-06, RNF-05 | 5 · Responsabilidad sanitaria | `tests/cmp-05.test.js` |
+| CMP-06 | CA-06.1 a CA-06.8 | RF-03, RF-08, RNF-05 | 2 · Coordinación de recogida | `tests/cmp-06.test.js` |
+| CMP-07 | CA-07.1 a CA-07.7 | RF-07, RNF-05 | 5 · Responsabilidad sanitaria | `tests/cmp-07.test.js` |
+| CMP-08 | CA-08.1 a CA-08.7 | RNF-01 | 1 · Gestión de donaciones | `tests/cmp-08.test.js` |
