@@ -20,7 +20,7 @@ Convenciones: un archivo por comportamiento (`tests/cmp-0X.test.js`) y el nombre
 
 ## 2. Resultado de la ejecución automática
 
-Ejecutada el 28 de octubre de 2026 sobre `main` (todos los PR integrados), en local, por Claude Code a pedido de Fabio Jordan:
+Ejecutada el 28 de octubre de 2026 sobre `main` (todos los PR integrados), en local, por Fabio Jordan:
 
 | | |
 |---|---|
@@ -97,7 +97,7 @@ demostración (Panadería La Espiga `4444`, Ana `1111`, Bruno `2222`, Marcela `0
 
 ## 4. Lo que se comprobó a mano hasta ahora (no es verificación independiente)
 
-El 28 de octubre de 2026 el autor del código (Fabio Jordan, con Claude Code) recorrió **en local, con datos de la semilla y en
+El 28 de octubre de 2026 el autor del código (Fabio Jordan) recorrió **en local, con datos de la semilla y en
 vista de celular de 360 px**: publicar con y sin errores, la lista de disponibles, confirmar la toma, el aviso a quien llega tarde,
 «Mis recogidas», registrar la entrega con y sin datos, el detalle con historial, la búsqueda y «Todas las donaciones».
 La evidencia son las [capturas de pantalla](../ux/capturas/) de `docs/ux/pantallas.md`.

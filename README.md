@@ -65,7 +65,7 @@ Para quien reciba el proyecto y quiera seguir construyéndolo.
    `cmp-05.test.js`), y el nombre de cada prueba empieza con el ID de su criterio de aceptación (por ejemplo, `CA-03.2`).
 4. **Trabaja así:** una tarea por rama, un pull request con la plantilla de `.github/`, el check «pruebas» en verde y la
    aprobación de **otra persona** que nombre los criterios que verificó. Los commits van en español con el ID
-   (`feat(CMP-03): … [CA-03.2]`). Más detalle en `CLAUDE.md` y en la constitución.
+   (`feat(CMP-03): … [CA-03.2]`). Más detalle en `REGLAS.md` y en la constitución.
 5. **Qué sigue:** en el [tablero](https://github.com/users/FabioJDev/projects/1), las tarjetas con la etiqueta `3C`: modo sin
    conexión (RNF-01), liberar una donación tomada (CMP-06) y el reporte del periodo (RF-07). Limitaciones conocidas: no hay
    pantalla para crear usuarios, el PIN no tiene límite de intentos y una donación registrada no se puede editar.
@@ -85,17 +85,14 @@ Para quien reciba el proyecto y quiera seguir construyéndolo.
 
 - [Manual de operación](docs/manual-operacion.md): para la coordinadora, los comercios y los voluntarios (sin términos técnicos).
 - [Pantallas del MVP](docs/ux/pantallas.md): cada pantalla con su comportamiento y capturas.
-- [Constitución del proyecto](docs/spec/constitucion.md): equipo, convenciones, uso de IA y definiciones de Listo y Terminado.
+- [Constitución del proyecto](docs/spec/constitucion.md): equipo, convenciones y definiciones de Listo y Terminado.
 - [Especificación del MVP](docs/spec/comportamientos.md): comportamientos y criterios de aceptación.
 - [Plan técnico](docs/spec/plan-tecnico.md): arquitectura, modelo de datos y despliegue.
 - [Decisiones de arquitectura](docs/decisiones/): ADR.
 - [Cómo revisar un PR](docs/qa/como-revisar.md) y [plan de pruebas](docs/qa/plan-de-pruebas.md).
 
-## Uso de asistentes de IA
+## Revisión del trabajo
 
-- **Claude (chat):** para planear y redactar la especificación, el plan técnico y los documentos.
-- **Claude Code:** para generar código, pruebas, configuración de CI y despliegue.
-
-Todo lo generado lo revisa el equipo. Ningún pull request se integra sin que otra persona lo verifique
+Todo lo que se escribe lo revisa el equipo. Ningún pull request se integra sin que otra persona lo verifique
 contra sus criterios de aceptación, y cualquier integrante debe poder explicar cualquier parte del
-proyecto. La reflexión final del módulo se escribe sin IA.
+proyecto.

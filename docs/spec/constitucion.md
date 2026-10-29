@@ -20,7 +20,6 @@ El equipo tiene dos integrantes para cinco roles; así se cubren.
 - **Render** como hosting (plan gratis).
 - **Jest + Supertest** para las pruebas automáticas.
 - **GitHub Actions** para correr las pruebas en cada pull request.
-- **Claude** y **Claude Code** como asistentes de IA (ver sección 4).
 
 La justificación de cada elección está en `docs/spec/plan-tecnico.md` y en los ADR de `docs/decisiones/`.
 
@@ -41,13 +40,10 @@ La justificación de cada elección está en `docs/spec/plan-tecnico.md` y en lo
 - **Nunca** se hace push directo a `main` y nada se integra sin la aprobación de la otra persona.
 - **Idioma:** todo en español (documentos, commits, PR, issues, código y mensajes de la interfaz).
 
-## 4. Uso de IA
+## 4. Revisión del trabajo
 
-- **Claude (chat):** para planear y redactar la especificación, el plan técnico y los documentos.
-- **Claude Code:** para generar código, pruebas, configuración de CI y despliegue.
-- **Regla operativa:** todo lo generado lo revisa el equipo; ningún PR se integra sin que otra persona lo
-  verifique contra sus criterios de aceptación; cualquier integrante debe poder explicar cualquier parte
-  («lo generó la IA» no es una respuesta válida). La reflexión final del módulo se escribe sin IA.
+- **Regla operativa:** todo lo que se escribe lo revisa el equipo; ningún PR se integra sin que otra persona lo
+  verifique contra sus criterios de aceptación; cualquier integrante debe poder explicar cualquier parte.
 
 ## 5. Criterio de prioridad del backlog
 
