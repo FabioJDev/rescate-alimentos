@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>No se pudo registrar la entrega · Rescate de Alimentos</title>
   <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
 </head>
 <body>
+  <%- include('_marca', { volverA: '/mis-recogidas', volverNombre: 'Mis recogidas' }) %>
   <h1>No se pudo registrar la entrega</h1>
   <p class="error" role="alert"><%= mensaje %></p>
 

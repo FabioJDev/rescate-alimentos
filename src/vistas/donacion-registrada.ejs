@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Donación registrada · Rescate de Alimentos</title>
   <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
 </head>
 <body>
+  <%- include('_marca') %>
   <h1>Donación registrada</h1>
   <% if (aNombreDeOtro) { %>
     <p class="exito">Quedó registrada a nombre de <strong><%= donanteNombre %></strong>. Su código es <strong><%= donacion.codigo %></strong>.</p>
@@ -23,6 +25,5 @@
   </ul>
 
   <p><a href="/donaciones/<%= donacion.codigo %>">Ver su estado e historial</a></p>
-  <p><a href="/">Volver al inicio</a></p>
 </body>
 </html>

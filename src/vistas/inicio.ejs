@@ -5,30 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Inicio · Rescate de Alimentos</title>
   <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
 </head>
 <body>
-  <h1>Rescate de Alimentos</h1>
-  <p>Hola, <strong><%= usuario.nombre %></strong> (<%= usuario.rol %>).</p>
+  <header class="portada">
+    <h1 class="hero">Rescate de Alimentos</h1>
+    <p class="saludo">Hola, <strong><%= usuario.nombre %></strong> (<%= usuario.rol %>).</p>
+  </header>
 
-  <% if (usuario.rol === 'donante') { %>
-    <p><a class="boton" href="/donaciones/nueva">Publicar donación</a></p>
-    <p><a class="boton" href="/mis-donaciones">Mis donaciones</a></p>
-  <% } %>
+  <%# Los iconos son solo adorno (aria-hidden): el texto de cada acceso dice lo mismo. %>
+  <nav class="acciones" aria-label="Acciones">
+    <% if (usuario.rol === 'donante') { %>
+      <a class="accion principal" href="/donaciones/nueva">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg>
+        Publicar donación
+      </a>
+      <a class="accion" href="/mis-donaciones">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Mis donaciones
+      </a>
+    <% } %>
 
-  <% if (usuario.rol === 'voluntario') { %>
-    <p><a class="boton" href="/disponibles">Donaciones disponibles</a></p>
-    <p><a class="boton" href="/mis-recogidas">Mis recogidas</a></p>
-  <% } %>
+    <% if (usuario.rol === 'voluntario') { %>
+      <a class="accion principal" href="/disponibles">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Donaciones disponibles
+      </a>
+      <a class="accion" href="/mis-recogidas">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 8l-9-5-9 5 9 5 9-5zM3 8v8l9 5 9-5V8M12 13v8"/></svg>
+        Mis recogidas
+      </a>
+    <% } %>
 
-  <% if (usuario.rol === 'coordinadora') { %>
-    <p><a class="boton" href="/donaciones/nueva">Registrar donación de un comercio</a></p>
-    <p><a class="boton" href="/todas">Todas las donaciones</a></p>
-  <% } %>
+    <% if (usuario.rol === 'coordinadora') { %>
+      <a class="accion principal" href="/donaciones/nueva">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg>
+        Registrar donación de un comercio
+      </a>
+      <a class="accion" href="/todas">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 4h6v3H9zM7 5H5v16h14V5h-2M8 12h8M8 16h5"/></svg>
+        Todas las donaciones
+      </a>
+    <% } %>
 
-  <p><a class="boton" href="/buscar">Buscar donación por código</a></p>
+    <a class="accion" href="/buscar">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/></svg>
+      Buscar donación por código
+    </a>
+  </nav>
 
-  <form method="post" action="/salir">
-    <button type="submit">Salir</button>
+  <form class="salir" method="post" action="/salir">
+    <button type="submit" class="secundario">Salir</button>
   </form>
 </body>
 </html>

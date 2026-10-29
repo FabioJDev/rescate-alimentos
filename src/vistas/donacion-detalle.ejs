@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Donación <%= donacion.codigo %> · Rescate de Alimentos</title>
   <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
 </head>
 <body>
+  <%- include('_marca') %>
   <h1>Donación <%= donacion.codigo %></h1>
   <p class="estado <%= donacion.vencida ? 'estado-vencida' : 'estado-' + donacion.estado %>">Estado: <strong><%= estadoTexto %></strong></p>
 
-  <div class="tarjeta">
+  <div class="tarjeta tarjeta-<%= donacion.vencida ? 'estado-vencida' : 'estado-' + donacion.estado %>">
     <p class="tarjeta-titulo"><%= donacion.tipo_alimento %> · <%= donacion.cantidad %> <%= donacion.unidad %></p>
     <p>Donante: <%= donacion.donante_nombre %></p>
     <p>Recoger en: <%= donacion.punto_recogida %> (zona <%= donacion.zona %>)</p>
@@ -24,7 +26,6 @@
     <% }) %>
   </ol>
 
-  <p><a href="/buscar">Buscar otra donación</a></p>
-  <p><a href="/">Volver al inicio</a></p>
+  <p><a class="boton boton-secundario" href="/buscar">Buscar otra donación</a></p>
 </body>
 </html>

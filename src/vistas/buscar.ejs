@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Buscar donación · Rescate de Alimentos</title>
   <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
 </head>
 <body>
+  <%- include('_marca') %>
   <h1>Buscar donación</h1>
 
   <% if (mensaje) { %>
@@ -19,6 +21,5 @@
     <button type="submit">Buscar</button>
   </form>
 
-  <p><a href="/">Volver al inicio</a></p>
 </body>
 </html>

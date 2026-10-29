@@ -1,0 +1,17 @@
+<%# Barra fija de arriba en cada pantalla: a la izquierda el botón para volver, a la derecha la marca.
+    Cada vista puede pasar { volverA, volverNombre }; si no los pasa, vuelve al inicio. %>
+<% const destino = locals.volverA || '/'; const nombreDestino = locals.volverNombre || 'Inicio'; %>
+<nav class="barra" aria-label="Navegación principal">
+  <a class="boton-volver" href="<%= destino %>" aria-label="Volver a: <%= nombreDestino %>">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7"/></svg>
+    <%= nombreDestino %>
+  </a>
+  <span class="marca">
+    <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <rect x="2" y="9" width="28" height="21" rx="3" fill="#17352b"/>
+      <path d="M16 3c5 1 8 5 7 10-5-1-8-5-7-10z" fill="#f29a2e"/>
+      <path d="M16 3c-5 1-8 5-7 10 5-1 8-5 7-10z" fill="#1f7a45"/>
+    </svg>
+    Rescate de Alimentos
+  </span>
+</nav>
