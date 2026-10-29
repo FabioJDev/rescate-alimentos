@@ -15,32 +15,62 @@ const UNIDADES = ['kg', 'unidades', 'cajas', 'bultos'];
 
 // Registra una donación en estado «disponible» y deja el movimiento de registro (trazabilidad, RNF-05).
 // La donación y su movimiento se guardan juntos: o quedan los dos o no queda ninguno.
-async function registrarDonacion({ donanteId, registradaPorId, tipoAlimento, cantidad, unidad, puntoRecogida, zona, horaLimite }) {
+// CMP-08: si viene `idLocal` (el identificador que generó el teléfono al guardarla sin conexión) y esa donación
+// ya se registró, no se crea otra: se devuelve la que ya existía con `repetida: true` (CA-08.3). La base de
+// datos lo garantiza con un índice único, así que también funciona si dos envíos llegan al mismo tiempo.
+async function registrarDonacion({
+  donanteId,
+  registradaPorId,
+  tipoAlimento,
+  cantidad,
+  unidad,
+  puntoRecogida,
+  zona,
+  horaLimite,
+  idLocal = null,
+  detalle = null,
+}) {
+  let registrada = null;
+
   const cliente = await pool.connect();
   try {
     await cliente.query('BEGIN');
 
     const donacion = await cliente.query(
       `INSERT INTO donaciones
-         (tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite, donante_id, registrada_por_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         (tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite, donante_id, registrada_por_id, id_local)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING id, codigo`,
-      [tipoAlimento, cantidad, unidad, puntoRecogida, zona, horaLimite, donanteId, registradaPorId]
+      [tipoAlimento, cantidad, unidad, puntoRecogida, zona, horaLimite, donanteId, registradaPorId, idLocal]
     );
 
     await cliente.query(
-      "INSERT INTO movimientos (donacion_id, tipo, usuario_id) VALUES ($1, 'registro', $2)",
-      [donacion.rows[0].id, registradaPorId]
+      "INSERT INTO movimientos (donacion_id, tipo, usuario_id, detalle) VALUES ($1, 'registro', $2, $3)",
+      [donacion.rows[0].id, registradaPorId, detalle]
     );
 
     await cliente.query('COMMIT');
-    return donacion.rows[0];
+    registrada = donacion.rows[0];
   } catch (error) {
     await cliente.query('ROLLBACK');
-    throw error;
+    // 23505 = violación de unicidad: ya existe una donación con este identificador local (envío repetido).
+    if (!(idLocal && error.code === '23505')) throw error;
   } finally {
+    // Se devuelve la conexión antes de consultar la donación existente (ver la explicación en tomarDonacion).
     cliente.release();
   }
+
+  if (registrada) return registrada;
+  return { ...(await buscarPorIdLocal(registradaPorId, idLocal)), repetida: true };
+}
+
+// CMP-08: busca una donación ya registrada con este identificador local (para no duplicarla).
+async function buscarPorIdLocal(registradaPorId, idLocal) {
+  const r = await consultar('SELECT id, codigo FROM donaciones WHERE registrada_por_id = $1 AND id_local = $2', [
+    registradaPorId,
+    idLocal,
+  ]);
+  return r.rows[0] || null;
 }
 
 async function buscarPorCodigo(codigo) {
@@ -180,6 +210,7 @@ module.exports = {
   TIPOS_ALIMENTO,
   UNIDADES,
   registrarDonacion,
+  buscarPorIdLocal,
   buscarPorCodigo,
   listarDisponibles,
   tomarDonacion,

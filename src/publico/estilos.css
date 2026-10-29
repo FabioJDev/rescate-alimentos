@@ -822,3 +822,20 @@ body:has(> h1.hero)::after {
     transform: none;
   }
 }
+
+/* Modo sin conexión (CMP-08): aviso de donaciones guardadas en el teléfono. */
+.aviso-sin-conexion {
+  margin: 0.5rem 0 1rem;
+}
+
+.aviso-sin-conexion .error button {
+  margin-top: 0.5rem;
+}
+
+.aviso {
+  margin: 1rem 0;
+  padding: 0.85rem 1rem;
+  border-radius: 0.4rem;
+  border-left: 0.5rem solid var(--ambar);
+  background: #fbefd3;
+}
