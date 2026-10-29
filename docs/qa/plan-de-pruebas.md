@@ -5,7 +5,7 @@ automática (archivo y cantidad de pruebas) y con pasos a mano en la URL despleg
 
 Este documento separa con cuidado **qué se ejecutó** y **quién lo verificó**, porque no es lo mismo: las pruebas
 automáticas las corre el CI; la verificación independiente a mano la tiene que hacer una persona distinta de quien
-escribió el código. **Esa verificación independiente todavía no está registrada** (ver «Verificación independiente»).
+escribió el código. La verificación independiente se hizo el 29 de octubre de 2026 y está en la sección 5, con lo que sí se probó y lo que no.
 
 ## 1. Estrategia
 
@@ -20,12 +20,14 @@ Convenciones: un archivo por comportamiento (`tests/cmp-0X.test.js`) y el nombre
 
 ## 2. Resultado de la ejecución automática
 
-Ejecutada el 28 de octubre de 2026 sobre `main` (todos los PR integrados), en local, por Fabio Jordan:
+Ejecutada el 29 de octubre de 2026 sobre `main` (commit 4b2e7eb, ya con CMP-06 a CMP-08), en local. Antes, el 28 de
+octubre, se había corrido con los CMP-01 a CMP-05 (9 archivos y 107 pruebas). En esta computadora (Node 25) Jest solo arranca con
+`NODE_OPTIONS=--no-experimental-webstorage`; sin esa opción las 12 suites fallan antes de empezar.
 
 | | |
 |---|---|
-| Archivos de prueba | 9 de 9 pasan |
-| Pruebas | **107 de 107 pasan**, 0 fallan |
+| Archivos de prueba | 12 de 12 pasan |
+| Pruebas | **134 de 134 pasan**, 0 fallan |
 | CI en `main` | check «pruebas» en verde en el último commit |
 
 ## 3. Cobertura por criterio
@@ -87,6 +89,45 @@ demostración (Panadería La Espiga `4444`, Ana `1111`, Bruno `2222`, Marcela `0
 | CA-05.5 | 8 | Marcela → Todas las donaciones → filtros Disponibles, Asignadas, Entregadas y Vencidas |
 | CA-05.6 | 5 | Panadería → Mis donaciones: solo las suyas, con su estado |
 
+### CMP-06 · Soltar una donación tomada (`tests/cmp-06.test.js`)
+
+| CA | Auto | Pasos a mano en la URL |
+|---|---|---|
+| CA-06.1 | 1 | Ana toma una donación → Mis recogidas → «No puedo recogerla: soltar» → «Sí, soltar esta donación»: vuelve a «Disponible», sale de sus recogidas y reaparece en la lista de Bruno |
+| CA-06.2 | 1 | Bruno abre «soltar» de una donación de Ana: se rechaza («Solo quien la tomó puede soltarla») y no cambia nada |
+| CA-06.3 | 1 | Abrir «soltar» de una disponible: «Esta donación no está asignada a nadie»; de una entregada: «ya fue entregada el … a …; no se puede soltar» |
+| CA-06.4 | 1 | Repetir «soltar» después de soltarla: sale el mismo mensaje y el historial tiene un solo «Soltada por» |
+| CA-06.5 | 1 | Tomar una donación con hora límite cercana, esperar a que pase y soltarla: queda «Vencida (no recogida)» y no vuelve a la lista |
+| CA-06.6 | 1 | Detalle de la soltada: el historial dice «Soltada por Ana»; Bruno puede tomarla |
+| CA-06.7 | 1 | Difícil de provocar a mano; se apoya en la prueba automática |
+| CA-06.8 | 1 | La panadería o Marcela abren «soltar»: «No tienes permiso» |
+
+### CMP-07 · Reporte del periodo (`tests/cmp-07.test.js`)
+
+| CA | Auto | Pasos a mano en la URL |
+|---|---|---|
+| CA-07.1 | 1 | Marcela → Reporte del periodo: cuántas donaciones se registraron y cuántas hay en cada estado |
+| CA-07.2 | 1 | La cantidad rescatada sale separada por unidad (por ejemplo kg y unidades), sin sumarlas |
+| CA-07.3 | 1 | Entregas por organización y donaciones por tipo de alimento |
+| CA-07.4 | 1 | Poner «hasta» antes que «desde», o una fecha inválida: mensaje claro y sin datos |
+| CA-07.5 | 1 | Un periodo sin donaciones (por ejemplo enero de 2026): «No hay donaciones en este periodo» |
+| CA-07.6 | 1 | Ana o la panadería abren `/reporte` o `/reporte.csv`: «No tienes permiso» |
+| CA-07.7 | 1 | «Descargar CSV»: una fila por donación y las tildes bien; abrirlo en Excel |
+
+### CMP-08 · Registrar una donación sin conexión (`tests/cmp-08.test.js`)
+
+Para quitar la señal en Chrome: herramientas de desarrollo (F12) → pestaña Network → «Offline». Antes hay que abrir «Publicar donación» con conexión.
+
+| CA | Auto | Pasos a mano en la URL |
+|---|---|---|
+| CA-08.1 | 2 | Sin conexión, llenar el formulario y publicar: «Guardada en tu teléfono. Se enviará cuando haya señal.»; al recargar, «Publicar donación» sigue abriendo |
+| CA-08.2 | 2 | Volver la conexión: «Se envió la donación que tenías guardada. Su código es D-…»; queda «disponible» a nombre de quien la escribió |
+| CA-08.3 | 2 | La misma pendiente en dos pestañas: se registra una sola vez |
+| CA-08.4 | 2 | Guardar con una hora límite que venza antes de reconectar: al volver la señal sale el rechazo con el motivo y el botón «Descartar» |
+| CA-08.5 | 2 | Quitar la sesión antes de reconectar: la pendiente se queda guardada; otra persona que ingrese en ese teléfono no la ve ni se registra a su nombre |
+| CA-08.6 | 1 | Sin conexión, abrir otra pantalla (por ejemplo `/`): «Sin conexión» |
+| CA-08.7 | 1 | Ana (voluntaria) intenta sincronizar: 403 |
+
 ### Otras pruebas (no ligadas a un CA)
 
 | Archivo | Qué comprueba |
@@ -105,31 +146,57 @@ La evidencia son las [capturas de pantalla](../ux/capturas/) de `docs/ux/pantall
 En la **URL desplegada** se comprobó que responde, que las rutas protegidas mandan a ingresar y que un ingreso con un usuario
 inexistente se rechaza (lo que confirma que la base de datos contesta). Fabio ingresó como Marcela y vio su pantalla de inicio.
 
-**Lo que no se ha hecho:** recorrer los cinco comportamientos en la URL desplegada con los usuarios de demostración, ni probar
-en un teléfono real.
+Recorrer los comportamientos en la URL desplegada con los usuarios de demostración se hizo después, el 29 de octubre, y está en
+la sección 5 (CMP-01 a CMP-08).
 
 ## 5. Verificación independiente
 
 La condición de «Terminado» y el criterio de verificación piden que **alguien distinto de quien construyó** compruebe cada CA
-y **diga cuáles verificó**. Mientras esa persona no lo registre aquí, la verificación a mano **sigue pendiente**.
+y **diga cuáles verificó**. Esa verificación ya está registrada abajo, con fecha del 29 de octubre de 2026.
 
 Quien verifique completa la tabla (una fila por sesión de verificación):
 
 | Fecha | Quién verificó | CA verificados | Dónde (URL o local) | Usuarios usados | Resultado |
 |---|---|---|---|---|---|
-| | | | | | |
+| 29/10/2026 | Juan David Morales (QA) | CMP-01 a CMP-08: los 51 CA, todos verificados | URL desplegada: https://rescate-alimentos.onrender.com | Panadería La Espiga (4444), Ana (1111), Bruno (2222), Marcela (0000) | Ningún criterio falló |
 
 ### Verificado por
 
 | Nombre | Rol | Fecha | Qué verificó |
 |---|---|---|---|
-| *Pendiente* | QA Engineer | | |
+| Juan David Morales | QA Engineer | 29 de octubre de 2026 | CMP-01 a CMP-08 en la URL desplegada: los 51 CA verificados a mano. Ninguno falló |
 
 > Quien firme aquí debe haber hecho la verificación. Si algo no se pudo comprobar, se escribe como «no verificado» y por qué.
 
+#### Cómo se verificó
+
+Lo hice a mano en la URL desplegada, con dos navegadores (uno normal y uno en incógnito) para simular a dos personas a la vez. El
+modo sin conexión lo probé en Chrome, cortando la conexión desde las herramientas de desarrollo (F12 → Network → Offline), y el
+CSV del reporte lo abrí en Excel. Las donaciones que se crearon al probar quedan en la base de demostración. Las capturas y las
+notas están en mi computador, fuera del repositorio.
+
+#### Resultado por comportamiento
+
+| Comportamiento | Resultado | Qué se vio |
+|---|---|---|
+| CMP-01 | CA-01.1 a CA-01.6 completos | Publicación correcta con su código; mensajes de campo vacío, hora de ayer y cantidad 0, -3 y texto; Marcela registra a nombre de un comercio |
+| CMP-02 | CA-02.1 a CA-02.5 completos | Orden por urgencia con tiempo restante; «Ver todas las zonas»; lista vacía |
+| CMP-03 | CA-03.1 a CA-03.6 completos | Ana y Bruno pulsaron «Sí, tomar» sobre la misma donación a la vez: solo uno quedó asignado y el otro vio quién la tomó |
+| CMP-04 | CA-04.1 a CA-04.6 completos | Formulario vacío rechazado y entrega registrada a una organización con el nombre de quien recibe |
+| CMP-05 | CA-05.1 a CA-05.6 completos | Búsqueda por código (también un código inexistente); filtros de Marcela; «Mis donaciones» de la panadería |
+| CMP-06 | CA-06.1 a CA-06.8 completos | Ana toma, suelta y confirma; vuelve a «Disponible»; el historial dice «Soltada por Ana»; Bruno la puede tomar |
+| CMP-07 | CA-07.1 a CA-07.7 completos | Cifras por estado y por unidad, error con «hasta» anterior a «desde», CSV con las tildes bien en Excel |
+| CMP-08 | CA-08.1 a CA-08.7 completos | Publicar sin conexión, mensaje «Sin conexión», envío al volver la señal, rechazo con «Descartar» |
+
+#### Lo que queda fuera de esta verificación
+
+Ningún criterio de CMP-01 a CMP-08 quedó sin verificar. Quedan fuera la carga y el rendimiento en red 3G y la accesibilidad
+(ver la sección 6).
+
 ## 6. Riesgos y lo que este plan no cubre
 
-- **Modo sin conexión** (RNF-01): no existe todavía; no hay pruebas.
+- **Modo sin conexión** (RNF-01): existe desde CMP-08 y tiene 12 pruebas automáticas. En la URL se probó en Chrome, con la
+  conexión cortada desde las herramientas de desarrollo.
 - **Carga y rendimiento en red 3G** (RNF-07): no se midió; las páginas son livianas por diseño, pero no hay medición.
 - **Seguridad del ingreso:** el PIN de 4 dígitos no tiene límite de intentos ni protección CSRF con tokens (ver ADR-003).
 - **Accesibilidad:** no se hizo una auditoría; los estados van escritos y no solo en color.
