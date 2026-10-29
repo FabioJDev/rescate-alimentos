@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Soltar donación · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/mis-recogidas', volverNombre: 'Mis recogidas' }) %>
+  <h1>¿Soltar esta donación?</h1>
+
+  <div class="tarjeta">
+    <p class="tarjeta-titulo"><%= donacion.tipo_alimento %> · <%= donacion.cantidad %> <%= donacion.unidad %></p>
+    <p>Código: <%= donacion.codigo %></p>
+    <p>Recoger en: <%= donacion.punto_recogida %> (zona <%= donacion.zona %>)</p>
+    <p>Hora límite: <%= horaLimite %></p>
+  </div>
+
+  <p>Si la sueltas, deja de ser tuya y vuelve a la lista para que otro voluntario pueda tomarla. Ya no tendrás que recogerla.</p>
+
+  <form method="post" action="/donaciones/<%= donacion.codigo %>/soltar">
+    <button type="submit">Sí, soltar esta donación</button>
+  </form>
+
+  <p><a class="boton boton-secundario" href="/mis-recogidas">No, mantenerla</a></p>
+</body>
+</html>

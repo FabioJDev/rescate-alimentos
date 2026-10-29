@@ -14,6 +14,7 @@ const rutasConsulta = require('./rutas/consulta');
 const rutasListas = require('./rutas/listas');
 const rutasEntregar = require('./rutas/entregar');
 const rutasSincronizar = require('./rutas/sincronizar');
+const rutasSoltar = require('./rutas/soltar');
 
 const app = express();
 const enProduccion = process.env.NODE_ENV === 'production';
@@ -72,6 +73,7 @@ app.use(rutasConsulta);
 app.use(rutasListas);
 app.use(rutasEntregar);
 app.use(rutasSincronizar);
+app.use(rutasSoltar);
 
 // Pantalla de inicio: por ahora solo saluda; cada comportamiento agrega aquí su enlace.
 app.get('/', requerirSesion, (req, res) => {
