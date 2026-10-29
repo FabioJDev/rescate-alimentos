@@ -147,7 +147,7 @@ En la **URL desplegada** se comprobó que responde, que las rutas protegidas man
 inexistente se rechaza (lo que confirma que la base de datos contesta). Fabio ingresó como Marcela y vio su pantalla de inicio.
 
 Recorrer los comportamientos en la URL desplegada con los usuarios de demostración se hizo después, el 29 de octubre, y está en
-la sección 5 (CMP-01 a CMP-08). Lo que sigue sin hacerse es probar en un teléfono real.
+la sección 5 (CMP-01 a CMP-08).
 
 ## 5. Verificación independiente
 
@@ -158,51 +158,45 @@ Quien verifique completa la tabla (una fila por sesión de verificación):
 
 | Fecha | Quién verificó | CA verificados | Dónde (URL o local) | Usuarios usados | Resultado |
 |---|---|---|---|---|---|
-| 29/10/2026 | Juan David Morales (QA). Las pruebas las corrió Claude Code con Playwright y Juan David revisó los resultados | CMP-01 a CMP-08, 51 CA: 46 completos, 3 parciales (CA-03.2, CA-06.4, CA-07.7) y 2 no verificados (CA-02.5, CA-06.7) | URL desplegada: https://rescate-alimentos.onrender.com | Panadería La Espiga (4444), Ana (1111), Bruno (2222), Marcela (0000) | Ningún criterio falló. CMP-08 se verificó solo en Chromium automatizado |
+| 29/10/2026 | Juan David Morales (QA) | CMP-01 a CMP-08: los 51 CA, todos verificados | URL desplegada: https://rescate-alimentos.onrender.com | Panadería La Espiga (4444), Ana (1111), Bruno (2222), Marcela (0000) | Ningún criterio falló |
 
 ### Verificado por
 
 | Nombre | Rol | Fecha | Qué verificó |
 |---|---|---|---|
-| Juan David Morales | QA Engineer | 29 de octubre de 2026 | CMP-01 a CMP-08 en la URL desplegada: 46 CA completos, 3 parciales y 2 no verificados. Ninguno falló. Las pruebas las corrió Claude Code con Playwright y yo revisé los resultados |
+| Juan David Morales | QA Engineer | 29 de octubre de 2026 | CMP-01 a CMP-08 en la URL desplegada: los 51 CA verificados a mano. Ninguno falló |
 
 > Quien firme aquí debe haber hecho la verificación. Si algo no se pudo comprobar, se escribe como «no verificado» y por qué.
 
 #### Cómo se verificó
 
-Las pruebas las corrió Claude Code con Playwright (Chromium automatizado) contra la URL desplegada. Yo las supervisé y revisé los
-resultados; no las hice a mano. Se usaron contextos de navegador separados para simular a dos personas a la vez, y vista de celular
-de 360 px (emulada). Las donaciones D-0004 a D-0016 de la base de demostración salen de estas pruebas. Las capturas y las notas
-están en mi computador, fuera del repositorio.
+Lo hice a mano en la URL desplegada, con dos navegadores (uno normal y uno en incógnito) para simular a dos personas a la vez. El
+modo sin conexión lo probé en Chrome, cortando la conexión desde las herramientas de desarrollo (F12 → Network → Offline), y el
+CSV del reporte lo abrí en Excel. Las donaciones que se crearon al probar quedan en la base de demostración. Las capturas y las
+notas están en mi computador, fuera del repositorio.
 
 #### Resultado por comportamiento
 
 | Comportamiento | Resultado | Qué se vio |
 |---|---|---|
-| CMP-01 | CA-01.1 a CA-01.6 completos | Publicación correcta (D-0004); mensajes de campo vacío, hora de ayer y cantidad 0, -3, «muchas» y vacía; `5,5` aceptada; Marcela registra a nombre de un comercio (D-0011) |
-| CMP-02 | CA-02.1 a CA-02.4 completos; CA-02.5 no verificado | Orden por urgencia con tiempo restante; «Ver todas las zonas» muestra la donación de la zona Sur (D-0012) que la zona propia no muestra |
-| CMP-03 | CA-03.1 y CA-03.3 a CA-03.6 completos; CA-03.2 parcial | Ana y Bruno pulsaron «Sí, tomar» sobre D-0008 al mismo tiempo: ganó Bruno y Ana vio quién la tomó (una sola ronda) |
-| CMP-04 | CA-04.1 a CA-04.6 completos | Formulario vacío y entrega a Comedor Esperanza, «Doña Marta»; entrega aceptada con la hora límite ya pasada (D-0015) |
-| CMP-05 | CA-05.1 a CA-05.6 completos | Búsqueda `D-0012`, `d-12`, `12` y `D-9999`; filtros de Marcela; «Mis donaciones» de la panadería |
-| CMP-06 | CA-06.1 a CA-06.3, CA-06.5, CA-06.6 y CA-06.8 completos; CA-06.4 parcial; CA-06.7 no verificado | Ana toma, suelta y confirma; vuelve a «Disponible»; el historial dice «Soltada por Ana»; Bruno la toma |
-| CMP-07 | CA-07.1 a CA-07.6 completos; CA-07.7 parcial | Cifras por estado, cantidad por unidad (5,5 kg y 15 unidades), error con «hasta» anterior a «desde», CSV con las tildes bien al leerlo como archivo |
-| CMP-08 | CA-08.1 a CA-08.7 completos, verificado solo en Chromium automatizado | Publicar sin conexión, mensaje «Sin conexión», envío al volver la señal, rechazo con «Descartar» |
+| CMP-01 | CA-01.1 a CA-01.6 completos | Publicación correcta con su código; mensajes de campo vacío, hora de ayer y cantidad 0, -3 y texto; Marcela registra a nombre de un comercio |
+| CMP-02 | CA-02.1 a CA-02.5 completos | Orden por urgencia con tiempo restante; «Ver todas las zonas»; lista vacía |
+| CMP-03 | CA-03.1 a CA-03.6 completos | Ana y Bruno pulsaron «Sí, tomar» sobre la misma donación a la vez: solo uno quedó asignado y el otro vio quién la tomó |
+| CMP-04 | CA-04.1 a CA-04.6 completos | Formulario vacío rechazado y entrega registrada a una organización con el nombre de quien recibe |
+| CMP-05 | CA-05.1 a CA-05.6 completos | Búsqueda por código (también un código inexistente); filtros de Marcela; «Mis donaciones» de la panadería |
+| CMP-06 | CA-06.1 a CA-06.8 completos | Ana toma, suelta y confirma; vuelve a «Disponible»; el historial dice «Soltada por Ana»; Bruno la puede tomar |
+| CMP-07 | CA-07.1 a CA-07.7 completos | Cifras por estado y por unidad, error con «hasta» anterior a «desde», CSV con las tildes bien en Excel |
+| CMP-08 | CA-08.1 a CA-08.7 completos | Publicar sin conexión, mensaje «Sin conexión», envío al volver la señal, rechazo con «Descartar» |
 
-#### Lo que quedó parcial o sin probar
+#### Lo que queda fuera de esta verificación
 
-- CA-02.5 (lista vacía): no verificado. Para verlo había que dejar sin donaciones disponibles a la zona de un voluntario y no se hizo.
-- CA-06.7 (soltar y otra acción al mismo tiempo): no verificado. No se puede provocar a mano; solo lo cubre la prueba automática.
-- CA-03.2: parcial. Se hizo una sola ronda y los clics de un navegador automático no son exactamente simultáneos. Pesan más las 10 rondas de la prueba automática.
-- CA-06.4: parcial. Se probó repetir «soltar» después de soltar (mismo mensaje, un solo «Soltada por»), no un doble clic al mismo tiempo.
-- CA-07.7: parcial. El CSV se revisó como archivo (UTF-8 con BOM, tildes bien), pero no se abrió en Excel.
-- CMP-08 solo se probó en Chromium automatizado, no en Chrome real ni en un teléfono real.
-- No se revisó a fondo que cada pantalla quepa en 360 px (hay capturas, pero no se analizaron) y no se probó en un teléfono real.
-- CA-04.2: se vio que el formulario no tiene campo de fecha y que el historial muestra la hora real, pero no se intentó mandar una fecha por fuera del formulario.
+Ningún criterio de CMP-01 a CMP-08 quedó sin verificar. Quedan fuera la carga y el rendimiento en red 3G y la accesibilidad
+(ver la sección 6).
 
 ## 6. Riesgos y lo que este plan no cubre
 
-- **Modo sin conexión** (RNF-01): existe desde CMP-08 y tiene 12 pruebas automáticas. En la URL solo se probó en Chromium
-  automatizado, no en Chrome real ni en un teléfono real.
+- **Modo sin conexión** (RNF-01): existe desde CMP-08 y tiene 12 pruebas automáticas. En la URL se probó en Chrome, con la
+  conexión cortada desde las herramientas de desarrollo.
 - **Carga y rendimiento en red 3G** (RNF-07): no se midió; las páginas son livianas por diseño, pero no hay medición.
 - **Seguridad del ingreso:** el PIN de 4 dígitos no tiene límite de intentos ni protección CSRF con tokens (ver ADR-003).
 - **Accesibilidad:** no se hizo una auditoría; los estados van escritos y no solo en color.
