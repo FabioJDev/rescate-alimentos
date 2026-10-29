@@ -838,4 +838,19 @@ body:has(> h1.hero)::after {
   border-radius: 0.4rem;
   border-left: 0.5rem solid var(--ambar);
   background: #fbefd3;
+/* Reporte del periodo (CMP-07): listas de cifras y nota sobre cantidades declaradas. */
+.resumen {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.resumen li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #e3e3e3;
+}
+
+.nota {
+  font-size: 0.9rem;
+  color: #444;
 }

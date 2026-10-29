@@ -14,6 +14,7 @@ const rutasConsulta = require('./rutas/consulta');
 const rutasListas = require('./rutas/listas');
 const rutasEntregar = require('./rutas/entregar');
 const rutasSincronizar = require('./rutas/sincronizar');
+const rutasReporte = require('./rutas/reporte');
 const rutasSoltar = require('./rutas/soltar');
 
 const app = express();
@@ -73,6 +74,7 @@ app.use(rutasConsulta);
 app.use(rutasListas);
 app.use(rutasEntregar);
 app.use(rutasSincronizar);
+app.use(rutasReporte);
 app.use(rutasSoltar);
 
 // Pantalla de inicio: por ahora solo saluda; cada comportamiento agrega aquí su enlace.
