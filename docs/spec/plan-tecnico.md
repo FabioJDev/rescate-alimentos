@@ -42,8 +42,11 @@ flowchart LR
 - **`donaciones`**: id, codigo, tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite,
   estado (`disponible` | `asignada` | `entregada`), donante_id, registrada_por_id, creada_en,
   voluntario_id, tomada_en, organizacion_id, recibido_por, entregada_en.
-- **`movimientos`**: id, donacion_id, tipo (`registro` | `toma` | `entrega`), usuario_id, ocurrido_en, detalle.
-  Da la trazabilidad sanitaria (RNF-05): quién, qué, cuándo.
+- **`movimientos`**: id, donacion_id, tipo (`registro` | `toma` | `entrega` | `liberacion`), usuario_id,
+  ocurrido_en, detalle. Da la trazabilidad sanitaria (RNF-05): quién, qué, cuándo. `liberacion` (CMP-06) se
+  agregó en la 3C.
+- En la 3C, `donaciones` gana `id_local` (texto único, opcional): el identificador que genera el teléfono para
+  que enviar dos veces una donación guardada sin conexión no la duplique (CMP-08).
 
 «Vencida» **se calcula, no se guarda**: es una donación `disponible` con `hora_limite` cumplida.
 
@@ -68,7 +71,7 @@ Nombre + PIN de 4 dígitos, con sesión por cookie. Ver [ADR-003](../decisiones/
 
 | Riesgo o restricción | Decisión o tarea |
 |---|---|
-| **Técnico:** sin señal no se puede registrar. | El MVP minimiza datos y pasos. El modo sin conexión con sincronización (RNF-01) queda como tarea **T-3C.1** del backlog de la 3C. CA-03.5 (reintento sin duplicar) ya protege contra la mala señal. |
+| **Técnico:** sin señal no se puede registrar. | El MVP minimiza datos y pasos. En la 3C se agregó el modo sin conexión para registrar (CMP-08, tarea **T-3C.1**): cola en el teléfono y sincronización repetible, ver [ADR-004](../decisiones/ADR-004-modo-sin-conexion.md). CA-03.5 (reintento sin duplicar) ya protege contra la mala señal al tomar. |
 | **Contexto:** siguen usando WhatsApp en paralelo. | Tarea de la 3C: manual de operación y mensaje de lanzamiento para Marcela («solo cuenta lo registrado»). |
 | **Restricción:** nadie pesa el alimento. | La cantidad se guarda como **declarada**, con unidad; no se presenta como verificada. |
 
@@ -81,3 +84,4 @@ Ninguna. Si aparece alguna, se argumenta en esta sección.
 - [ADR-001 · Un solo voluntario toma cada donación](../decisiones/ADR-001-toma-atomica.md)
 - [ADR-002 · Hosting y base de datos: Render + Neon](../decisiones/ADR-002-hosting-render-neon.md)
 - [ADR-003 · Identificación con nombre + PIN](../decisiones/ADR-003-identificacion-nombre-pin.md)
+- [ADR-004 · Registrar sin conexión con una cola en el teléfono](../decisiones/ADR-004-modo-sin-conexion.md)
