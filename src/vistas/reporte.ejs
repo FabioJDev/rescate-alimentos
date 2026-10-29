@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reporte del periodo · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca') %>
+  <h1>Reporte del periodo</h1>
+
+  <form method="get" action="/reporte" novalidate>
+    <label for="desde">Desde</label>
+    <input id="desde" name="desde" type="date" value="<%= periodo.desde %>">
+
+    <label for="hasta">Hasta</label>
+    <input id="hasta" name="hasta" type="date" value="<%= periodo.hasta %>">
+
+    <button type="submit">Ver reporte</button>
+  </form>
+
+  <% if (error) { %>
+    <p class="error" role="alert"><%= error %></p>
+  <% } else if (reporte.conteos.total === 0) { %>
+    <p class="vacio">No hay donaciones en este periodo.</p>
+  <% } else { %>
+    <p>Donaciones <strong>registradas</strong> entre el <%= periodo.desde %> y el <%= periodo.hasta %> (hora de Colombia).</p>
+
+    <h2>Estado de las donaciones</h2>
+    <ul class="resumen">
+      <li>Registradas: <strong data-dato="total"><%= reporte.conteos.total %></strong></li>
+      <li>Entregadas: <strong data-dato="entregadas"><%= reporte.conteos.entregadas %></strong></li>
+      <li>Asignadas (en camino): <strong data-dato="asignadas"><%= reporte.conteos.asignadas %></strong></li>
+      <li>Disponibles: <strong data-dato="disponibles"><%= reporte.conteos.disponibles %></strong></li>
+      <li>Vencidas (no recogidas): <strong data-dato="vencidas"><%= reporte.conteos.vencidas %></strong></li>
+    </ul>
+
+    <h2>Cantidad rescatada</h2>
+    <% if (reporte.porUnidad.length === 0) { %>
+      <p class="vacio">Todavía no hay entregas en este periodo.</p>
+    <% } else { %>
+      <ul class="resumen">
+        <% reporte.porUnidad.forEach((u) => { %>
+          <li data-unidad="<%= u.unidad %>"><%= u.cantidad.toLocaleString('es-CO') %> <%= u.unidad %></li>
+        <% }) %>
+      </ul>
+      <p class="nota">Solo cuenta lo entregado. Las cantidades son declaradas por quien dona (nadie pesa el alimento) y no se
+        suman unidades distintas entre sí.</p>
+    <% } %>
+
+    <h2>Entregas por organización</h2>
+    <% if (reporte.porOrganizacion.length === 0) { %>
+      <p class="vacio">Todavía no hay entregas en este periodo.</p>
+    <% } else { %>
+      <ul class="resumen">
+        <% reporte.porOrganizacion.forEach((o) => { %>
+          <li><%= o.nombre %>: <strong data-organizacion="<%= o.nombre %>"><%= o.entregas %></strong></li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <h2>Donaciones por tipo de alimento</h2>
+    <ul class="resumen">
+      <% reporte.porTipo.forEach((t) => { %>
+        <li><%= t.tipo %>: <strong data-tipo="<%= t.tipo %>"><%= t.donaciones %></strong></li>
+      <% }) %>
+    </ul>
+
+    <p><a class="boton" href="/reporte.csv?desde=<%= periodo.desde %>&amp;hasta=<%= periodo.hasta %>">Descargar CSV</a></p>
+  <% } %>
+</body>
+</html>
