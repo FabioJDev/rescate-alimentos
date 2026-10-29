@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>No se pudo soltar la donación · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/mis-recogidas', volverNombre: 'Mis recogidas' }) %>
+  <h1>No se pudo soltar la donación</h1>
+  <p class="error" role="alert"><%= mensaje %></p>
+
+  <p><a class="boton" href="/mis-recogidas">Ver mis recogidas</a></p>
+</body>
+</html>
