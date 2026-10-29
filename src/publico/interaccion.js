@@ -91,4 +91,10 @@
     });
     mensajeExito.insertAdjacentElement('afterend', copiar);
   }
+
+  // 6. Modo sin conexión (CMP-08): se carga aparte para que, si falla, lo demás siga funcionando igual.
+  var scriptSinConexion = document.createElement('script');
+  scriptSinConexion.src = '/sin-conexion.js';
+  scriptSinConexion.defer = true;
+  document.head.appendChild(scriptSinConexion);
 })();

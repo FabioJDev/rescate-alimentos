@@ -13,6 +13,9 @@ const rutasTomar = require('./rutas/tomar');
 const rutasConsulta = require('./rutas/consulta');
 const rutasListas = require('./rutas/listas');
 const rutasEntregar = require('./rutas/entregar');
+const rutasSincronizar = require('./rutas/sincronizar');
+const rutasReporte = require('./rutas/reporte');
+const rutasSoltar = require('./rutas/soltar');
 
 const app = express();
 const enProduccion = process.env.NODE_ENV === 'production';
@@ -52,6 +55,12 @@ app.use(
   })
 );
 
+// Las vistas saben quién está dentro (el formulario de donaciones guarda su id para el modo sin conexión).
+app.use((req, res, next) => {
+  res.locals.usuarioActual = (req.session && req.session.usuario) || null;
+  next();
+});
+
 // Ruta de salud: sirve para comprobar que el servidor está arriba (también en Render).
 app.get('/salud', (req, res) => {
   res.json({ estado: 'ok' });
@@ -64,6 +73,9 @@ app.use(rutasTomar);
 app.use(rutasConsulta);
 app.use(rutasListas);
 app.use(rutasEntregar);
+app.use(rutasSincronizar);
+app.use(rutasReporte);
+app.use(rutasSoltar);
 
 // Pantalla de inicio: por ahora solo saluda; cada comportamiento agrega aquí su enlace.
 app.get('/', requerirSesion, (req, res) => {

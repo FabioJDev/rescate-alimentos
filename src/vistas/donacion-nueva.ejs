@@ -15,7 +15,8 @@
     <p class="error" role="alert">No se registró la donación. Revisa los campos marcados.</p>
   <% } %>
 
-  <form method="post" action="/donaciones" novalidate>
+  <%# data-sin-conexion: el script del teléfono guarda aquí la donación si no hay señal (CMP-08, ADR-004). %>
+  <form method="post" action="/donaciones" novalidate data-sin-conexion data-usuario="<%= locals.usuarioActual ? usuarioActual.id : '' %>">
     <% if (comercios) { %>
       <label for="donante_id">Comercio que avisó la donación</label>
       <select id="donante_id" name="donante_id" required>

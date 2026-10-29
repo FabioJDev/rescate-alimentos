@@ -2,20 +2,14 @@
 const express = require('express');
 const { requerirRol } = require('../middleware/autenticacion');
 const { consultar } = require('../db/conexion');
-const { TIPOS_ALIMENTO, UNIDADES, registrarDonacion, buscarPorCodigo } = require('../servicios/donaciones');
-const { validarDonacion } = require('../servicios/validar-donacion');
+const { TIPOS_ALIMENTO, UNIDADES, buscarPorCodigo } = require('../servicios/donaciones');
+const { listarComercios, registrarDesdeFormulario } = require('../servicios/registrar');
 const { formatearFechaHora } = require('../utilidades/fechas');
 
 const router = express.Router();
 
 // El donante registra lo suyo; la coordinadora registra a nombre de un comercio que avisa por llamada (CA-01.5).
 const donanteOCoordinadora = requerirRol('donante', 'coordinadora');
-
-// Los comercios entre los que puede elegir la coordinadora.
-async function listarComercios() {
-  const r = await consultar("SELECT id, nombre, zona, direccion FROM usuarios WHERE rol = 'donante' ORDER BY nombre");
-  return r.rows;
-}
 
 // `comercios` es null cuando quien registra es un donante: no tiene que elegir comercio.
 function mostrarFormulario(res, estado, valores, errores, comercios) {
@@ -60,36 +54,15 @@ router.get('/donaciones/nueva', donanteOCoordinadora, async (req, res, next) => 
 // CA-01.5: si registra la coordinadora, la donación queda a nombre del comercio y con ella como «registrada por».
 router.post('/donaciones', donanteOCoordinadora, async (req, res, next) => {
   try {
-    const usuario = req.session.usuario;
-    const esCoordinadora = usuario.rol === 'coordinadora';
-    const comercios = esCoordinadora ? await listarComercios() : null;
+    // La validación y el registro viven en un servicio que también usa la sincronización sin conexión (CMP-08).
+    const resultado = await registrarDesdeFormulario(req.session.usuario, req.body);
 
-    // Si quien registra es un donante, se ignora cualquier `donante_id` que venga en el formulario:
-    // un donante solo puede registrar donaciones a su propio nombre.
-    const { errores, valores, datos } = validarDonacion(req.body, new Date(), { comercios });
-
-    if (Object.keys(errores).length > 0) {
-      return mostrarFormulario(res, 400, valores, errores, comercios);
+    if (resultado.errores) {
+      return mostrarFormulario(res, 400, resultado.valores, resultado.errores, resultado.comercios);
     }
 
-    const donanteId = esCoordinadora ? datos.comercio.id : usuario.id;
-    const zona = esCoordinadora
-      ? datos.comercio.zona
-      : (await consultar('SELECT zona FROM usuarios WHERE id = $1', [usuario.id])).rows[0].zona;
-
-    const donacion = await registrarDonacion({
-      donanteId,
-      registradaPorId: usuario.id,
-      tipoAlimento: datos.tipoAlimento,
-      cantidad: datos.cantidad,
-      unidad: datos.unidad,
-      puntoRecogida: datos.puntoRecogida,
-      zona,
-      horaLimite: datos.horaLimite,
-    });
-
     // Se redirige para que recargar la página de confirmación no registre la donación otra vez.
-    res.redirect(`/donaciones/${donacion.codigo}/registrada`);
+    res.redirect(`/donaciones/${resultado.donacion.codigo}/registrada`);
   } catch (error) {
     next(error);
   }
