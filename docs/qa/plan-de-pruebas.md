@@ -20,7 +20,7 @@ Convenciones: un archivo por comportamiento (`tests/cmp-0X.test.js`) y el nombre
 
 ## 2. Resultado de la ejecución automática
 
-Ejecutada el 29 de octubre de 2026 sobre `main` (commit 4b2e7eb, ya con CMP-06 a CMP-08), en local. Antes, el 28 de
+Ejecutada el 29 de octubre de 2026 sobre `main` (commit 4b2e7eb, ya con CMP-06 a CMP-08), en local, por Claude Code a pedido de Fabio Jordan. Antes, el 28 de
 octubre, se había corrido con los CMP-01 a CMP-05 (9 archivos y 107 pruebas). En esta computadora (Node 25) Jest solo arranca con
 `NODE_OPTIONS=--no-experimental-webstorage`; sin esa opción las 12 suites fallan antes de empezar.
 
@@ -138,7 +138,7 @@ Para quitar la señal en Chrome: herramientas de desarrollo (F12) → pestaña N
 
 ## 4. Lo que se comprobó a mano hasta ahora (no es verificación independiente)
 
-El 28 de octubre de 2026 el autor del código (Fabio Jordan) recorrió **en local, con datos de la semilla y en
+El 28 de octubre de 2026 el autor del código (Fabio Jordan, con Claude Code) recorrió **en local, con datos de la semilla y en
 vista de celular de 360 px**: publicar con y sin errores, la lista de disponibles, confirmar la toma, el aviso a quien llega tarde,
 «Mis recogidas», registrar la entrega con y sin datos, el detalle con historial, la búsqueda y «Todas las donaciones».
 La evidencia son las [capturas de pantalla](../ux/capturas/) de `docs/ux/pantallas.md`.
