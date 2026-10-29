@@ -22,6 +22,8 @@ function frasesDelHistorial(donacion, historial) {
     const cuando = formatearFechaHora(paso.ocurrido_en);
     if (paso.tipo === 'registro') return { cuando, texto: `Registrada por ${paso.usuario_nombre}` };
     if (paso.tipo === 'toma') return { cuando, texto: `Tomada por ${paso.usuario_nombre}` };
+    // CA-06.6: soltar una donación también queda en el historial.
+    if (paso.tipo === 'liberacion') return { cuando, texto: `Soltada por ${paso.usuario_nombre}` };
     return {
       cuando,
       texto: `Entregada a ${donacion.organizacion_nombre}. Recibió: ${donacion.recibido_por}. Entregó: ${paso.usuario_nombre}`,
