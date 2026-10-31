@@ -33,7 +33,7 @@
           <p><%= nombresDeRol[u.rol] %><%= u.zona ? ' · zona ' + u.zona : '' %></p>
           <p>Teléfono: <%= u.telefono || 'sin registrar' %></p>
           <% if (u.direccion) { %><p>Dirección: <%= u.direccion %></p><% } %>
-          <p><a href="/usuarios/<%= u.id %>/editar">Editar datos</a></p>
+          <p><a href="/usuarios/<%= u.id %>/editar">Editar datos</a> · <a href="/usuarios/<%= u.id %>/restablecer-pin">Restablecer PIN</a></p>
           <form method="post" action="/usuarios/<%= u.id %>/<%= u.activo ? 'desactivar' : 'activar' %>">
             <button type="submit" class="secundario"><%= u.activo ? 'Desactivar' : 'Activar' %></button>
           </form>

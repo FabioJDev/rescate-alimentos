@@ -185,6 +185,39 @@ async function cambiarActivo(id, activo, quienEdita) {
   return { usuario: { ...usuario, activo } };
 }
 
+// CA-11.1 y CA-11.2: cambiar el propio PIN. Se pide el actual para que nadie lo cambie con una sesión olvidada.
+async function cambiarPin(usuarioId, cuerpo) {
+  const actual = (cuerpo.pin_actual || '').trim();
+  const nuevo = (cuerpo.pin_nuevo || '').trim();
+  const repetido = (cuerpo.pin_repetido || '').trim();
+
+  const r = await consultar('SELECT pin_hash FROM usuarios WHERE id = $1', [usuarioId]);
+  const errores = {};
+  if (!(await bcrypt.compare(actual, r.rows[0].pin_hash))) errores.pin_actual = 'El PIN actual no es correcto.';
+  if (!/^\d{4}$/.test(nuevo)) errores.pin_nuevo = 'El PIN nuevo debe tener 4 números.';
+  else if (nuevo !== repetido) errores.pin_repetido = 'Los dos PIN nuevos no coinciden.';
+  else if (nuevo === actual) errores.pin_nuevo = 'El PIN nuevo debe ser distinto del actual.';
+  if (Object.keys(errores).length > 0) return { errores };
+
+  const pinHash = await bcrypt.hash(nuevo, 10);
+  await consultar('UPDATE usuarios SET pin_hash = $1, debe_cambiar_pin = FALSE WHERE id = $2', [pinHash, usuarioId]);
+  return { cambiado: true };
+}
+
+// CA-11.3: la coordinadora restablece el PIN de otra persona. El anterior deja de servir, se cierran sus
+// sesiones y la persona tendrá que cambiar el temporal al entrar (CA-11.4).
+async function restablecerPin(id, quienRestablece) {
+  const usuario = await buscarUsuario(id);
+  if (!usuario) return { noExiste: true };
+  if (usuario.id === quienRestablece.id) return { error: 'Para tu propio PIN usa «Cambiar mi PIN».' };
+
+  const pin = generarPin();
+  const pinHash = await bcrypt.hash(pin, 10);
+  await consultar('UPDATE usuarios SET pin_hash = $1, debe_cambiar_pin = TRUE WHERE id = $2', [pinHash, id]);
+  await cerrarSesionesDe(id);
+  return { usuario, pin };
+}
+
 module.exports = {
   ROLES,
   NOMBRES_DE_ROL,
@@ -197,4 +230,6 @@ module.exports = {
   crearUsuario,
   editarUsuario,
   cambiarActivo,
+  cambiarPin,
+  restablecerPin,
 };

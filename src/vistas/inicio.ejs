@@ -13,6 +13,8 @@
     <p class="saludo">Hola, <strong><%= usuario.nombre %></strong> (<%= usuario.rol %>).</p>
   </header>
 
+  <% if (locals.aviso) { %><p class="exito" role="status"><%= aviso %></p><% } %>
+
   <%# Los iconos son solo adorno (aria-hidden): el texto de cada acceso dice lo mismo. %>
   <nav class="acciones" aria-label="Acciones">
     <% if (usuario.rol === 'donante') { %>
@@ -71,6 +73,8 @@
       </a>
     </nav>
   <% } %>
+
+  <p><a class="boton boton-secundario" href="/mi-pin">Cambiar mi PIN</a></p>
 
   <form class="salir" method="post" action="/salir">
     <button type="submit" class="secundario">Salir</button>
