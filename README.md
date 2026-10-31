@@ -48,9 +48,16 @@ Está en Render (plan gratis). Si nadie la visita en unos 15 minutos, Render la 
 
 1. **Base de datos:** crear un proyecto PostgreSQL gratis en [Neon](https://neon.tech) y copiar su cadena de conexión.
 2. **Aplicación:** en [Render](https://render.com), «New +» → «Blueprint», elegir este repositorio. Render lee `render.yaml`.
-3. Cuando Render pida `DATABASE_URL`, pegar la cadena de Neon en esa página (nunca en el repositorio ni en un chat).
-   `SESSION_SECRET` lo genera Render solo.
-4. Al arrancar, la aplicación aplica las migraciones y, solo la primera vez, carga los datos de demostración.
+3. Cuando Render pida las variables, escribirlas en esa página (nunca en el repositorio ni en un chat):
+   - `DATABASE_URL`: la cadena de Neon.
+   - `PRIMERA_COORDINADORA_NOMBRE` y `PRIMERA_COORDINADORA_PIN` (4 números): la persona que administrará la página.
+   - `SESSION_SECRET` lo genera Render solo.
+4. Al arrancar, la aplicación aplica las migraciones y, si no hay ninguna coordinadora activa, crea la primera con esas
+   variables. Al entrar por primera vez, la página le pide cambiar el PIN; desde ahí ella crea los demás usuarios,
+   zonas y organizaciones (Inicio → Administración).
+5. **En producción no se cargan los datos de demostración**: sus PIN están publicados arriba. Si una base ya los tiene
+   (por ejemplo, la de la demostración de la 3B), antes de usarla de verdad la coordinadora debe cambiar su PIN y
+   desactivar o restablecer el PIN de cada usuario de demostración (ver el [manual de operación](docs/manual-operacion.md)).
 
 ### Cómo retomar el proyecto
 
@@ -78,6 +85,7 @@ Para quien reciba el proyecto y quiera seguir construyéndolo.
   [ADR-001](docs/decisiones/ADR-001-toma-atomica.md)). No la separes en «leer y luego escribir»: reaparecería el problema de los
   dos voluntarios. `tests/cmp-03-concurrencia.test.js` lo vigila.
 - `npm run db:semilla -- --reiniciar` **borra todos los datos**. Sin esa opción, la semilla se niega a correr si ya hay usuarios.
+  Con `NODE_ENV=production` se niega siempre.
 - Las horas son de Colombia (UTC-5, sin horario de verano). Los mensajes de error los da el servidor, no el navegador.
 - El plan gratis de Render «duerme» la aplicación tras unos 15 minutos sin visitas.
 

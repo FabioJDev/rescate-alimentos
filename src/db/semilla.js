@@ -27,6 +27,10 @@ const donaciones = [
 ];
 
 async function sembrar({ reiniciar = false } = {}) {
+  // T-ADM.3: los PIN de la semilla son públicos (están en el README). En producción nunca se cargan.
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('La semilla de demostración no se carga en producción: sus PIN son públicos. Usa la primera coordinadora (README).');
+  }
   const cliente = await pool.connect();
   try {
     await cliente.query('BEGIN');
