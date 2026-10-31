@@ -6,6 +6,7 @@ const session = require('express-session');
 const PgStore = require('connect-pg-simple')(session);
 const { pool } = require('./db/conexion');
 const { requerirSesion } = require('./middleware/autenticacion');
+const { cabeceras, verificarOrigen } = require('./middleware/seguridad');
 const rutasAutenticacion = require('./rutas/autenticacion');
 const rutasDonaciones = require('./rutas/donaciones');
 const rutasDisponibles = require('./rutas/disponibles');
@@ -38,6 +39,9 @@ app.set('trust proxy', 1);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'vistas'));
 
+// T-SEG.1: cabeceras de seguridad en todas las respuestas, también en estilos y scripts.
+app.use(cabeceras({ enProduccion }));
+
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'publico')));
 
@@ -67,6 +71,9 @@ app.use((req, res, next) => {
   res.locals.usuarioActual = (req.session && req.session.usuario) || null;
   next();
 });
+
+// T-SEG.1: ningún formulario enviado desde otra página web cambia nada (ADR-006).
+app.use(verificarOrigen);
 
 // CA-11.4 y CA-11.5: con un PIN temporal pendiente solo se puede cambiar el PIN o salir. El JavaScript del
 // teléfono recibe 401 («falta ingresar»), así lo guardado sin conexión sigue pendiente y no se pierde.
