@@ -64,29 +64,35 @@ Está en Render (plan gratis). Si nadie la visita en unos 15 minutos, Render la 
 Para quien reciba el proyecto y quiera seguir construyéndolo.
 
 1. **Lee en este orden** (unos 30 minutos): este README → [constitución](docs/spec/constitucion.md) →
-   [especificación](docs/spec/comportamientos.md) → [plan técnico](docs/spec/plan-tecnico.md) → los tres
+   [especificación](docs/spec/comportamientos.md) → [plan técnico](docs/spec/plan-tecnico.md) → los
    [ADR](docs/decisiones/). La especificación es la fuente de verdad: si algo cambia, se cambia primero ahí, con su razón.
 2. **Levántalo en tu computador** con los pasos de arriba y corre `npm test` (las pruebas necesitan un PostgreSQL real).
 3. **Ubícate en el código.** Cada petición va de una ruta (`src/rutas/`) a un servicio (`src/servicios/`, donde viven las reglas y
    el SQL) y de ahí a una vista (`src/vistas/`). Hay un archivo de pruebas por comportamiento en `tests/` (`cmp-01.test.js` …
-   `cmp-05.test.js`), y el nombre de cada prueba empieza con el ID de su criterio de aceptación (por ejemplo, `CA-03.2`).
+   `cmp-15.test.js`), y el nombre de cada prueba empieza con el ID de su criterio de aceptación (por ejemplo, `CA-03.2`).
 4. **Trabaja así:** una tarea por rama, un pull request con la plantilla de `.github/`, el check «pruebas» en verde y la
    aprobación de **otra persona** que nombre los criterios que verificó. Los commits van en español con el ID
    (`feat(CMP-03): … [CA-03.2]`). Más detalle en `REGLAS.md` y en la constitución.
-5. **Qué sigue:** en el [tablero](https://github.com/users/FabioJDev/projects/1), las tarjetas con la etiqueta `3C`: modo sin
-   conexión (RNF-01), liberar una donación tomada (CMP-06) y el reporte del periodo (RF-07). Limitaciones conocidas: no hay
-   pantalla para crear usuarios, el PIN no tiene límite de intentos y una donación registrada no se puede editar.
+5. **Qué sigue:** el [tablero](https://github.com/users/FabioJDev/projects/1). Ya están el modo sin conexión (CMP-08), soltar
+   una donación (CMP-06), el reporte (CMP-07) y la administración (CMP-09 a CMP-15: usuarios, PIN, zonas, organizaciones,
+   corregir, cancelar e intervenir donaciones, teléfonos). Limitaciones conocidas: el PIN no tiene límite de intentos, los
+   formularios no tienen protección CSRF, no hay recordatorios (RF-10) ni registro de beneficiarios (RF-07), y las
+   organizaciones receptoras no inician sesión (RF-04).
 6. **Cuentas que necesitas:** el repositorio en GitHub, un servicio en [Render](https://render.com) y una base de datos en
-   [Neon](https://neon.tech). Las variables de entorno son `DATABASE_URL` y `SESSION_SECRET` (ver `.env.example`).
+   [Neon](https://neon.tech). Las variables de entorno son `DATABASE_URL`, `SESSION_SECRET` y, para el primer arranque,
+   `PRIMERA_COORDINADORA_NOMBRE` y `PRIMERA_COORDINADORA_PIN` (ver `.env.example`).
 
 **Cosas que sorprenden la primera vez**
 - «Vencida» **no se guarda**: se calcula (donación disponible con la hora límite cumplida).
-- Tomar y entregar una donación son **una sola actualización atómica** en la base de datos (ver
-  [ADR-001](docs/decisiones/ADR-001-toma-atomica.md)). No la separes en «leer y luego escribir»: reaparecería el problema de los
+- Tomar, entregar, soltar, corregir, cancelar, liberar y asignar una donación son **una sola actualización atómica
+  condicional** en la base de datos (ver [ADR-001](docs/decisiones/ADR-001-toma-atomica.md)). No la separes en «leer y luego escribir»: reaparecería el problema de los
   dos voluntarios. `tests/cmp-03-concurrencia.test.js` lo vigila.
 - `npm run db:semilla -- --reiniciar` **borra todos los datos**. Sin esa opción, la semilla se niega a correr si ya hay usuarios.
   Con `NODE_ENV=production` se niega siempre.
 - Las horas son de Colombia (UTC-5, sin horario de verano). Los mensajes de error los da el servidor, no el navegador.
+- Usuarios, zonas y organizaciones **no se borran nunca**: se desactivan, porque el historial apunta a ellos (ADR-005).
+- Si cambias un archivo que el teléfono guarda (lista `ESTATICOS` de `src/publico/sw.js`, como `estilos.css`), sube la
+  `VERSION` de `sw.js`; si no, los teléfonos seguirán mostrando la versión vieja.
 - El plan gratis de Render «duerme» la aplicación tras unos 15 minutos sin visitas.
 
 ## Documentación
