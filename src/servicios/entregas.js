@@ -55,7 +55,9 @@ function validarEntrega(cuerpo, organizaciones) {
 // (ADR-001): solo cambia si sigue «asignada» y es de este voluntario. La fecha y hora las pone el servidor
 // (now()); el usuario no las puede escribir. El movimiento va en la misma transacción (RNF-05).
 // CA-04.6: no se mira la hora límite; aplica a la recogida, no a la entrega.
-async function registrarEntrega({ codigo, voluntarioId, organizacionId, recibidoPor }) {
+// CA-14.4: si la registra la coordinadora en nombre del voluntario, `registradaPorId` es ella: el movimiento
+// dice quién la registró y la donación sigue diciendo qué voluntario la entregó.
+async function registrarEntrega({ codigo, voluntarioId, organizacionId, recibidoPor, registradaPorId = null }) {
   let entregada = null;
 
   const cliente = await pool.connect();
@@ -75,7 +77,7 @@ async function registrarEntrega({ codigo, voluntarioId, organizacionId, recibido
     } else {
       await cliente.query("INSERT INTO movimientos (donacion_id, tipo, usuario_id) VALUES ($1, 'entrega', $2)", [
         actualizada.rows[0].id,
-        voluntarioId,
+        registradaPorId || voluntarioId,
       ]);
       await cliente.query('COMMIT');
       entregada = actualizada.rows[0];

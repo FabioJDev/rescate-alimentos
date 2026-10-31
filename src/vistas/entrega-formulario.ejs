@@ -8,18 +8,26 @@
   <script src="/interaccion.js" defer></script>
 </head>
 <body>
-  <%- include('_marca', { volverA: '/mis-recogidas', volverNombre: 'Mis recogidas' }) %>
+  <%# La usa el voluntario (CMP-04) y la coordinadora en nombre del voluntario (CMP-14, porCoordinadora). %>
+  <% const porCoordinadora = locals.porCoordinadora || false; %>
+  <% if (porCoordinadora) { %>
+    <%- include('_marca', { volverA: '/donaciones/' + donacion.codigo, volverNombre: 'Donación ' + donacion.codigo }) %>
+  <% } else { %>
+    <%- include('_marca', { volverA: '/mis-recogidas', volverNombre: 'Mis recogidas' }) %>
+  <% } %>
   <h1>Registrar entrega</h1>
 
   <div class="tarjeta tarjeta-estado-asignada">
     <p class="tarjeta-titulo"><%= donacion.codigo %> · <%= donacion.tipo_alimento %> · <%= donacion.cantidad %> <%= donacion.unidad %></p>
+    <% if (porCoordinadora) { %><p>En nombre de: <strong><%= donacion.voluntario_nombre %></strong>, que la entregó.</p><% } %>
   </div>
 
   <% if (Object.keys(errores).length > 0) { %>
     <p class="error" role="alert">No se registró la entrega. Revisa los campos marcados.</p>
   <% } %>
 
-  <form method="post" action="/donaciones/<%= donacion.codigo %>/entregar" novalidate>
+  <form method="post" action="<%= locals.accion || '/donaciones/' + donacion.codigo + '/entregar' %>" novalidate>
+    <% if (porCoordinadora) { %><input type="hidden" name="voluntario_actual" value="<%= donacion.voluntario_id %>"><% } %>
     <label for="organizacion_id">Organización que recibe</label>
     <select id="organizacion_id" name="organizacion_id" required>
       <option value="">Elige una organización</option>

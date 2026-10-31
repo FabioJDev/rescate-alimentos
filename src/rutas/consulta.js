@@ -24,13 +24,19 @@ function frasesDelHistorial(donacion, historial) {
     if (paso.tipo === 'registro') return { cuando, texto: `Registrada por ${paso.usuario_nombre}` };
     if (paso.tipo === 'toma') return { cuando, texto: `Tomada por ${paso.usuario_nombre}` };
     // CA-06.6: soltar una donación también queda en el historial.
-    if (paso.tipo === 'liberacion') return { cuando, texto: `Soltada por ${paso.usuario_nombre}` };
+    // CA-14.1: si la liberó la coordinadora, el detalle dice a quién se la quitó.
+    if (paso.tipo === 'liberacion') {
+      return { cuando, texto: paso.detalle ? `Liberada por ${paso.usuario_nombre} (${paso.detalle})` : `Soltada por ${paso.usuario_nombre}` };
+    }
+    if (paso.tipo === 'asignacion') return { cuando, texto: paso.detalle };
     // CA-13.1 y CA-13.6: las correcciones dicen qué cambió y las cancelaciones, por qué.
     if (paso.tipo === 'correccion') return { cuando, texto: `Corregida por ${paso.usuario_nombre}. ${paso.detalle}` };
     if (paso.tipo === 'cancelacion') return { cuando, texto: `Cancelada por ${paso.usuario_nombre}. Motivo: ${paso.detalle}` };
+    // CA-14.4: quien entregó es el voluntario; si la registró la coordinadora en su nombre, también se dice.
+    const registro = paso.usuario_nombre !== donacion.voluntario_nombre ? `. Registrada por ${paso.usuario_nombre}` : '';
     return {
       cuando,
-      texto: `Entregada a ${donacion.organizacion_nombre}. Recibió: ${donacion.recibido_por}. Entregó: ${paso.usuario_nombre}`,
+      texto: `Entregada a ${donacion.organizacion_nombre}. Recibió: ${donacion.recibido_por}. Entregó: ${donacion.voluntario_nombre}${registro}`,
     };
   });
 }

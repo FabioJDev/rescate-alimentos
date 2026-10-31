@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asignar <%= donacion.codigo %> · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/donaciones/' + donacion.codigo, volverNombre: 'Donación ' + donacion.codigo }) %>
+  <h1>Asignar la donación <%= donacion.codigo %></h1>
+
+  <div class="tarjeta">
+    <p class="tarjeta-titulo"><%= donacion.tipo_alimento %> · <%= Number(donacion.cantidad) %> <%= donacion.unidad %></p>
+    <p>Recoger en: <%= donacion.punto_recogida %> (zona <%= donacion.zona %>)</p>
+    <p><%= donacion.voluntario_nombre ? 'Ahora la tiene: ' + donacion.voluntario_nombre : 'Nadie la ha tomado todavía.' %></p>
+  </div>
+
+  <% if (error) { %><p class="error" role="alert"><%= error %></p><% } %>
+
+  <form method="post" action="/donaciones/<%= donacion.codigo %>/asignar" novalidate>
+    <input type="hidden" name="voluntario_actual" value="<%= donacion.voluntario_id || '' %>">
+    <label for="voluntario_id">Voluntario que la va a recoger</label>
+    <select id="voluntario_id" name="voluntario_id" required>
+      <option value="">Elige un voluntario</option>
+      <% voluntarios.forEach((v) => { %>
+        <option value="<%= v.id %>"><%= v.nombre %><%= v.zona ? ' (zona ' + v.zona + ')' : '' %></option>
+      <% }) %>
+    </select>
+    <button type="submit">Asignar</button>
+  </form>
+
+  <p class="nota">Avísale al voluntario: la donación aparece en sus «Mis recogidas».</p>
+</body>
+</html>
