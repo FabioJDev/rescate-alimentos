@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { consultar } = require('../db/conexion');
 const { cerrarSesionesDe } = require('./sesiones');
+const { limpiarNombre } = require('./intentos');
 
 const ROLES = ['donante', 'voluntario', 'coordinadora'];
 const NOMBRES_DE_ROL = { donante: 'Comercio (donante)', voluntario: 'Voluntario', coordinadora: 'Coordinadora' };
@@ -215,6 +216,7 @@ async function restablecerPin(id, quienRestablece) {
   const pinHash = await bcrypt.hash(pin, 10);
   await consultar('UPDATE usuarios SET pin_hash = $1, debe_cambiar_pin = TRUE WHERE id = $2', [pinHash, id]);
   await cerrarSesionesDe(id);
+  await limpiarNombre(usuario.nombre); // CA-16.4: restablecer el PIN desbloquea
   return { usuario, pin };
 }
 

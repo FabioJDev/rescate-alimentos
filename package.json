@@ -15,6 +15,11 @@
     "db:semilla": "node src/db/semilla.js",
     "db:primera-coordinadora": "node src/db/primera-coordinadora.js"
   },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "./tests/preparar.js"
+    ]
+  },
   "license": "UNLICENSED",
   "dependencies": {
     "bcryptjs": "^3.0.3",

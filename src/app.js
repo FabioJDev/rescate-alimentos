@@ -30,8 +30,9 @@ if (!process.env.SESSION_SECRET) {
   throw new Error('Falta la variable de entorno SESSION_SECRET (ver .env.example).');
 }
 
-// Render pone un proxy delante: hay que confiar en él para que la cookie «secure» funcione.
-if (enProduccion) app.set('trust proxy', 1);
+// Render pone un proxy delante: hay que confiar en él para que la cookie «secure» funcione y para saber la dirección
+// real de quien entra (CMP-16 cuenta los intentos por origen). Se confía solo en el primer proxy.
+app.set('trust proxy', 1);
 
 // Las páginas se generan en el servidor con EJS (alternativa B: liviano para redes 3G).
 app.set('view engine', 'ejs');

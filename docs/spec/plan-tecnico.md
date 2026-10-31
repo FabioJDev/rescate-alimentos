@@ -65,10 +65,10 @@ Nada se borra: usuarios, zonas y organizaciones se **desactivan**, porque el his
 
 Con la seguridad y los requerimientos que faltaban (CMP-16 a CMP-23):
 
-- **`usuarios`**: intentos_fallidos y bloqueado_hasta (CMP-16), privacidad_aceptada_en (CMP-18), rol `organizacion`
-  y organizacion_id (CMP-19).
-- **`intentos_por_origen`** (CMP-16): origen (dirección IP), fallos y desde cuándo se cuentan. Vive en la base para
-  que un reinicio de Render no borre el conteo.
+- **`usuarios`**: privacidad_aceptada_en (CMP-18), rol `organizacion` y organizacion_id (CMP-19).
+- **`intentos_ingreso`** (CMP-16): clave (`nombre:<nombre escrito>` u `origen:<dirección IP>`), fallos, desde cuándo se
+  cuentan y bloqueado_hasta. Se cuenta por el nombre **escrito**, exista o no el usuario, para que el bloqueo no revele
+  qué nombres existen (CA-16.6). Vive en la base para que un reinicio de Render no borre el conteo.
 - **`donaciones`**: destino_organizacion_id (CMP-19), kg_aproximados (CMP-22).
 - **`movimientos`**: tipos `solicitud` y `retiro_solicitud` (CMP-19).
 - **`atenciones`** (CMP-20): id, organizacion_id, fecha, personas, registrada_por_id, registrada_en, corregida_por_id,
