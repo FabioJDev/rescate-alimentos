@@ -7,6 +7,7 @@ const PgStore = require('connect-pg-simple')(session);
 const { pool } = require('./db/conexion');
 const { requerirSesion } = require('./middleware/autenticacion');
 const { cabeceras, verificarOrigen } = require('./middleware/seguridad');
+const { manejarError } = require('./middleware/errores');
 const rutasAutenticacion = require('./rutas/autenticacion');
 const rutasDonaciones = require('./rutas/donaciones');
 const rutasDisponibles = require('./rutas/disponibles');
@@ -114,14 +115,7 @@ app.get('/', requerirSesion, (req, res) => {
   res.render('inicio', { usuario: req.session.usuario, aviso });
 });
 
-// Errores no previstos: se muestran en español y no se filtra información interna.
-// eslint-disable-next-line no-unused-vars
-app.use((error, req, res, next) => {
-  console.error(error);
-  res.status(500).render('error', {
-    titulo: 'Algo salió mal',
-    mensaje: 'Intenta de nuevo en un momento.',
-  });
-});
+// Errores no previstos: el usuario ve un código y el registro guarda el detalle (T-SEG.2).
+app.use(manejarError);
 
 module.exports = app;
