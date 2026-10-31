@@ -19,7 +19,8 @@
   <% } %>
 
   <form method="post" action="<%= usuario ? '/usuarios/' + usuario.id : '/usuarios' %>" novalidate>
-    <label for="nombre">Nombre (con este nombre se ingresa)</label>
+    <label for="nombre">Nombre y apellido (con este nombre se ingresa)</label>
+    <p class="nota">Debe ser único. Si hay dos personas con el mismo nombre, agrega el apellido o un apodo (por ejemplo, «Ana Pérez» o «Ana del Norte»).</p>
     <input id="nombre" name="nombre" type="text" maxlength="80" value="<%= valores.nombre %>" required>
     <% if (errores.nombre) { %><p class="error-campo" role="alert"><%= errores.nombre %></p><% } %>
 

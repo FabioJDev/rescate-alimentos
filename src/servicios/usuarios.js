@@ -6,15 +6,24 @@ const { cerrarSesionesDe } = require('./sesiones');
 const { limpiarNombre } = require('./intentos');
 
 const ROLES = ['donante', 'voluntario', 'coordinadora'];
+
+// CMP-17: la misma normalización en JavaScript (lo que escribe la persona) y en SQL (lo guardado, migración 011).
+function normalizarNombre(texto) {
+  return (texto || '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+const NOMBRE_NORMALIZADO_SQL = "lower(translate(regexp_replace(trim(nombre), '\\s+', ' ', 'g'), 'ÁÉÍÓÚÜÑ', 'áéíóúüñ'))";
 const NOMBRES_DE_ROL = { donante: 'Comercio (donante)', voluntario: 'Voluntario', coordinadora: 'Coordinadora' };
 
 // Devuelve los datos públicos del usuario si el nombre y el PIN son correctos; si no, null.
 // No dice cuál de los dos falló, para no ayudar a adivinar nombres. Solo con el PIN correcto se dice que el
 // usuario está desactivado (CA-10.6): así no se revela a cualquiera qué nombres existen.
 async function autenticar(nombre, pin) {
+  // CA-17.1: se busca sin importar mayúsculas, tildes en mayúscula ni espacios de más (migración 011).
   const resultado = await consultar(
-    'SELECT id, nombre, rol, zona, pin_hash, activo, debe_cambiar_pin FROM usuarios WHERE nombre = $1',
-    [nombre]
+    `SELECT id, nombre, rol, zona, pin_hash, activo, debe_cambiar_pin
+       FROM usuarios
+      WHERE ${NOMBRE_NORMALIZADO_SQL} = $1`,
+    [normalizarNombre(nombre)]
   );
   const usuario = resultado.rows[0];
   if (!usuario) return null;
@@ -107,7 +116,9 @@ function validarUsuario(cuerpo, zonasActivas) {
   };
 }
 
-const MENSAJE_NOMBRE_REPETIDO = 'Ya existe un usuario con ese nombre.';
+// CA-17.2: con el nombre se ingresa, así que no puede repetirse; se sugiere cómo distinguirlo.
+const MENSAJE_NOMBRE_REPETIDO =
+  'Ya existe un usuario con ese nombre. Agrega el apellido o un apodo (por ejemplo, «Ana Pérez» o «Ana del Norte»).';
 
 // CA-10.7: un voluntario con donaciones asignadas no puede dejar de ser voluntario activo.
 async function contarAsignadas(usuarioId) {
