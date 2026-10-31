@@ -24,6 +24,7 @@ const rutasPin = require('./rutas/pin');
 const rutasOrganizaciones = require('./rutas/organizaciones');
 const rutasCorrecciones = require('./rutas/correcciones');
 const rutasIntervenciones = require('./rutas/intervenciones');
+const rutasPrivacidad = require('./rutas/privacidad');
 
 const app = express();
 const enProduccion = process.env.NODE_ENV === 'production';
@@ -76,9 +77,19 @@ app.use((req, res, next) => {
 // T-SEG.1: ningún formulario enviado desde otra página web cambia nada (ADR-006).
 app.use(verificarOrigen);
 
+// CA-18.2 y CA-18.4: quien no ha aceptado el aviso de privacidad solo puede leerlo, aceptarlo o salir. Va antes que el
+// PIN temporal: primero se acepta el aviso y después se cambia el PIN. El teléfono recibe 401 («falta ingresar»).
+const PERMITIDAS_SIN_PRIVACIDAD = ['/privacidad', '/privacidad/aceptar', '/salir', '/salud', '/sin-conexion'];
+app.use((req, res, next) => {
+  const usuario = req.session && req.session.usuario;
+  if (!usuario || usuario.privacidadAceptada || PERMITIDAS_SIN_PRIVACIDAD.includes(req.path)) return next();
+  if (req.path.startsWith('/api/')) return res.status(401).json({ estado: 'sin_sesion' });
+  res.redirect('/privacidad');
+});
+
 // CA-11.4 y CA-11.5: con un PIN temporal pendiente solo se puede cambiar el PIN o salir. El JavaScript del
 // teléfono recibe 401 («falta ingresar»), así lo guardado sin conexión sigue pendiente y no se pierde.
-const PERMITIDAS_CON_PIN_TEMPORAL = ['/mi-pin', '/salir', '/salud', '/sin-conexion'];
+const PERMITIDAS_CON_PIN_TEMPORAL = ['/mi-pin', '/salir', '/salud', '/sin-conexion', '/privacidad', '/privacidad/aceptar'];
 app.use((req, res, next) => {
   const usuario = req.session && req.session.usuario;
   if (!usuario || !usuario.debeCambiarPin || PERMITIDAS_CON_PIN_TEMPORAL.includes(req.path)) return next();
@@ -107,6 +118,7 @@ app.use(rutasPin);
 app.use(rutasOrganizaciones);
 app.use(rutasCorrecciones);
 app.use(rutasIntervenciones);
+app.use(rutasPrivacidad);
 
 // Pantalla de inicio: los accesos de cada rol. Muestra una vez el aviso de la última acción (por ejemplo, PIN cambiado).
 app.get('/', requerirSesion, (req, res) => {

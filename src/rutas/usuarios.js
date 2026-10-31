@@ -12,6 +12,7 @@ const {
   cambiarActivo,
 } = require('../servicios/usuarios');
 const { listarZonasActivas } = require('../servicios/zonas');
+const { formatearFechaHora } = require('../utilidades/fechas');
 
 const router = express.Router();
 const soloCoordinadora = requerirRol('coordinadora');
@@ -40,7 +41,11 @@ async function mostrarFormulario(res, estado, { usuario = null, valores, errores
 async function mostrarLista(req, res, { estado = 200, error = null } = {}) {
   const rol = ROLES.includes(req.query.rol) ? req.query.rol : null;
   res.status(estado).render('usuarios', {
-    usuarios: await listarUsuarios({ rol }),
+    // CA-18.5: si aceptó el aviso de privacidad y cuándo.
+    usuarios: (await listarUsuarios({ rol })).map((u) => ({
+      ...u,
+      privacidadTexto: u.privacidad_aceptada_en ? `aceptado el ${formatearFechaHora(u.privacidad_aceptada_en)}` : 'sin aceptar',
+    })),
     rol,
     roles: ROLES,
     nombresDeRol: NOMBRES_DE_ROL,

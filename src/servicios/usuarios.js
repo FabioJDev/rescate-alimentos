@@ -20,7 +20,7 @@ const NOMBRES_DE_ROL = { donante: 'Comercio (donante)', voluntario: 'Voluntario'
 async function autenticar(nombre, pin) {
   // CA-17.1: se busca sin importar mayúsculas, tildes en mayúscula ni espacios de más (migración 011).
   const resultado = await consultar(
-    `SELECT id, nombre, rol, zona, pin_hash, activo, debe_cambiar_pin
+    `SELECT id, nombre, rol, zona, pin_hash, activo, debe_cambiar_pin, privacidad_aceptada_en
        FROM usuarios
       WHERE ${NOMBRE_NORMALIZADO_SQL} = $1`,
     [normalizarNombre(nombre)]
@@ -39,7 +39,13 @@ async function autenticar(nombre, pin) {
     rol: usuario.rol,
     zona: usuario.zona,
     debeCambiarPin: usuario.debe_cambiar_pin,
+    privacidadAceptada: Boolean(usuario.privacidad_aceptada_en),
   };
+}
+
+// CA-18.2: guarda la fecha y hora en que la persona aceptó el aviso de privacidad.
+async function aceptarPrivacidad(usuarioId) {
+  await consultar('UPDATE usuarios SET privacidad_aceptada_en = now() WHERE id = $1 AND privacidad_aceptada_en IS NULL', [usuarioId]);
 }
 
 // PIN temporal de 4 dígitos al azar (ADR-005). `crypto.randomInt` es seguro para esto; `Math.random` no.
@@ -50,7 +56,7 @@ function generarPin() {
 // CA-10.1: todos los usuarios, con filtro opcional por rol. Los activos primero.
 async function listarUsuarios({ rol = null } = {}) {
   const r = await consultar(
-    `SELECT id, nombre, rol, zona, telefono, direccion, activo
+    `SELECT id, nombre, rol, zona, telefono, direccion, activo, privacidad_aceptada_en
        FROM usuarios
       WHERE $1::text IS NULL OR rol = $1
       ORDER BY activo DESC, nombre`,
@@ -245,4 +251,5 @@ module.exports = {
   cambiarActivo,
   cambiarPin,
   restablecerPin,
+  aceptarPrivacidad,
 };
