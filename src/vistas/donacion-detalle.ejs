@@ -17,7 +17,15 @@
     <p>Donante: <%= donacion.donante_nombre %></p>
     <p>Recoger en: <%= donacion.punto_recogida %> (zona <%= donacion.zona %>)</p>
     <p>Hora límite: <%= horaLimite %></p>
+    <% if (donacion.estado === 'cancelada') { %><p>Motivo de la cancelación: <%= donacion.motivo_cancelacion %></p><% } %>
   </div>
+
+  <% if (puedeCorregir || puedeCancelar) { %>
+    <p>
+      <% if (puedeCorregir) { %><a class="boton boton-secundario" href="/donaciones/<%= donacion.codigo %>/corregir">Corregir datos</a><% } %>
+      <% if (puedeCancelar) { %><a class="boton boton-secundario" href="/donaciones/<%= donacion.codigo %>/cancelar">Cancelar donación</a><% } %>
+    </p>
+  <% } %>
 
   <h2>Historial</h2>
   <ol class="historial">

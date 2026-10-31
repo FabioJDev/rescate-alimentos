@@ -17,6 +17,7 @@ function mensajeDeRechazo(motivo, donacion) {
   if (motivo === 'vencida') {
     return 'La hora límite de esta donación ya pasó; no se puede tomar';
   }
+  if (motivo === 'cancelada') return 'Esta donación fue cancelada. No vayas al punto de recogida.';
   return 'No existe una donación con ese código';
 }
 

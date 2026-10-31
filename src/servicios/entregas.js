@@ -20,6 +20,7 @@ async function motivoEntrega(codigo, voluntarioId) {
   const donacion = r.rows[0];
 
   if (!donacion) return { motivo: 'no_existe' };
+  if (donacion.estado === 'cancelada') return { motivo: 'cancelada', donacion };
   if (donacion.estado === 'entregada') return { motivo: 'ya_entregada', donacion };
   if (donacion.estado !== 'asignada') return { motivo: 'no_asignada', donacion };
   if (donacion.voluntario_id !== voluntarioId) return { motivo: 'otro_voluntario', donacion };

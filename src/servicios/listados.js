@@ -2,7 +2,7 @@
 const { consultar } = require('../db/conexion');
 
 // Filtros de estado que se pueden pedir. «vencida» se calcula (disponible + hora límite cumplida), no se guarda.
-const FILTROS = ['disponible', 'asignada', 'entregada', 'vencida'];
+const FILTROS = ['disponible', 'asignada', 'entregada', 'vencida', 'cancelada'];
 
 const COLUMNAS = `d.codigo, d.tipo_alimento, d.cantidad, d.unidad, d.estado, d.hora_limite, d.creada_en,
                   donante.nombre AS donante_nombre,
@@ -19,7 +19,7 @@ async function listarTodas({ estado = null } = {}) {
       WHERE $1::text IS NULL
          OR ($1 = 'vencida'    AND d.estado = 'disponible' AND d.hora_limite <= now())
          OR ($1 = 'disponible' AND d.estado = 'disponible' AND d.hora_limite >  now())
-         OR ($1 IN ('asignada', 'entregada') AND d.estado = $1)
+         OR ($1 IN ('asignada', 'entregada', 'cancelada') AND d.estado = $1)
       ORDER BY d.creada_en DESC, d.id DESC
       LIMIT 200`,
     [filtro]

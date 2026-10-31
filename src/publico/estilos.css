@@ -860,3 +860,12 @@ body:has(> h1.hero)::after {
   font-size: 2rem;
   letter-spacing: 0.4em;
 }
+
+/* Donación cancelada (CMP-13): gris, porque ya no hay nada que hacer con ella. */
+.tarjeta-estado-cancelada {
+  --color-estado: #6b6b6b;
+}
+
+.estado-cancelada {
+  background: #e6e6e6;
+}

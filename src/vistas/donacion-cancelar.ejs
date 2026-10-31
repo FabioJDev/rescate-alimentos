@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cancelar <%= donacion.codigo %> · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/donaciones/' + donacion.codigo, volverNombre: 'Donación ' + donacion.codigo }) %>
+  <h1>¿Cancelar la donación <%= donacion.codigo %>?</h1>
+
+  <div class="tarjeta">
+    <p class="tarjeta-titulo"><%= donacion.tipo_alimento %> · <%= Number(donacion.cantidad) %> <%= donacion.unidad %></p>
+    <p>Recoger en: <%= donacion.punto_recogida %></p>
+  </div>
+
+  <p>Deja de estar disponible para los voluntarios<% if (donacion.estado === 'asignada') { %> y sale de las recogidas del voluntario que la tomó<% } %>. <strong>No se puede deshacer.</strong></p>
+
+  <form method="post" action="/donaciones/<%= donacion.codigo %>/cancelar" novalidate>
+    <label for="motivo">¿Por qué se cancela?</label>
+    <input id="motivo" name="motivo" type="text" maxlength="200" value="<%= motivo %>" required placeholder="Ej.: el comercio ya no tiene el alimento">
+    <% if (errores.motivo) { %><p class="error-campo" role="alert"><%= errores.motivo %></p><% } %>
+    <button type="submit">Sí, cancelar la donación</button>
+  </form>
+
+  <p><a class="boton boton-secundario" href="/donaciones/<%= donacion.codigo %>">No, volver</a></p>
+</body>
+</html>

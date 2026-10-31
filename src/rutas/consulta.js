@@ -4,6 +4,7 @@ const { requerirSesion } = require('../middleware/autenticacion');
 const { obtenerDetalle } = require('../servicios/donaciones');
 const { formatearFechaHora } = require('../utilidades/fechas');
 const { etiquetaDeEstado } = require('../utilidades/estados');
+const { puedeCambiar } = require('../servicios/correcciones');
 
 const router = express.Router();
 
@@ -24,6 +25,9 @@ function frasesDelHistorial(donacion, historial) {
     if (paso.tipo === 'toma') return { cuando, texto: `Tomada por ${paso.usuario_nombre}` };
     // CA-06.6: soltar una donación también queda en el historial.
     if (paso.tipo === 'liberacion') return { cuando, texto: `Soltada por ${paso.usuario_nombre}` };
+    // CA-13.1 y CA-13.6: las correcciones dicen qué cambió y las cancelaciones, por qué.
+    if (paso.tipo === 'correccion') return { cuando, texto: `Corregida por ${paso.usuario_nombre}. ${paso.detalle}` };
+    if (paso.tipo === 'cancelacion') return { cuando, texto: `Cancelada por ${paso.usuario_nombre}. Motivo: ${paso.detalle}` };
     return {
       cuando,
       texto: `Entregada a ${donacion.organizacion_nombre}. Recibió: ${donacion.recibido_por}. Entregó: ${paso.usuario_nombre}`,
@@ -52,11 +56,14 @@ router.get('/donaciones/:codigo(D-\\d+)', requerirSesion, async (req, res, next)
     if (!detalle) return mostrarNoExiste(res);
 
     const { donacion, historial } = detalle;
+    const usuario = req.session.usuario;
     res.render('donacion-detalle', {
       donacion: { ...donacion, cantidad: Number(donacion.cantidad) },
       estadoTexto: etiquetaDeEstado(donacion),
       horaLimite: formatearFechaHora(donacion.hora_limite),
       historial: frasesDelHistorial(donacion, historial),
+      puedeCorregir: puedeCambiar('corregir', donacion, usuario),
+      puedeCancelar: puedeCambiar('cancelar', donacion, usuario),
     });
   } catch (error) {
     next(error);

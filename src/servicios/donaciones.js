@@ -142,7 +142,7 @@ async function tomarDonacion(codigo, voluntarioId) {
 }
 
 // Explica por qué una donación no se puede tomar (o si todavía se puede). No modifica nada.
-// motivo: 'no_existe' | 'ya_es_tuya' | 'ya_tomada' | 'vencida' | 'disponible'
+// motivo: 'no_existe' | 'cancelada' | 'ya_es_tuya' | 'ya_tomada' | 'vencida' | 'disponible'
 async function motivoNoDisponible(codigo, voluntarioId) {
   const r = await consultar(
     `SELECT d.*, v.nombre AS voluntario_nombre, (d.hora_limite <= now()) AS vencida
@@ -154,6 +154,7 @@ async function motivoNoDisponible(codigo, voluntarioId) {
   const donacion = r.rows[0];
 
   if (!donacion) return { motivo: 'no_existe' };
+  if (donacion.estado === 'cancelada') return { motivo: 'cancelada', donacion };
   if (donacion.estado !== 'disponible') {
     // CA-03.5: si ya la tomó esta misma persona (doble clic o reintento), no es un error.
     if (donacion.voluntario_id === voluntarioId) return { motivo: 'ya_es_tuya', donacion };
@@ -183,7 +184,7 @@ async function obtenerDetalle(codigo) {
   if (!donacion) return null;
 
   const movimientos = await consultar(
-    `SELECT m.tipo, m.ocurrido_en, u.nombre AS usuario_nombre
+    `SELECT m.tipo, m.ocurrido_en, m.detalle, u.nombre AS usuario_nombre
        FROM movimientos m
        JOIN usuarios u ON u.id = m.usuario_id
       WHERE m.donacion_id = $1
