@@ -31,6 +31,7 @@
           <p>Recoger en: <%= d.punto_recogida %> (zona <%= d.zona %>)</p>
           <p>Hora límite: <%= d.horaLimiteTexto %></p>
           <p class="restante">Quedan <%= d.restante %><% if (d.vencePronto) { %> · <span class="vence-pronto">Vence pronto</span><% } %></p>
+          <% if (d.tiene_foto) { %><p class="nota">Tiene foto: ábrela en «Ver detalle».</p><% } %>
           <%- include('_destino', { d }) %>
           <a class="boton" href="/donaciones/<%= d.codigo %>/tomar">Tomar</a>
           <p><a href="/donaciones/<%= d.codigo %>">Ver detalle</a></p>

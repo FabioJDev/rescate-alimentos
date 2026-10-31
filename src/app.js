@@ -28,6 +28,7 @@ const rutasPrivacidad = require('./rutas/privacidad');
 const rutasRecepcion = require('./rutas/recepcion');
 const rutasAtenciones = require('./rutas/atenciones');
 const rutasPorVencer = require('./rutas/por-vencer');
+const rutasFotos = require('./rutas/fotos');
 const { contarPorVencer } = require('./servicios/por-vencer');
 
 const app = express();
@@ -48,6 +49,9 @@ app.set('views', path.join(__dirname, 'vistas'));
 // T-SEG.1: cabeceras de seguridad en todas las respuestas, también en estilos y scripts.
 app.use(cabeceras({ enProduccion }));
 
+// CMP-23: los formularios de donaciones pueden traer una foto (hasta 400 KB, que en texto base64 son ~550 KB).
+// Solo ahí se permite un envío más grande; el resto sigue con el límite normal.
+app.use('/donaciones', express.urlencoded({ extended: false, limit: '700kb' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'publico')));
 
@@ -126,6 +130,7 @@ app.use(rutasPrivacidad);
 app.use(rutasRecepcion);
 app.use(rutasAtenciones);
 app.use(rutasPorVencer);
+app.use(rutasFotos);
 
 // Pantalla de inicio: los accesos de cada rol. Muestra una vez el aviso de la última acción (por ejemplo, PIN cambiado).
 app.get('/', requerirSesion, async (req, res, next) => {

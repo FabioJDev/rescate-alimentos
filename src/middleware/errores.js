@@ -10,6 +10,14 @@ function nuevoCodigo() {
 // todo lo necesario para encontrar el problema. Nunca se muestra la pila ni el mensaje interno en la página.
 // eslint-disable-next-line no-unused-vars
 function manejarError(error, req, res, next) {
+  // CA-23.2: un envío demasiado grande (una foto sin achicar) no es un error del sistema: se explica.
+  if (error.type === 'entity.too.large') {
+    return res.status(413).render('error', {
+      titulo: 'El envío es muy pesado',
+      mensaje: 'La foto pesa demasiado. Vuelve atrás, quítala o elige otra, y publica de nuevo.',
+    });
+  }
+
   const codigo = nuevoCodigo();
   const usuario = req.session && req.session.usuario;
   console.error(

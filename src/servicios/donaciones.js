@@ -1,5 +1,6 @@
 // Lógica de negocio de las donaciones. Las rutas llaman a estas funciones; aquí vive el acceso a la base de datos.
 const { pool, consultar } = require('../db/conexion');
+const { guardarFoto } = require('./fotos');
 
 // Listas cerradas del plan de especificación (docs/spec/comportamientos.md, «Datos que se piden»).
 const TIPOS_ALIMENTO = [
@@ -32,6 +33,7 @@ async function registrarDonacion({
   zona,
   horaLimite,
   kgAproximados = null,
+  foto = null,
   idLocal = null,
   detalle = null,
 }) {
@@ -54,6 +56,8 @@ async function registrarDonacion({
       "INSERT INTO movimientos (donacion_id, tipo, usuario_id, detalle) VALUES ($1, 'registro', $2, $3)",
       [donacion.rows[0].id, registradaPorId, detalle]
     );
+    // CMP-23: la foto va en la misma transacción que la donación.
+    if (foto) await guardarFoto(cliente, donacion.rows[0].id, foto);
 
     await cliente.query('COMMIT');
     registrada = donacion.rows[0];
@@ -90,7 +94,8 @@ async function buscarPorCodigo(codigo) {
 // CA-19.7: con el destino, si una organización ya la pidió.
 async function listarDisponibles({ zona = null } = {}) {
   const r = await consultar(
-    `SELECT d.codigo, d.tipo_alimento, d.cantidad, d.unidad, d.punto_recogida, d.zona, d.hora_limite, ${COLUMNAS_DESTINO}
+    `SELECT d.codigo, d.tipo_alimento, d.cantidad, d.unidad, d.punto_recogida, d.zona, d.hora_limite, ${COLUMNAS_DESTINO},
+            EXISTS (SELECT 1 FROM fotos_donacion f WHERE f.donacion_id = d.id) AS tiene_foto
        FROM donaciones d
        ${UNIR_DESTINO}
       WHERE d.estado = 'disponible'
@@ -183,7 +188,8 @@ async function obtenerDetalle(codigo) {
             donante.nombre AS donante_nombre, donante.telefono AS donante_telefono,
             voluntario.nombre AS voluntario_nombre, voluntario.telefono AS voluntario_telefono,
             org.nombre AS organizacion_nombre, org.telefono AS organizacion_telefono,
-            (d.estado = 'disponible' AND d.hora_limite <= now()) AS vencida, ${COLUMNAS_DESTINO}
+            (d.estado = 'disponible' AND d.hora_limite <= now()) AS vencida, ${COLUMNAS_DESTINO},
+            (SELECT f.bytes FROM fotos_donacion f WHERE f.donacion_id = d.id) AS foto_bytes
        FROM donaciones d
        JOIN usuarios donante ON donante.id = d.donante_id
        LEFT JOIN usuarios voluntario ON voluntario.id = d.voluntario_id

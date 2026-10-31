@@ -3,6 +3,7 @@
 const { consultar } = require('../db/conexion');
 const { validarDonacion } = require('./validar-donacion');
 const { registrarDonacion } = require('./donaciones');
+const { leerFoto } = require('./fotos');
 
 // Los comercios entre los que puede elegir la coordinadora. Los desactivados no aparecen (CA-10.6).
 async function listarComercios() {
@@ -19,6 +20,9 @@ async function registrarDesdeFormulario(usuario, cuerpo, opciones = {}) {
   // Si quien registra es un donante, se ignora cualquier `donante_id` que venga en el formulario:
   // un donante solo puede registrar donaciones a su propio nombre.
   const { errores, valores, datos } = validarDonacion(cuerpo, new Date(), { comercios });
+  // CA-23.1 y CA-23.2: la foto es opcional; si viene y no sirve, no se registra nada.
+  const { foto, error: errorFoto } = leerFoto(cuerpo.foto);
+  if (errorFoto) errores.foto = errorFoto;
   if (Object.keys(errores).length > 0) return { errores, valores, comercios };
 
   const donanteId = esCoordinadora ? datos.comercio.id : usuario.id;
@@ -36,6 +40,7 @@ async function registrarDesdeFormulario(usuario, cuerpo, opciones = {}) {
     zona,
     horaLimite: datos.horaLimite,
     kgAproximados: datos.kgAproximados,
+    foto,
     idLocal: opciones.idLocal,
     detalle: opciones.detalle,
   });

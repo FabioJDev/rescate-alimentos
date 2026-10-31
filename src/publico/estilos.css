@@ -906,3 +906,12 @@ a.telefono {
 .boton-whatsapp {
   background: #1f8f4e;
 }
+
+/* CMP-23: vista previa de la foto antes de publicarla. */
+.campo-foto img {
+  display: block;
+  max-width: 100%;
+  max-height: 14rem;
+  margin-top: 0.5rem;
+  border-radius: 0.5rem;
+}

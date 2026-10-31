@@ -17,6 +17,10 @@
     <p>Donante: <%= donacion.donante_nombre %></p>
     <p>Recoger en: <%= donacion.punto_recogida %> (zona <%= donacion.zona %>)</p>
     <p>Hora límite: <%= horaLimite %></p>
+    <%# CA-23.3: la foto solo se descarga si se pide (datos limitados, RNF-02). %>
+    <% if (donacion.foto_bytes) { %>
+      <p><a href="/donaciones/<%= donacion.codigo %>/foto">Ver foto (≈ <%= Math.max(1, Math.round(donacion.foto_bytes / 1024)) %> KB)</a></p>
+    <% } %>
     <% if (donacion.destino_nombre && ['disponible', 'asignada'].includes(donacion.estado)) { %>
       <p>Pedida por: <strong><%= donacion.destino_nombre %></strong>, <%= donacion.destino_direccion %></p>
     <% } %>
