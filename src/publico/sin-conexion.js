@@ -337,7 +337,12 @@
       function (evento) {
         var formulario = evento.target;
         if (formulario && formulario.getAttribute && formulario.getAttribute('action') === '/salir' && raiz.caches) {
-          raiz.caches.delete('rescate-paginas-v1');
+          // Se borra la de cualquier versión: el nombre cambia cada vez que sube la VERSION de sw.js.
+          raiz.caches.keys().then(function (nombres) {
+            nombres.forEach(function (nombre) {
+              if (nombre.indexOf('rescate-paginas-') === 0) raiz.caches.delete(nombre);
+            });
+          });
         }
       },
       true
