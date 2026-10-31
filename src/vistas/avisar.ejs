@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Avisar <%= donacion.codigo %> · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/por-vencer', volverNombre: 'Por vencer' }) %>
+  <h1>Avisar: <%= donacion.codigo %></h1>
+
+  <div class="tarjeta tarjeta-estado-<%= donacion.estado %>">
+    <p class="tarjeta-titulo"><%= donacion.tipo_alimento %> · <%= donacion.cantidad %> <%= donacion.unidad %></p>
+    <p>Recoger en: <%= donacion.punto_recogida %> (zona <%= donacion.zona %>)</p>
+    <p>Hora límite: <%= donacion.horaLimiteTexto %></p>
+  </div>
+
+  <p class="nota">Cada botón abre WhatsApp con el mensaje ya escrito. Revísalo y pulsa enviar.</p>
+
+  <% if (avisos.length === 0) { %>
+    <p class="vacio">No hay voluntarios activos en la zona <%= donacion.zona %>.</p>
+  <% } else { %>
+    <ul class="lista-donaciones">
+      <% avisos.forEach((a) => { %>
+        <li class="tarjeta">
+          <p class="tarjeta-titulo"><%= a.nombre %></p>
+          <p><%= a.papel %></p>
+          <% if (a.enlace) { %>
+            <a class="boton boton-whatsapp" href="<%= a.enlace %>" rel="noopener">Enviar por WhatsApp</a>
+          <% } else { %>
+            <p class="nota">Sin teléfono registrado</p>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</body>
+</html>

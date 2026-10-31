@@ -62,6 +62,11 @@
     <% } %>
 
     <% if (usuario.rol === 'coordinadora') { %>
+      <%# CA-21.1: cuántas donaciones están por vencer, con acceso directo. %>
+      <a class="accion<%= locals.porVencer > 0 ? ' accion-urgente' : '' %>" href="/por-vencer">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
+        Por vencer: <strong data-por-vencer><%= locals.porVencer || 0 %></strong>
+      </a>
       <a class="accion principal" href="/donaciones/nueva">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg>
         Registrar donación de un comercio

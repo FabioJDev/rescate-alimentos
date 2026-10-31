@@ -27,6 +27,8 @@ const rutasIntervenciones = require('./rutas/intervenciones');
 const rutasPrivacidad = require('./rutas/privacidad');
 const rutasRecepcion = require('./rutas/recepcion');
 const rutasAtenciones = require('./rutas/atenciones');
+const rutasPorVencer = require('./rutas/por-vencer');
+const { contarPorVencer } = require('./servicios/por-vencer');
 
 const app = express();
 const enProduccion = process.env.NODE_ENV === 'production';
@@ -123,12 +125,20 @@ app.use(rutasIntervenciones);
 app.use(rutasPrivacidad);
 app.use(rutasRecepcion);
 app.use(rutasAtenciones);
+app.use(rutasPorVencer);
 
 // Pantalla de inicio: los accesos de cada rol. Muestra una vez el aviso de la última acción (por ejemplo, PIN cambiado).
-app.get('/', requerirSesion, (req, res) => {
-  const aviso = req.session.aviso || null;
-  delete req.session.aviso;
-  res.render('inicio', { usuario: req.session.usuario, aviso });
+app.get('/', requerirSesion, async (req, res, next) => {
+  try {
+    const aviso = req.session.aviso || null;
+    delete req.session.aviso;
+    const usuario = req.session.usuario;
+    // CA-21.1: la coordinadora ve cuántas donaciones están por vencer.
+    const porVencer = usuario.rol === 'coordinadora' ? await contarPorVencer() : 0;
+    res.render('inicio', { usuario, aviso, porVencer });
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Errores no previstos: el usuario ve un código y el registro guarda el detalle (T-SEG.2).

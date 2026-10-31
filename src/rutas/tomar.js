@@ -3,6 +3,7 @@ const express = require('express');
 const { requerirRol } = require('../middleware/autenticacion');
 const { tomarDonacion, motivoNoDisponible, listarRecogidasDe } = require('../servicios/donaciones');
 const { formatearFechaHora, formatearHora } = require('../utilidades/fechas');
+const { vencePronto } = require('../servicios/por-vencer');
 
 const router = express.Router();
 
@@ -90,6 +91,7 @@ router.get('/mis-recogidas', soloVoluntarios, async (req, res, next) => {
       ...d,
       cantidad: Number(d.cantidad),
       horaLimiteTexto: formatearFechaHora(d.hora_limite),
+      vencePronto: vencePronto(d.hora_limite), // CA-21.5
     }));
     res.render('mis-recogidas', { recogidas });
   } catch (error) {

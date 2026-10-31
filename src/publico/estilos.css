@@ -888,3 +888,21 @@ a.telefono {
   border-left: 4px solid var(--bosque);
   background: #eef5f0;
 }
+
+/* CMP-21: lo que vence pronto se destaca; el botón de WhatsApp lleva su color para reconocerlo. */
+.vence-pronto {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--remolacha);
+}
+
+.accion-urgente {
+  border-color: var(--remolacha);
+}
+
+.boton-whatsapp {
+  background: #1f8f4e;
+}
