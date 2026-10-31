@@ -46,6 +46,15 @@
     </select>
     <% if (errores.zona) { %><p class="error-campo" role="alert"><%= errores.zona %></p><% } %>
 
+    <label for="organizacion_id">Organización a la que pertenece (solo para el rol «Organización receptora»)</label>
+    <select id="organizacion_id" name="organizacion_id">
+      <option value="">Ninguna</option>
+      <% organizaciones.forEach((o) => { %>
+        <option value="<%= o.id %>" <%= valores.organizacion_id === String(o.id) ? 'selected' : '' %>><%= o.nombre %></option>
+      <% }) %>
+    </select>
+    <% if (errores.organizacion_id) { %><p class="error-campo" role="alert"><%= errores.organizacion_id %></p><% } %>
+
     <label for="direccion">Dirección del comercio (solo comercios; es el punto de recogida por defecto)</label>
     <input id="direccion" name="direccion" type="text" maxlength="150" value="<%= valores.direccion %>">
     <% if (errores.direccion) { %><p class="error-campo" role="alert"><%= errores.direccion %></p><% } %>

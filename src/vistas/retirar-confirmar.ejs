@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ya no la necesitamos · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/vienen', volverNombre: 'Vienen para nosotros' }) %>
+  <h1>¿Ya no necesitan esta donación?</h1>
+
+  <div class="tarjeta">
+    <p class="tarjeta-titulo"><%= donacion.tipo_alimento %> · <%= donacion.cantidad %> <%= donacion.unidad %></p>
+    <p>Código: <%= donacion.codigo %></p>
+  </div>
+
+  <p>Deja de estar pedida por ustedes y otra organización podrá pedirla.<% if (donacion.estado === 'asignada') { %> Si el voluntario ya va en camino, avísenle a la coordinadora.<% } %></p>
+
+  <form method="post" action="/donaciones/<%= donacion.codigo %>/retirar-solicitud">
+    <button type="submit">Sí, ya no la necesitamos</button>
+  </form>
+  <p><a class="boton boton-secundario" href="/vienen">No, volver</a></p>
+</body>
+</html>

@@ -881,3 +881,10 @@ a.telefono {
 .contactos {
   padding-left: 1.2rem;
 }
+
+/* CMP-19: a dónde llevar una donación que pidió una organización. */
+.destino {
+  padding: 0.4rem 0.6rem;
+  border-left: 4px solid var(--bosque);
+  background: #eef5f0;
+}

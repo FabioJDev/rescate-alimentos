@@ -39,6 +39,21 @@
       </a>
     <% } %>
 
+    <% if (usuario.rol === 'organizacion') { %>
+      <a class="accion principal" href="/para-recibir">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Donaciones para recibir
+      </a>
+      <a class="accion" href="/vienen">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 100-4 2 2 0 000 4zM17 19a2 2 0 100-4 2 2 0 000 4z"/></svg>
+        Vienen para nosotros
+      </a>
+      <a class="accion" href="/recibidas">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12l5 5L20 7"/></svg>
+        Recibidas
+      </a>
+    <% } %>
+
     <% if (usuario.rol === 'coordinadora') { %>
       <a class="accion principal" href="/donaciones/nueva">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14"/></svg>

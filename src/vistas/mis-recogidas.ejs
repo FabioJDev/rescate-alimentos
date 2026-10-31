@@ -22,6 +22,7 @@
           <p>Recoger en: <%= d.punto_recogida %> (zona <%= d.zona %>)</p>
           <p>Hora límite: <%= d.horaLimiteTexto %></p>
           <p>Teléfono de <%= d.donante_nombre %>: <%- include('_telefono', { telefono: d.donante_telefono, sinTelefono: 'El comercio no tiene teléfono registrado' }) %></p>
+          <%- include('_destino', { d }) %>
           <a class="boton" href="/donaciones/<%= d.codigo %>/entregar">Registrar entrega</a>
           <p><a href="/donaciones/<%= d.codigo %>/soltar">No puedo recogerla: soltar</a></p>
           <p><a href="/donaciones/<%= d.codigo %>">Ver estado e historial</a></p>

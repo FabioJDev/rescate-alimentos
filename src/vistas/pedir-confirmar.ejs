@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pedir donación · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/para-recibir', volverNombre: 'Para recibir' }) %>
+  <h1>¿Pedir esta donación para <%= organizacion.nombre %>?</h1>
+
+  <div class="tarjeta">
+    <p class="tarjeta-titulo"><%= donacion.tipo_alimento %> · <%= donacion.cantidad %> <%= donacion.unidad %></p>
+    <p>Código: <%= donacion.codigo %> · Zona <%= donacion.zona %></p>
+    <p>Hora límite para recogerla: <%= donacion.horaLimiteTexto %></p>
+  </div>
+
+  <p>El voluntario que la recoja verá que debe llevarla a su organización. Solo pídanla si pueden recibirla y usarla.</p>
+
+  <form method="post" action="/donaciones/<%= donacion.codigo %>/pedir">
+    <button type="submit">Sí, la pedimos</button>
+  </form>
+  <p><a class="boton boton-secundario" href="/para-recibir">No, volver</a></p>
+</body>
+</html>

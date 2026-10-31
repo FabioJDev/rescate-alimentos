@@ -29,6 +29,9 @@ function frasesDelHistorial(donacion, historial) {
       return { cuando, texto: paso.detalle ? `Liberada por ${paso.usuario_nombre} (${paso.detalle})` : `Soltada por ${paso.usuario_nombre}` };
     }
     if (paso.tipo === 'asignacion') return { cuando, texto: paso.detalle };
+    // CA-19.3 y CA-19.6: la organización la pidió o dejó de pedirla.
+    if (paso.tipo === 'solicitud') return { cuando, texto: `Pedida por ${paso.detalle} (${paso.usuario_nombre})` };
+    if (paso.tipo === 'retiro_solicitud') return { cuando, texto: `${paso.detalle} ya no la necesita (${paso.usuario_nombre})` };
     // CA-13.1 y CA-13.6: las correcciones dicen qué cambió y las cancelaciones, por qué.
     if (paso.tipo === 'correccion') return { cuando, texto: `Corregida por ${paso.usuario_nombre}. ${paso.detalle}` };
     if (paso.tipo === 'cancelacion') return { cuando, texto: `Cancelada por ${paso.usuario_nombre}. Motivo: ${paso.detalle}` };
@@ -87,7 +90,7 @@ router.get('/donaciones/:codigo(D-\\d+)', requerirSesion, async (req, res, next)
     const usuario = req.session.usuario;
     const contactos = contactosVisibles(donacion, usuario);
     // Los teléfonos no llegan a la vista salvo en `contactos`: así no se muestran por error (CA-15.4).
-    const { donante_telefono, voluntario_telefono, organizacion_telefono, ...datosSinTelefonos } = donacion;
+    const { donante_telefono, voluntario_telefono, organizacion_telefono, destino_telefono, ...datosSinTelefonos } = donacion;
     res.render('donacion-detalle', {
       contactos,
       donacion: { ...datosSinTelefonos, cantidad: Number(donacion.cantidad) },

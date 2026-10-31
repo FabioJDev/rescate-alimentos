@@ -25,6 +25,7 @@ const rutasOrganizaciones = require('./rutas/organizaciones');
 const rutasCorrecciones = require('./rutas/correcciones');
 const rutasIntervenciones = require('./rutas/intervenciones');
 const rutasPrivacidad = require('./rutas/privacidad');
+const rutasRecepcion = require('./rutas/recepcion');
 
 const app = express();
 const enProduccion = process.env.NODE_ENV === 'production';
@@ -119,6 +120,7 @@ app.use(rutasOrganizaciones);
 app.use(rutasCorrecciones);
 app.use(rutasIntervenciones);
 app.use(rutasPrivacidad);
+app.use(rutasRecepcion);
 
 // Pantalla de inicio: los accesos de cada rol. Muestra una vez el aviso de la última acción (por ejemplo, PIN cambiado).
 app.get('/', requerirSesion, (req, res) => {

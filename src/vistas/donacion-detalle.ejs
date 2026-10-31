@@ -17,6 +17,9 @@
     <p>Donante: <%= donacion.donante_nombre %></p>
     <p>Recoger en: <%= donacion.punto_recogida %> (zona <%= donacion.zona %>)</p>
     <p>Hora límite: <%= horaLimite %></p>
+    <% if (donacion.destino_nombre && ['disponible', 'asignada'].includes(donacion.estado)) { %>
+      <p>Pedida por: <strong><%= donacion.destino_nombre %></strong>, <%= donacion.destino_direccion %></p>
+    <% } %>
     <% if (donacion.estado === 'cancelada') { %><p>Motivo de la cancelación: <%= donacion.motivo_cancelacion %></p><% } %>
   </div>
 
