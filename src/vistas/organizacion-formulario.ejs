@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= organizacion ? 'Editar organización' : 'Crear organización' %> · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/organizaciones', volverNombre: 'Organizaciones' }) %>
+  <h1><%= organizacion ? 'Editar «' + organizacion.nombre + '»' : 'Crear organización' %></h1>
+
+  <% if (Object.keys(errores).length > 0) { %>
+    <p class="error" role="alert">No se guardó. Revisa los campos marcados.</p>
+  <% } %>
+
+  <form method="post" action="<%= organizacion ? '/organizaciones/' + organizacion.id : '/organizaciones' %>" novalidate>
+    <label for="nombre">Nombre</label>
+    <input id="nombre" name="nombre" type="text" maxlength="100" value="<%= valores.nombre %>" required>
+    <% if (errores.nombre) { %><p class="error-campo" role="alert"><%= errores.nombre %></p><% } %>
+
+    <label for="direccion">Dirección</label>
+    <input id="direccion" name="direccion" type="text" maxlength="150" value="<%= valores.direccion %>" required>
+    <% if (errores.direccion) { %><p class="error-campo" role="alert"><%= errores.direccion %></p><% } %>
+
+    <label for="zona">Zona</label>
+    <select id="zona" name="zona" required>
+      <option value="">Elige una zona</option>
+      <% zonas.forEach((z) => { %>
+        <option value="<%= z %>" <%= valores.zona === z ? 'selected' : '' %>><%= z %></option>
+      <% }) %>
+    </select>
+    <% if (errores.zona) { %><p class="error-campo" role="alert"><%= errores.zona %></p><% } %>
+
+    <label for="refrigeracion">¿Tiene refrigeración?</label>
+    <select id="refrigeracion" name="refrigeracion" required>
+      <option value="">Elige una opción</option>
+      <option value="si" <%= valores.refrigeracion === 'si' ? 'selected' : '' %>>Sí</option>
+      <option value="no" <%= valores.refrigeracion === 'no' ? 'selected' : '' %>>No</option>
+    </select>
+    <% if (errores.refrigeracion) { %><p class="error-campo" role="alert"><%= errores.refrigeracion %></p><% } %>
+
+    <label for="telefono">Teléfono (opcional)</label>
+    <input id="telefono" name="telefono" type="tel" inputmode="tel" maxlength="25" value="<%= valores.telefono %>">
+    <% if (errores.telefono) { %><p class="error-campo" role="alert"><%= errores.telefono %></p><% } %>
+
+    <button type="submit"><%= organizacion ? 'Guardar cambios' : 'Crear organización' %></button>
+  </form>
+</body>
+</html>

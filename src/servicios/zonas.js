@@ -25,7 +25,7 @@ async function listarZonasConUso() {
             (SELECT count(*)::int FROM usuarios u
               WHERE u.activo AND lower(trim(u.zona)) = lower(trim(z.nombre))) AS usuarios,
             (SELECT count(*)::int FROM organizaciones o
-              WHERE lower(trim(o.zona)) = lower(trim(z.nombre))) AS organizaciones
+              WHERE o.activa AND lower(trim(o.zona)) = lower(trim(z.nombre))) AS organizaciones
        FROM zonas z
       ORDER BY z.activa DESC, z.nombre`
   );

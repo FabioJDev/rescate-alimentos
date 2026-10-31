@@ -1,8 +1,9 @@
 // CMP-04 · Registrar la entrega a la organización receptora.
 const { pool, consultar } = require('../db/conexion');
 
+// Solo las activas: una organización desactivada no se puede elegir al entregar (CA-12.5).
 async function listarOrganizaciones() {
-  const r = await consultar('SELECT id, nombre, zona, refrigeracion FROM organizaciones ORDER BY nombre');
+  const r = await consultar('SELECT id, nombre, zona, refrigeracion, telefono FROM organizaciones WHERE activa ORDER BY nombre');
   return r.rows;
 }
 
