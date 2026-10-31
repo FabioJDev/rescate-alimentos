@@ -50,6 +50,19 @@ flowchart LR
 
 «Vencida» **se calcula, no se guarda**: es una donación `disponible` con `hora_limite` cumplida.
 
+Con la administración (CMP-09 a CMP-15) el modelo gana:
+
+- **`zonas`** (CMP-09): id, nombre (único sin importar mayúsculas), activa. Las columnas `zona` de usuarios,
+  organizaciones y donaciones siguen siendo texto con el nombre: la lista controla qué se puede elegir y renombrar
+  una zona actualiza las tres tablas en una sola transacción.
+- **`usuarios`** (CMP-10 y CMP-11): telefono, activo, debe_cambiar_pin (PIN temporal pendiente), creado_en.
+- **`organizaciones`** (CMP-12): telefono, activa.
+- **`donaciones`** (CMP-13): estado `cancelada`, motivo_cancelacion, cancelada_en.
+- **`movimientos`**: tipos `correccion` y `cancelacion` (CMP-13) y `asignacion` (CMP-14). La liberación por la
+  coordinadora usa `liberacion` con un detalle que dice a quién se la quitó.
+
+Nada se borra: usuarios, zonas y organizaciones se **desactivan**, porque el historial apunta a ellos (RNF-05).
+
 ## 4. Integraciones
 
 Ninguna externa obligatoria: sin mapas, sin SMS, sin notificaciones. Por costo, y porque la geolocalización
@@ -62,10 +75,19 @@ no era un requisito real (Módulo 2): basta filtrar por zona.
 - **Pruebas:** GitHub Actions corre Jest + Supertest en cada pull request contra un PostgreSQL de servicio.
 - **Variables de entorno:** `DATABASE_URL`, `SESSION_SECRET`, `TZ=America/Bogota`, `NODE_ENV`. Van en `.env`
   (ignorado por git); en el repo solo está `.env.example` con valores falsos.
+- **Arranque seguro (T-ADM.3):** en producción el servidor **no** carga la semilla de demostración (sus PIN son
+  públicos en el README). Al arrancar aplica las migraciones y, si no hay ninguna coordinadora activa, crea la
+  primera con `PRIMERA_COORDINADORA_NOMBRE` y `PRIMERA_COORDINADORA_PIN` (variables que se escriben en Render,
+  nunca en el repositorio); esa persona debe cambiar el PIN al entrar (CA-11.4). El plan gratis de Render no tiene
+  consola, por eso se hace con variables y no con un comando. La semilla se niega a correr con
+  `NODE_ENV=production`.
 
 ## 6. Identificación de usuarios
 
 Nombre + PIN de 4 dígitos, con sesión por cookie. Ver [ADR-003](../decisiones/ADR-003-identificacion-nombre-pin.md).
+La coordinadora crea usuarios y restablece PIN con un PIN temporal que la persona cambia al entrar; desactivar,
+editar o restablecer cierra las sesiones abiertas de esa persona. Ver
+[ADR-005](../decisiones/ADR-005-administracion-pin-temporal.md).
 
 ## 7. Riesgos del Módulo 2 convertidos en decisiones o tareas
 
@@ -85,3 +107,19 @@ Ninguna. Si aparece alguna, se argumenta en esta sección.
 - [ADR-002 · Hosting y base de datos: Render + Neon](../decisiones/ADR-002-hosting-render-neon.md)
 - [ADR-003 · Identificación con nombre + PIN](../decisiones/ADR-003-identificacion-nombre-pin.md)
 - [ADR-004 · Registrar sin conexión con una cola en el teléfono](../decisiones/ADR-004-modo-sin-conexion.md)
+- [ADR-005 · Administración por la coordinadora con PIN temporal](../decisiones/ADR-005-administracion-pin-temporal.md)
+
+## Tareas de la administración
+
+| Tarea | Comportamiento | Rama |
+|---|---|---|
+| T-ADM.2 · Especificación de la administración | CMP-09 a CMP-15 | `docs/especificacion-administracion` |
+| T-09.1 · Catálogo de zonas | CMP-09 | `feat/CMP-09-zonas` |
+| T-10.1 · Administrar usuarios | CMP-10 | `feat/CMP-10-usuarios` |
+| T-11.1 · Cambiar y restablecer el PIN | CMP-11 | `feat/CMP-11-pin` |
+| T-12.1 · Administrar organizaciones | CMP-12 | `feat/CMP-12-organizaciones` |
+| T-13.1 · Corregir o cancelar una donación | CMP-13 | `feat/CMP-13-corregir-cancelar` |
+| T-14.1 · Intervención de la coordinadora | CMP-14 | `feat/CMP-14-intervencion` |
+| T-15.1 · Teléfono de contacto | CMP-15 | `feat/CMP-15-contacto` |
+| T-ADM.3 · Arranque seguro en producción | Sección 5 | `infra/arranque-seguro` |
+| T-ADM.4 · Manual de operación actualizado | — | `docs/manual-administracion` |
