@@ -4,13 +4,14 @@
 const bcrypt = require('bcryptjs');
 const { pool } = require('./conexion');
 
+// Los teléfonos son inventados (CMP-15): sirven para ver en la demostración el enlace para llamar.
 const usuarios = [
-  { nombre: 'Marcela', rol: 'coordinadora', pin: '0000', zona: null, direccion: null },
-  { nombre: 'Ana', rol: 'voluntario', pin: '1111', zona: 'Norte', direccion: null },
-  { nombre: 'Bruno', rol: 'voluntario', pin: '2222', zona: 'Norte', direccion: null },
-  { nombre: 'Carlos', rol: 'voluntario', pin: '3333', zona: 'Sur', direccion: null },
-  { nombre: 'Panadería La Espiga', rol: 'donante', pin: '4444', zona: 'Norte', direccion: 'Calle 10 # 5-20, Norte' },
-  { nombre: 'Plaza de Mercado Puesto 12', rol: 'donante', pin: '5555', zona: 'Sur', direccion: 'Plaza de Mercado, puesto 12, Sur' },
+  { nombre: 'Marcela', rol: 'coordinadora', pin: '0000', zona: null, direccion: null, telefono: '300 000 0000' },
+  { nombre: 'Ana', rol: 'voluntario', pin: '1111', zona: 'Norte', direccion: null, telefono: '300 000 0001' },
+  { nombre: 'Bruno', rol: 'voluntario', pin: '2222', zona: 'Norte', direccion: null, telefono: '300 000 0002' },
+  { nombre: 'Carlos', rol: 'voluntario', pin: '3333', zona: 'Sur', direccion: null, telefono: '300 000 0003' },
+  { nombre: 'Panadería La Espiga', rol: 'donante', pin: '4444', zona: 'Norte', direccion: 'Calle 10 # 5-20, Norte', telefono: '600 000 0004' },
+  { nombre: 'Plaza de Mercado Puesto 12', rol: 'donante', pin: '5555', zona: 'Sur', direccion: 'Plaza de Mercado, puesto 12, Sur', telefono: '600 000 0005' },
 ];
 
 const organizaciones = [
@@ -40,16 +41,22 @@ async function sembrar({ reiniciar = false } = {}) {
       throw new Error('Ya hay usuarios en la base de datos. Usa --reiniciar si de verdad quieres borrar todo y cargar la semilla.');
     }
     if (reiniciar) {
-      await cliente.query('TRUNCATE movimientos, donaciones, organizaciones, usuarios RESTART IDENTITY CASCADE');
+      await cliente.query('TRUNCATE movimientos, donaciones, organizaciones, usuarios, zonas RESTART IDENTITY CASCADE');
       await cliente.query('ALTER SEQUENCE secuencia_codigo_donacion RESTART WITH 1');
+    }
+
+    // CMP-09: las zonas de la demostración tienen que estar en la lista para poder elegirlas en los formularios.
+    const zonas = [...new Set([...usuarios, ...organizaciones].map((x) => x.zona).filter(Boolean))];
+    for (const zona of zonas) {
+      await cliente.query('INSERT INTO zonas (nombre) VALUES ($1) ON CONFLICT DO NOTHING', [zona]);
     }
 
     const idUsuario = {};
     for (const u of usuarios) {
       const pinHash = await bcrypt.hash(u.pin, 10);
       const r = await cliente.query(
-        'INSERT INTO usuarios (nombre, rol, pin_hash, zona, direccion) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-        [u.nombre, u.rol, pinHash, u.zona, u.direccion]
+        'INSERT INTO usuarios (nombre, rol, pin_hash, zona, direccion, telefono) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+        [u.nombre, u.rol, pinHash, u.zona, u.direccion, u.telefono]
       );
       idUsuario[u.nombre] = r.rows[0].id;
     }
