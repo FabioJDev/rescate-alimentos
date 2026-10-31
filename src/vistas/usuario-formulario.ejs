@@ -33,7 +33,7 @@
     </select>
     <% if (errores.rol) { %><p class="error-campo" role="alert"><%= errores.rol %></p><% } %>
 
-    <label for="telefono">Teléfono (obligatorio para comercios y voluntarios)</label>
+    <label for="telefono">Teléfono (obligatorio para comercios, voluntarios y organizaciones)</label>
     <input id="telefono" name="telefono" type="tel" inputmode="tel" maxlength="25" value="<%= valores.telefono %>">
     <% if (errores.telefono) { %><p class="error-campo" role="alert"><%= errores.telefono %></p><% } %>
 
