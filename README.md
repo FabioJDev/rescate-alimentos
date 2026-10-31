@@ -69,15 +69,20 @@ Para quien reciba el proyecto y quiera seguir construyéndolo.
 2. **Levántalo en tu computador** con los pasos de arriba y corre `npm test` (las pruebas necesitan un PostgreSQL real).
 3. **Ubícate en el código.** Cada petición va de una ruta (`src/rutas/`) a un servicio (`src/servicios/`, donde viven las reglas y
    el SQL) y de ahí a una vista (`src/vistas/`). Hay un archivo de pruebas por comportamiento en `tests/` (`cmp-01.test.js` …
-   `cmp-15.test.js`), y el nombre de cada prueba empieza con el ID de su criterio de aceptación (por ejemplo, `CA-03.2`).
+   `cmp-23.test.js`, más `seguridad.test.js`), y el nombre de cada prueba empieza con el ID de su criterio de aceptación
+   (por ejemplo, `CA-03.2`). `tests/preparar.js` corre antes de cada archivo: aplica las migraciones, limpia el conteo de
+   intentos de ingreso y, **solo en la base de pruebas**, hace que los usuarios nazcan con el aviso de privacidad aceptado.
 4. **Trabaja así:** una tarea por rama, un pull request con la plantilla de `.github/`, el check «pruebas» en verde y la
    aprobación de **otra persona** que nombre los criterios que verificó. Los commits van en español con el ID
    (`feat(CMP-03): … [CA-03.2]`). Más detalle en `REGLAS.md` y en la constitución.
 5. **Qué sigue:** el [tablero](https://github.com/users/FabioJDev/projects/1). Ya están el modo sin conexión (CMP-08), soltar
    una donación (CMP-06), el reporte (CMP-07) y la administración (CMP-09 a CMP-15: usuarios, PIN, zonas, organizaciones,
-   corregir, cancelar e intervenir donaciones, teléfonos). Limitaciones conocidas: el PIN no tiene límite de intentos, los
-   formularios no tienen protección CSRF, no hay recordatorios (RF-10) ni registro de beneficiarios (RF-07), y las
-   organizaciones receptoras no inician sesión (RF-04).
+   corregir, cancelar e intervenir donaciones, teléfonos) y la seguridad y los requerimientos que faltaban (CMP-16 a
+   CMP-23 y T-SEG: límite de intentos, origen de los formularios y cabeceras, errores con código, nombres sin importar
+   mayúsculas, aviso de privacidad, organizaciones con usuario, personas atendidas, por vencer con WhatsApp, kilos
+   aproximados y foto). Limitaciones conocidas: los recordatorios los envía la coordinadora (no hay envío automático), las
+   personas atendidas son atenciones por día y no personas distintas, y el aviso de privacidad es un texto base que la
+   fundación debe revisar con apoyo jurídico.
 6. **Cuentas que necesitas:** el repositorio en GitHub, un servicio en [Render](https://render.com) y una base de datos en
    [Neon](https://neon.tech). Las variables de entorno son `DATABASE_URL`, `SESSION_SECRET` y, para el primer arranque,
    `PRIMERA_COORDINADORA_NOMBRE` y `PRIMERA_COORDINADORA_PIN` (ver `.env.example`).
@@ -94,6 +99,11 @@ Para quien reciba el proyecto y quiera seguir construyéndolo.
 - Si cambias un archivo que el teléfono guarda (lista `ESTATICOS` de `src/publico/sw.js`, como `estilos.css`), sube la
   `VERSION` de `sw.js`; si no, los teléfonos seguirán mostrando la versión vieja.
 - El plan gratis de Render «duerme» la aplicación tras unos 15 minutos sin visitas.
+- Todo POST que viene de otro sitio se rechaza mirando la cabecera `Origin` (ADR-006). Por eso la cabecera
+  `Referrer-Policy` es `same-origin` y **no** `no-referrer`: con `no-referrer` el navegador manda `Origin: null` y se
+  rechazarían todos los formularios propios. Las pruebas automáticas no simulan un navegador; prueba los cambios de
+  seguridad también en el navegador.
+- Los errores inesperados muestran un código de 6 caracteres; búscalo en los Logs de Render para ver el detalle (T-SEG.2).
 
 ## Documentación
 
