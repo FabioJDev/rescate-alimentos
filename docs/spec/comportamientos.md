@@ -36,7 +36,7 @@ aparte: va de asignada a entregada en una sola acción, para cumplir el máximo 
 ## Actores
 
 Donante (comercio), Voluntario y Coordinadora (Marcela y su equipo). Las organizaciones receptoras son datos
-(destino de la entrega); no inician sesión en el MVP.
+(destino de la entrega); no inician sesión en el MVP. *(Desde CMP-19 sí inician sesión con el rol «organización».)*
 
 ---
 
@@ -399,13 +399,196 @@ encuentra el lugar o el comercio cerró; el comercio no sabe quién viene.
 
 ---
 
+# Seguridad para operar con datos reales
+
+Antes de que la fundación cargue personas y comercios reales, el ingreso y los formularios tienen que resistir los
+ataques más comunes. Las decisiones técnicas están en [ADR-006](../decisiones/ADR-006-seguridad-basica.md).
+
+## CMP-16 · Límite de intentos de ingreso
+
+**Origen:** RNF-04 · ADR-003 (mitigación pendiente desde la 3C) · Un PIN de 4 dígitos tiene 10.000 combinaciones: sin
+límite, se adivina en minutos.
+
+- **CA-16.1** Dado un usuario que se equivoca de PIN 5 veces seguidas, cuando intenta la sexta vez (aunque el PIN sea
+  correcto), entonces no entra y ve «Demasiados intentos. Espera 15 minutos o pide a la coordinadora que restablezca tu
+  PIN.».
+- **CA-16.2** Dado un usuario bloqueado, cuando pasan 15 minutos, entonces puede volver a intentar.
+- **CA-16.3** Dado un usuario que entra con el PIN correcto antes de llegar al límite, cuando entra, entonces sus
+  intentos fallidos vuelven a cero.
+- **CA-16.4** Dado un usuario bloqueado, cuando la coordinadora restablece su PIN (CA-11.3), entonces queda
+  desbloqueado y puede entrar con el PIN temporal.
+- **CA-16.5** Dado un mismo teléfono o computador que falla 20 veces en 15 minutos (con cualquier nombre, existan o no),
+  cuando intenta otra vez, entonces se rechaza con el mismo mensaje de CA-16.1, sin decir si el nombre existe.
+- **CA-16.6** Dado un nombre que no existe, cuando se falla, entonces el mensaje es el mismo de siempre («El nombre o el
+  PIN no son correctos.»): el bloqueo no revela qué nombres existen.
+
+## T-SEG.1 · Formularios de otros sitios y cabeceras de seguridad
+
+**Origen:** RNF-04 · Tarea técnica sin pantalla (sus criterios se prueban en `tests/seguridad.test.js`).
+
+- **CA-SEG.1** Dado un envío de formulario (POST) que llega desde otra página web (su origen no es el de la
+  aplicación), entonces se rechaza con «Esta acción no viene de la página de Rescate de Alimentos.» y no cambia nada.
+- **CA-SEG.2** Dado un envío desde la propia aplicación, entonces funciona como siempre.
+- **CA-SEG.3** Dada cualquier página, cuando se responde, entonces lleva cabeceras de seguridad: política de contenido
+  que solo permite scripts propios, prohibición de mostrarse dentro de otra página y de adivinar el tipo de archivo.
+
+## T-SEG.2 · Registro de errores con código
+
+**Origen:** RNF-08 · Hoy un error inesperado solo dice «Algo salió mal» y nadie puede saber qué pasó.
+
+- **CA-SEG.4** Dado un error inesperado, cuando ocurre, entonces el usuario ve «Algo salió mal. Si vuelve a pasar,
+  avisa a la coordinadora con este código: [código]» y nunca ve detalles internos.
+- **CA-SEG.5** Dado un error inesperado, cuando ocurre, entonces el registro del servidor (Logs de Render) guarda una
+  línea con el mismo código, la fecha, la ruta, el usuario (si había sesión) y el error, para encontrarlo después.
+
+## CMP-17 · Nombres de usuario fáciles de distinguir y de escribir
+
+**Origen:** RNF-03, RNF-04 · Con el nombre se ingresa, así que dos voluntarias «Ana» no pueden existir; y quien escribe
+«ana » o «ANA» desde el celular no debería quedarse afuera.
+
+- **CA-17.1** Dado un usuario «Ana Pérez», cuando ingresa escribiendo «ana pérez», «ANA PÉREZ» o con espacios de más,
+  entonces entra igual (con su PIN correcto).
+- **CA-17.2** Dado un nombre que ya existe, cuando la coordinadora crea otro usuario con ese nombre, entonces el mensaje
+  dice «Ya existe un usuario con ese nombre. Agrega el apellido o un apodo (por ejemplo, «Ana Pérez» o «Ana del
+  Norte»).».
+- **CA-17.3** Dado el formulario de crear usuario, cuando se abre, entonces explica que el nombre debe ser único y que
+  conviene usar nombre y apellido.
+
+## CMP-18 · Aviso de privacidad y autorización de datos
+
+**Origen:** RNF-04 · Ley 1581 de 2012 (protección de datos personales en Colombia) · Se guardan nombres, teléfonos y
+direcciones de personas reales.
+
+- **CA-18.1** Dado cualquier visitante, cuando abre «Aviso de privacidad» (enlace en la página de ingreso), entonces lee
+  qué datos se guardan, para qué, quién los ve, cuánto tiempo y cómo pedir que se corrijan o se borren.
+- **CA-18.2** Dado un usuario que no ha aceptado el aviso, cuando entra, entonces debe leerlo y pulsar «Acepto» antes de
+  usar cualquier otra pantalla (sí puede salir). Se guarda la fecha y hora de la aceptación.
+- **CA-18.3** Dado un usuario que ya aceptó, cuando entra, entonces no se le vuelve a pedir.
+- **CA-18.4** Dado un usuario con PIN temporal que no ha aceptado, cuando entra, entonces primero acepta el aviso y luego
+  cambia el PIN (CA-11.4).
+- **CA-18.5** Dada la coordinadora, cuando abre «Usuarios», entonces ve quién aceptó el aviso y cuándo.
+
+# Requerimientos del Módulo 1 que faltaban
+
+## CMP-19 · Las organizaciones receptoras usan la aplicación
+
+**Origen:** RF-04, RF-05 · Épica 3 (Planeación en la recepción) · Hasta ahora las organizaciones eran solo datos: no
+sabían qué les iba a llegar (el caso de los 200 kilos de tomate que llegaron sin aviso un viernes en la noche).
+
+Con esto aparece un cuarto rol, **organización**, que la coordinadora crea en «Usuarios» y asocia a una organización.
+**Necesitan refrigeración** los lácteos y los cárnicos (decisión del equipo, que Marcela puede pedir cambiar).
+
+- **CA-19.1** Dada la coordinadora, cuando crea un usuario con rol «Organización», entonces debe elegir la organización
+  (activa) a la que pertenece y su teléfono; queda con PIN temporal como cualquier usuario (CA-10.2).
+- **CA-19.2** Dado un usuario de una organización, cuando abre «Donaciones para recibir», entonces ve las donaciones
+  disponibles o en camino que nadie más ha pedido, de la más urgente a la menos urgente; si su organización **no tiene
+  refrigeración**, no ve lácteos ni cárnicos (RF-05).
+- **CA-19.3** Dada una donación de esa lista, cuando pulsa «Pedir para nosotros» y confirma, entonces la donación queda
+  con su organización como destino, el historial registra la «solicitud» y deja de aparecer para las demás
+  organizaciones.
+- **CA-19.4** Dadas dos organizaciones que piden la misma donación al mismo tiempo, entonces exactamente una queda como
+  destino y la otra ve «Esta donación ya la pidió [organización]» (misma garantía que ADR-001).
+- **CA-19.5** Dado un usuario de una organización, cuando abre «Vienen para nosotros», entonces ve las donaciones con su
+  organización como destino que no se han entregado: si alguien ya la tomó, ve «En camino», quién la trae, su teléfono y
+  a qué hora la tomó; si nadie la ha tomado, ve «Esperando voluntario» (aviso de la Épica 3).
+- **CA-19.6** Dada una donación pedida que todavía no se entrega, cuando la organización pulsa «Ya no la necesitamos» y
+  confirma, entonces deja de tener destino y vuelve a aparecer para las demás.
+- **CA-19.7** Dado un voluntario, cuando ve una donación con destino (en «Donaciones disponibles», al tomarla o en «Mis
+  recogidas»), entonces ve «Llevar a: [organización], [dirección]» y su teléfono; al registrar la entrega, esa
+  organización ya viene elegida (puede cambiarla si no la reciben).
+- **CA-19.8** Dado un usuario de una organización, cuando abre «Recibidas», entonces ve las entregas de los últimos 30
+  días a su organización con fecha, tipo, cantidad, quién la entregó y quién la recibió.
+- **CA-19.9** Dado un usuario de una organización, cuando intenta tomar, entregar, publicar donaciones o administrar,
+  entonces se rechaza (RNF-04); y dado un usuario que no es de una organización, cuando intenta pedir una donación,
+  entonces se rechaza.
+
+## CMP-20 · Personas atendidas, sin doble conteo
+
+**Origen:** RF-07 · Épica 4 · Hoy cada organización manda por WhatsApp cuántas personas atendió y se suman en un Excel,
+con doble conteo posible que nadie detecta (Módulo 2). Es lo que más pesan los cooperantes.
+
+Se registra **una cifra por organización y por día**: «personas atendidas ese día». Así el mismo reporte no puede
+llegar dos veces. Una persona que viene dos días distintos cuenta dos veces: por eso el reporte dice «atenciones (personas
+por día)» y no «personas distintas». No se piden nombres ni documentos de los beneficiarios (Módulo 1).
+
+- **CA-20.1** Dado un usuario de una organización, cuando abre «Personas atendidas», escribe la fecha (hoy por defecto)
+  y cuántas personas atendió y guarda, entonces queda registrado a nombre de su organización con quién lo registró y
+  cuándo.
+- **CA-20.2** Dada una organización que ya registró personas para una fecha, cuando intenta registrar otra vez esa
+  misma fecha, entonces no se suma: ve «Ya se registraron [N] personas para el [fecha]. Si es un error, corrígelo.» con
+  la opción de corregir la cifra, que reemplaza la anterior y guarda quién la corrigió.
+- **CA-20.3** Dado un número vacío, cero, negativo, con decimales o mayor que 5.000, o una fecha futura o de hace más de
+  60 días, cuando se guarda, entonces se rechaza con un mensaje claro.
+- **CA-20.4** Dada la coordinadora, cuando registra o corrige personas atendidas, entonces elige la organización (para
+  las que reportan por llamada).
+- **CA-20.5** Dada la coordinadora, cuando abre el reporte del periodo, entonces ve el total de atenciones (personas por
+  día) del periodo y el detalle por organización, y el CSV de atenciones se puede descargar aparte.
+- **CA-20.6** Dado un usuario que no es de una organización ni coordinadora, cuando intenta registrar personas
+  atendidas, entonces se rechaza; y una organización solo registra para sí misma (RNF-04).
+
+## CMP-21 · Donaciones por vencer y recordatorio por WhatsApp
+
+**Origen:** RF-10 · Épica 1 · El aviso urgente se reserva para cuando se acerca la hora límite (reflexión del Módulo 1).
+Sin SMS ni notificaciones pagadas (RNF-06): la aplicación arma el mensaje y la coordinadora lo envía por WhatsApp con un
+toque.
+
+Una donación está **por vencer** si le faltan 60 minutos o menos para la hora límite y no se ha entregado.
+
+- **CA-21.1** Dada la coordinadora, cuando abre el inicio, entonces ve cuántas donaciones están por vencer y un acceso a
+  «Por vencer».
+- **CA-21.2** Dada la coordinadora, cuando abre «Por vencer», entonces ve las disponibles y las asignadas por vencer,
+  de la más urgente a la menos urgente, con el tiempo que les queda.
+- **CA-21.3** Dada una disponible por vencer, cuando la coordinadora abre «Avisar», entonces ve los voluntarios activos
+  de esa zona con un botón «Enviar por WhatsApp» que abre WhatsApp con el mensaje ya escrito (código, alimento,
+  cantidad, punto de recogida, hora límite y el enlace para tomarla).
+- **CA-21.4** Dada una asignada por vencer, cuando la coordinadora abre «Avisar», entonces ve botones de WhatsApp para
+  el voluntario que la tomó y para el comercio, con un recordatorio ya escrito.
+- **CA-21.5** Dado un voluntario, cuando abre «Mis recogidas» o «Donaciones disponibles», entonces las que están por
+  vencer se marcan con «Vence pronto».
+- **CA-21.6** Dado un usuario sin teléfono registrado, cuando aparece en «Avisar», entonces se muestra «Sin teléfono
+  registrado» en vez del botón.
+- **CA-21.7** Dado un usuario que no es coordinadora, cuando intenta abrir «Por vencer», entonces se rechaza (RNF-04).
+
+## CMP-22 · Kilos aproximados rescatados
+
+**Origen:** RF-07 · Los cooperantes piden kilos, pero los comercios declaran en kg, unidades, cajas o bultos, y nadie
+pesa (Módulo 2). No se inventan equivalencias: el comercio puede decir, si quiere, cuántos kilos calcula.
+
+- **CA-22.1** Dado el formulario «Publicar donación» con una unidad distinta de kg, cuando se llena, entonces tiene un
+  campo **opcional** «Peso aproximado en kg»; con unidad kg no se pide (el peso es la cantidad).
+- **CA-22.2** Dado un peso aproximado escrito, cuando no es un número mayor que cero, entonces se rechaza con un mensaje
+  claro; si se deja vacío, la donación se registra igual (sigue siendo de 4 campos obligatorios, CA-01.6).
+- **CA-22.3** Dada la coordinadora, cuando abre el reporte, entonces ve «Kilos aproximados entregados» (los kg
+  declarados más los pesos aproximados) y cuántas entregas no tienen peso aproximado, aclarando que son cifras
+  declaradas, no pesadas.
+- **CA-22.4** Dada una donación, cuando se corrige (CMP-13) o se registra sin conexión (CMP-08), entonces el peso
+  aproximado también se puede indicar y aplica la misma regla.
+
+## CMP-23 · Foto opcional de la donación
+
+**Origen:** RF-01 · Reflexión del Módulo 1 («foto opcional») · Una foto le muestra al voluntario qué tan grande es la
+donación antes de ir. Ver [ADR-007](../decisiones/ADR-007-fotos-en-la-base-de-datos.md).
+
+- **CA-23.1** Dado el formulario «Publicar donación» (por el comercio o la coordinadora), cuando se elige una foto,
+  entonces el teléfono la achica antes de enviarla (máximo 1.024 px y unos 300 KB) y se guarda con la donación; sin foto
+  la donación se registra igual.
+- **CA-23.2** Dado un archivo que no es una imagen JPEG, PNG o WebP, o que pesa más de 400 KB al llegar, cuando se
+  envía, entonces no se registra nada y se indica el problema; lo demás escrito se conserva.
+- **CA-23.3** Dada una donación con foto, cuando un usuario con sesión abre su detalle, entonces ve «Ver foto (≈ N KB)»;
+  la foto solo se descarga si la pide (RNF-02, datos limitados). En «Donaciones disponibles» se marca «Tiene foto».
+- **CA-23.4** Dado un visitante sin sesión, cuando pide la foto de una donación, entonces se rechaza (RNF-04).
+- **CA-23.5** Dado un usuario sin conexión, cuando publica una donación con foto, entonces la donación se guarda en el
+  teléfono **sin la foto** y se le avisa (las fotos no caben en la memoria del navegador).
+
+---
+
 ## Fuera del alcance del MVP
 
-Panel de indicadores, notificaciones automáticas (RF-10) y asignación automática de destino. Soltar una donación, el
-reporte del periodo (RF-07) y el modo sin conexión para registrar (RNF-01) quedaron fuera del MVP y se agregaron en
-la 3C como CMP-06, CMP-07 y CMP-08. La administración (usuarios, PIN, zonas, organizaciones, corregir, cancelar e
-intervenir donaciones y teléfonos de contacto) se agregó después como CMP-09 a CMP-15: ver
-[plan técnico](plan-tecnico.md).
+Panel de indicadores, notificaciones automáticas por SMS o push (RF-10 se cubre con recordatorios por WhatsApp que
+envía la coordinadora, CMP-21) y asignación automática de destino (el destino lo pide la organización, CMP-19). Soltar
+una donación, el reporte del periodo (RF-07) y el modo sin conexión para registrar (RNF-01) quedaron fuera del MVP y
+se agregaron en la 3C como CMP-06, CMP-07 y CMP-08. La administración se agregó como CMP-09 a CMP-15, y la seguridad y
+los requerimientos que faltaban como CMP-16 a CMP-23 y T-SEG.1 y T-SEG.2: ver [plan técnico](plan-tecnico.md).
 
 ## Tabla de trazabilidad
 
@@ -426,3 +609,12 @@ intervenir donaciones y teléfonos de contacto) se agregó después como CMP-09 
 | CMP-13 | CA-13.1 a CA-13.10 | RF-01, RF-08, RNF-05 | 1 · Gestión de donaciones | `tests/cmp-13.test.js` |
 | CMP-14 | CA-14.1 a CA-14.7 | RF-03, RF-08, RF-09, RNF-05 | 2 · Coordinación de recogida | `tests/cmp-14.test.js` |
 | CMP-15 | CA-15.1 a CA-15.4 | RF-03, RNF-04 | 2 · Coordinación de recogida | `tests/cmp-15.test.js` |
+| CMP-16 | CA-16.1 a CA-16.6 | RNF-04 | 5 · Responsabilidad sanitaria | `tests/cmp-16.test.js` |
+| T-SEG.1 y T-SEG.2 | CA-SEG.1 a CA-SEG.5 | RNF-04, RNF-08 | — | `tests/seguridad.test.js` |
+| CMP-17 | CA-17.1 a CA-17.3 | RNF-03, RNF-04 | — | `tests/cmp-17.test.js` |
+| CMP-18 | CA-18.1 a CA-18.5 | RNF-04 | — | `tests/cmp-18.test.js` |
+| CMP-19 | CA-19.1 a CA-19.9 | RF-04, RF-05 | 3 · Planeación en la recepción | `tests/cmp-19.test.js` |
+| CMP-20 | CA-20.1 a CA-20.6 | RF-07 | 4 · Trazabilidad y reportes | `tests/cmp-20.test.js` |
+| CMP-21 | CA-21.1 a CA-21.7 | RF-10 | 1 · Gestión de donaciones | `tests/cmp-21.test.js` |
+| CMP-22 | CA-22.1 a CA-22.4 | RF-07 | 4 · Trazabilidad y reportes | `tests/cmp-22.test.js` |
+| CMP-23 | CA-23.1 a CA-23.5 | RF-01, RNF-02 | 1 · Gestión de donaciones | `tests/cmp-23.test.js` |
