@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cambiar nombre de zona · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/zonas', volverNombre: 'Zonas' }) %>
+  <h1>Cambiar el nombre de «<%= zona.nombre %>»</h1>
+
+  <p class="nota">El nombre nuevo se aplica a todos los usuarios, organizaciones y donaciones de esta zona.</p>
+  <% if (error) { %><p class="error" role="alert"><%= error %></p><% } %>
+
+  <form method="post" action="/zonas/<%= zona.id %>" novalidate>
+    <label for="nombre">Nombre de la zona</label>
+    <input id="nombre" name="nombre" type="text" maxlength="60" value="<%= nombre %>" required>
+    <button type="submit">Guardar nombre</button>
+  </form>
+</body>
+</html>

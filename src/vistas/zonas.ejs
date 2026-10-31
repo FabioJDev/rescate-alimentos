@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Zonas · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca') %>
+  <h1>Zonas</h1>
+
+  <% if (aviso) { %><p class="exito" role="status"><%= aviso %></p><% } %>
+  <% if (error) { %><p class="error" role="alert"><%= error %></p><% } %>
+
+  <form method="post" action="/zonas" novalidate>
+    <label for="nombre">Nueva zona</label>
+    <input id="nombre" name="nombre" type="text" maxlength="60" value="<%= nombre %>" required>
+    <button type="submit">Crear zona</button>
+  </form>
+
+  <% if (zonas.length === 0) { %>
+    <p class="vacio">Todavía no hay zonas.</p>
+  <% } else { %>
+    <ul class="lista-donaciones">
+      <% zonas.forEach((z) => { %>
+        <li class="tarjeta">
+          <p class="tarjeta-titulo"><%= z.nombre %><%= z.activa ? '' : ' (desactivada)' %></p>
+          <p>Usuarios: <%= z.usuarios %> · Organizaciones: <%= z.organizaciones %></p>
+          <p><a href="/zonas/<%= z.id %>/editar">Cambiar el nombre</a></p>
+          <form method="post" action="/zonas/<%= z.id %>/<%= z.activa ? 'desactivar' : 'activar' %>">
+            <button type="submit" class="secundario"><%= z.activa ? 'Desactivar' : 'Activar' %></button>
+          </form>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</body>
+</html>
