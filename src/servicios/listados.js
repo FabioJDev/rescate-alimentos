@@ -28,11 +28,13 @@ async function listarTodas({ estado = null } = {}) {
 }
 
 // CA-05.6: las donaciones de un donante (las que él registró y las que la coordinadora registró a su nombre).
+// CA-15.2: con el nombre y el teléfono del voluntario que va a recogerla.
 async function listarDeDonante(donanteId) {
   const r = await consultar(
-    `SELECT ${COLUMNAS}
+    `SELECT ${COLUMNAS}, voluntario.nombre AS voluntario_nombre, voluntario.telefono AS voluntario_telefono
        FROM donaciones d
        JOIN usuarios donante ON donante.id = d.donante_id
+       LEFT JOIN usuarios voluntario ON voluntario.id = d.voluntario_id
       WHERE d.donante_id = $1
       ORDER BY d.creada_en DESC, d.id DESC
       LIMIT 200`,

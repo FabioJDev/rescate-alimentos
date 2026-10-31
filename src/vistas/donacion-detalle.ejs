@@ -20,6 +20,15 @@
     <% if (donacion.estado === 'cancelada') { %><p>Motivo de la cancelación: <%= donacion.motivo_cancelacion %></p><% } %>
   </div>
 
+  <% if (contactos.length > 0) { %>
+    <h2>Contacto</h2>
+    <ul class="contactos">
+      <% contactos.forEach((c) => { %>
+        <li><%= c.etiqueta %>: <strong><%= c.nombre %></strong> · <%- include('_telefono', { telefono: c.telefono, sinTelefono: 'sin teléfono registrado' }) %></li>
+      <% }) %>
+    </ul>
+  <% } %>
+
   <%# CMP-14: lo que la coordinadora puede hacer cuando una donación está trabada. %>
   <% if (locals.usuarioActual && usuarioActual.rol === 'coordinadora') { %>
     <% if (donacion.estado === 'asignada') { %>

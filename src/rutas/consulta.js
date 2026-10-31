@@ -41,6 +41,28 @@ function frasesDelHistorial(donacion, historial) {
   });
 }
 
+// CA-15.3 y CA-15.4: los teléfonos que puede ver quien abre el detalle. La coordinadora ve todos; el voluntario
+// asignado, el del comercio; el donante, el del voluntario que va a recoger. Nadie más ve ninguno (RNF-04).
+function contactosVisibles(donacion, usuario) {
+  const contacto = (etiqueta, nombre, telefono) => ({ etiqueta, nombre, telefono });
+  if (usuario.rol === 'coordinadora') {
+    const lista = [contacto('Donante', donacion.donante_nombre, donacion.donante_telefono)];
+    if (donacion.voluntario_nombre) lista.push(contacto('Voluntario', donacion.voluntario_nombre, donacion.voluntario_telefono));
+    if (donacion.organizacion_nombre) {
+      lista.push(contacto('Organización que recibió', donacion.organizacion_nombre, donacion.organizacion_telefono));
+    }
+    return lista;
+  }
+  if (donacion.estado !== 'asignada') return [];
+  if (usuario.rol === 'voluntario' && donacion.voluntario_id === usuario.id) {
+    return [contacto('Comercio', donacion.donante_nombre, donacion.donante_telefono)];
+  }
+  if (usuario.rol === 'donante' && donacion.donante_id === usuario.id) {
+    return [contacto('Voluntario que va a recogerla', donacion.voluntario_nombre, donacion.voluntario_telefono)];
+  }
+  return [];
+}
+
 function mostrarNoExiste(res) {
   res.status(404).render('buscar', { mensaje: MENSAJE_NO_EXISTE, codigo: '' });
 }
@@ -63,8 +85,12 @@ router.get('/donaciones/:codigo(D-\\d+)', requerirSesion, async (req, res, next)
 
     const { donacion, historial } = detalle;
     const usuario = req.session.usuario;
+    const contactos = contactosVisibles(donacion, usuario);
+    // Los teléfonos no llegan a la vista salvo en `contactos`: así no se muestran por error (CA-15.4).
+    const { donante_telefono, voluntario_telefono, organizacion_telefono, ...datosSinTelefonos } = donacion;
     res.render('donacion-detalle', {
-      donacion: { ...donacion, cantidad: Number(donacion.cantidad) },
+      contactos,
+      donacion: { ...datosSinTelefonos, cantidad: Number(donacion.cantidad) },
       estadoTexto: etiquetaDeEstado(donacion),
       horaLimite: formatearFechaHora(donacion.hora_limite),
       historial: frasesDelHistorial(donacion, historial),

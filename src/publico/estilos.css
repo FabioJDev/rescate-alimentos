@@ -869,3 +869,15 @@ body:has(> h1.hero)::after {
 .estado-cancelada {
   background: #e6e6e6;
 }
+
+/* Teléfonos de contacto (CMP-15): enlace grande para llamar con el dedo. */
+a.telefono {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.5rem 0;
+  font-weight: 700;
+}
+
+.contactos {
+  padding-left: 1.2rem;
+}
