@@ -79,6 +79,8 @@ describe('T-SEG.1 · Formularios de otros sitios y cabeceras de seguridad', () =
     expect(res.headers['x-frame-options']).toBe('DENY');
     expect(res.headers['x-content-type-options']).toBe('nosniff');
     expect(res.headers['x-powered-by']).toBeUndefined();
+    // Con «no-referrer» el navegador mandaría «Origin: null» y CA-SEG.1 rechazaría los formularios propios.
+    expect(res.headers['referrer-policy']).toBe('same-origin');
 
     const estilos = await request(app).get('/estilos.css');
     expect(estilos.headers['x-content-type-options']).toBe('nosniff');

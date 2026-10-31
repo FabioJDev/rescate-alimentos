@@ -15,6 +15,9 @@ function cabeceras({ enProduccion }) {
       },
     },
     frameguard: { action: 'deny' },
+    // NO «no-referrer» (lo que trae helmet por defecto): con esa política el navegador manda «Origin: null» en los
+    // formularios y verificarOrigen los rechazaría todos. «same-origin» da el origen a la propia página y nada a otras.
+    referrerPolicy: { policy: 'same-origin' },
   });
 }
 
