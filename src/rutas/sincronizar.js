@@ -59,7 +59,7 @@ router.post('/api/donaciones/sincronizar', express.json({ limit: '20kb' }), asyn
 
     // CA-08.4: las mismas reglas de CMP-01 (CA-01.2 a CA-01.4). Todo llega como texto, como en el formulario.
     const campos = {};
-    for (const nombre of ['tipo_alimento', 'cantidad', 'unidad', 'punto_recogida', 'hora_limite', 'donante_id']) {
+    for (const nombre of ['tipo_alimento', 'cantidad', 'unidad', 'punto_recogida', 'hora_limite', 'donante_id', 'kg_aproximados']) {
       campos[nombre] = comoTexto(cuerpo[nombre]);
     }
 

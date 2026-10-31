@@ -76,7 +76,9 @@ async function corregirDonacion(codigo, usuario, cuerpo) {
     unidad: datos.unidad,
     punto: datos.puntoRecogida,
     hora: horaEscrita && minuto(horaEscrita) !== minuto(actual.hora_limite) ? horaEscrita : new Date(actual.hora_limite),
+    kg: datos.kgAproximados, // CA-22.4
   };
+  const kgAntes = actual.kg_aproximados === null ? null : Number(actual.kg_aproximados);
 
   // CA-13.1: el historial dice qué cambió, de qué a qué.
   const cambios = [];
@@ -88,6 +90,10 @@ async function corregirDonacion(codigo, usuario, cuerpo) {
   if (nueva.hora.getTime() !== new Date(actual.hora_limite).getTime()) {
     cambios.push(`Hora límite: ${formatearFechaHora(actual.hora_limite)} → ${formatearFechaHora(nueva.hora)}`);
   }
+  if (nueva.kg !== kgAntes) {
+    const texto = (kg) => (kg === null ? 'sin peso' : `${kg} kg`);
+    cambios.push(`Peso aproximado: ${texto(kgAntes)} → ${texto(nueva.kg)}`);
+  }
   if (cambios.length === 0) return { sinCambios: true, valores, donacion: actual, editaHora };
 
   let corregida = null;
@@ -96,10 +102,10 @@ async function corregirDonacion(codigo, usuario, cuerpo) {
     await cliente.query('BEGIN');
     const r = await cliente.query(
       `UPDATE donaciones
-          SET tipo_alimento = $1, cantidad = $2, unidad = $3, punto_recogida = $4, hora_limite = $5
+          SET tipo_alimento = $1, cantidad = $2, unidad = $3, punto_recogida = $4, hora_limite = $5, kg_aproximados = $8
         WHERE codigo = $6 AND estado = $7
         RETURNING id, codigo`,
-      [nueva.tipo, nueva.cantidad, nueva.unidad, nueva.punto, nueva.hora, codigo, actual.estado]
+      [nueva.tipo, nueva.cantidad, nueva.unidad, nueva.punto, nueva.hora, codigo, actual.estado, nueva.kg]
     );
     if (r.rows.length === 0) {
       await cliente.query('ROLLBACK');

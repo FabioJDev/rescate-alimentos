@@ -49,6 +49,13 @@
       </ul>
       <p class="nota">Solo cuenta lo entregado. Las cantidades son declaradas por quien dona (nadie pesa el alimento) y no se
         suman unidades distintas entre sí.</p>
+
+      <%# CA-22.3 %>
+      <p>Kilos aproximados entregados: <strong data-kilos><%= reporte.kilosAproximados.kilos.toLocaleString('es-CO') %> kg</strong></p>
+      <% if (reporte.kilosAproximados.sinPeso > 0) { %>
+        <p class="nota"><span data-sin-peso><%= reporte.kilosAproximados.sinPeso %></span> entrega(s) en otras unidades no tienen peso aproximado y no están en ese total.</p>
+      <% } %>
+      <p class="nota">Son kilos declarados por los comercios, no pesados.</p>
     <% } %>
 
     <h2>Entregas por organización</h2>

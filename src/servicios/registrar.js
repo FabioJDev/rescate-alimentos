@@ -35,6 +35,7 @@ async function registrarDesdeFormulario(usuario, cuerpo, opciones = {}) {
     puntoRecogida: datos.puntoRecogida,
     zona,
     horaLimite: datos.horaLimite,
+    kgAproximados: datos.kgAproximados,
     idLocal: opciones.idLocal,
     detalle: opciones.detalle,
   });

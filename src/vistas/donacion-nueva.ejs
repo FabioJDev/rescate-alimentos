@@ -49,6 +49,11 @@
     </select>
     <% if (errores.unidad) { %><p class="error-campo" role="alert"><%= errores.unidad %></p><% } %>
 
+    <%# CA-22.1: opcional; con la unidad kg no hace falta (el peso es la cantidad). %>
+    <label for="kg_aproximados">Peso aproximado en kg (opcional, si la unidad no es kg)</label>
+    <input id="kg_aproximados" name="kg_aproximados" type="text" inputmode="decimal" value="<%= valores.kg_aproximados || '' %>">
+    <% if (errores.kg_aproximados) { %><p class="error-campo" role="alert"><%= errores.kg_aproximados %></p><% } %>
+
     <label for="punto_recogida">Punto de recogida<% if (comercios) { %> (si lo dejas vacío, se usa la dirección del comercio)<% } %></label>
     <input id="punto_recogida" name="punto_recogida" type="text" value="<%= valores.punto_recogida %>" <%= comercios ? '' : 'required' %>>
     <% if (errores.punto_recogida) { %><p class="error-campo" role="alert"><%= errores.punto_recogida %></p><% } %>

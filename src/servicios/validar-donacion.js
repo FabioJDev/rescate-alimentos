@@ -14,6 +14,7 @@ function validarDonacion(cuerpo, ahora = new Date(), { comercios = null } = {}) 
   const comercioTexto = (cuerpo.donante_id || '').trim();
   const cantidadTexto = (cuerpo.cantidad || '').trim();
   const horaLimiteTexto = (cuerpo.hora_limite || '').trim();
+  const kgTexto = (cuerpo.kg_aproximados || '').trim();
 
   // CA-01.2: cada campo obligatorio vacío se señala con su nombre.
   if (!tipoAlimento) errores.tipo_alimento = 'Falta elegir el tipo de alimento.';
@@ -49,6 +50,16 @@ function validarDonacion(cuerpo, ahora = new Date(), { comercios = null } = {}) 
     else if (cantidad <= 0) errores.cantidad = 'La cantidad debe ser mayor que cero.';
   }
 
+  // CA-22.1 y CA-22.2: el peso aproximado es opcional y solo tiene sentido si la unidad no es kg (con kg, el peso
+  // es la cantidad). Si se escribe, tiene que ser un número mayor que cero.
+  let kgAproximados = null;
+  if (unidad !== 'kg' && kgTexto) {
+    kgAproximados = Number(kgTexto.replace(',', '.'));
+    if (!Number.isFinite(kgAproximados) || kgAproximados <= 0) {
+      errores.kg_aproximados = 'El peso aproximado debe ser un número mayor que cero (o déjalo vacío).';
+    }
+  }
+
   // CA-01.3: la hora límite tiene que estar en el futuro.
   let horaLimite = null;
   if (!horaLimiteTexto) {
@@ -72,9 +83,10 @@ function validarDonacion(cuerpo, ahora = new Date(), { comercios = null } = {}) 
       punto_recogida: puntoEscrito,
       hora_limite: horaLimiteTexto,
       donante_id: comercioTexto,
+      kg_aproximados: kgTexto,
     },
     // Lo que se guarda cuando no hay errores.
-    datos: { tipoAlimento, cantidad, unidad, puntoRecogida, horaLimite, comercio },
+    datos: { tipoAlimento, cantidad, unidad, puntoRecogida, horaLimite, comercio, kgAproximados },
   };
 }
 

@@ -31,6 +31,7 @@ async function registrarDonacion({
   puntoRecogida,
   zona,
   horaLimite,
+  kgAproximados = null,
   idLocal = null,
   detalle = null,
 }) {
@@ -42,10 +43,11 @@ async function registrarDonacion({
 
     const donacion = await cliente.query(
       `INSERT INTO donaciones
-         (tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite, donante_id, registrada_por_id, id_local)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         (tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite, donante_id, registrada_por_id, id_local,
+          kg_aproximados)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING id, codigo`,
-      [tipoAlimento, cantidad, unidad, puntoRecogida, zona, horaLimite, donanteId, registradaPorId, idLocal]
+      [tipoAlimento, cantidad, unidad, puntoRecogida, zona, horaLimite, donanteId, registradaPorId, idLocal, kgAproximados]
     );
 
     await cliente.query(

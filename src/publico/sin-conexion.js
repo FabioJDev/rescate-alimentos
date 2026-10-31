@@ -10,7 +10,7 @@
   'use strict';
 
   var CLAVE = 'rescate-donaciones-pendientes';
-  var CAMPOS = ['tipo_alimento', 'cantidad', 'unidad', 'punto_recogida', 'hora_limite', 'donante_id'];
+  var CAMPOS = ['tipo_alimento', 'cantidad', 'unidad', 'punto_recogida', 'hora_limite', 'donante_id', 'kg_aproximados'];
 
   // Identificador único de cada donación guardada. Con él, enviarla dos veces no la duplica (CA-08.3).
   function idAleatorio() {
@@ -276,7 +276,7 @@
       CAMPOS.forEach(function (nombre) { campos[nombre] = textoDe(formulario, nombre); });
       cola.guardar(formulario.getAttribute('data-usuario'), campos);
 
-      ['tipo_alimento', 'cantidad', 'hora_limite', 'donante_id'].forEach(function (nombre) {
+      ['tipo_alimento', 'cantidad', 'hora_limite', 'donante_id', 'kg_aproximados'].forEach(function (nombre) {
         if (formulario.elements[nombre]) formulario.elements[nombre].value = '';
       });
       var boton = formulario.querySelector('button[type="submit"]');
