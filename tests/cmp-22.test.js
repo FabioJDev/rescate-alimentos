@@ -79,8 +79,8 @@ describe('CMP-22 · Kilos aproximados rescatados', () => {
   });
 
   test('CA-22.3 · el reporte suma kg declarados y pesos aproximados, y cuenta las entregas sin peso', async () => {
-    // Donaciones entregadas en un día propio para que el reporte solo las vea a ellas.
-    const dia = '2001-03-15';
+    // Donaciones entregadas en un día propio (distinto en cada corrida) para que el reporte solo vea estas.
+    const dia = new Date(Date.UTC(1990, 0, 1) + (Date.now() % 9000) * 86400000).toISOString().slice(0, 10);
     const entregar = async (cantidad, unidad, kg) =>
       consultar(
         `INSERT INTO donaciones (tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite, estado, donante_id,
