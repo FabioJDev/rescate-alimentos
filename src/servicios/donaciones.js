@@ -1,5 +1,6 @@
 // Lógica de negocio de las donaciones. Las rutas llaman a estas funciones; aquí vive el acceso a la base de datos.
 const { pool, consultar } = require('../db/conexion');
+const { guardarFoto } = require('./fotos');
 
 // Listas cerradas del plan de especificación (docs/spec/comportamientos.md, «Datos que se piden»).
 const TIPOS_ALIMENTO = [
@@ -12,6 +13,10 @@ const TIPOS_ALIMENTO = [
   'Otro',
 ];
 const UNIDADES = ['kg', 'unidades', 'cajas', 'bultos'];
+
+// CMP-19: la organización que pidió la donación (destino), para que el voluntario sepa a dónde llevarla.
+const COLUMNAS_DESTINO = `dest.nombre AS destino_nombre, dest.direccion AS destino_direccion, dest.telefono AS destino_telefono`;
+const UNIR_DESTINO = 'LEFT JOIN organizaciones dest ON dest.id = d.destino_organizacion_id';
 
 // Registra una donación en estado «disponible» y deja el movimiento de registro (trazabilidad, RNF-05).
 // La donación y su movimiento se guardan juntos: o quedan los dos o no queda ninguno.
@@ -27,6 +32,8 @@ async function registrarDonacion({
   puntoRecogida,
   zona,
   horaLimite,
+  kgAproximados = null,
+  foto = null,
   idLocal = null,
   detalle = null,
 }) {
@@ -38,16 +45,19 @@ async function registrarDonacion({
 
     const donacion = await cliente.query(
       `INSERT INTO donaciones
-         (tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite, donante_id, registrada_por_id, id_local)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         (tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite, donante_id, registrada_por_id, id_local,
+          kg_aproximados)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING id, codigo`,
-      [tipoAlimento, cantidad, unidad, puntoRecogida, zona, horaLimite, donanteId, registradaPorId, idLocal]
+      [tipoAlimento, cantidad, unidad, puntoRecogida, zona, horaLimite, donanteId, registradaPorId, idLocal, kgAproximados]
     );
 
     await cliente.query(
       "INSERT INTO movimientos (donacion_id, tipo, usuario_id, detalle) VALUES ($1, 'registro', $2, $3)",
       [donacion.rows[0].id, registradaPorId, detalle]
     );
+    // CMP-23: la foto va en la misma transacción que la donación.
+    if (foto) await guardarFoto(cliente, donacion.rows[0].id, foto);
 
     await cliente.query('COMMIT');
     registrada = donacion.rows[0];
@@ -81,14 +91,17 @@ async function buscarPorCodigo(codigo) {
 // CA-02.1 y CA-02.2: solo las donaciones «disponibles» cuya hora límite no se ha cumplido,
 // de la más urgente a la menos urgente. Las asignadas, entregadas y vencidas no salen.
 // Si se indica una zona, solo las de esa zona (CA-02.3).
+// CA-19.7: con el destino, si una organización ya la pidió.
 async function listarDisponibles({ zona = null } = {}) {
   const r = await consultar(
-    `SELECT codigo, tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite
-       FROM donaciones
-      WHERE estado = 'disponible'
-        AND hora_limite > now()
-        AND ($1::text IS NULL OR zona = $1)
-      ORDER BY hora_limite ASC, id ASC`,
+    `SELECT d.codigo, d.tipo_alimento, d.cantidad, d.unidad, d.punto_recogida, d.zona, d.hora_limite, ${COLUMNAS_DESTINO},
+            EXISTS (SELECT 1 FROM fotos_donacion f WHERE f.donacion_id = d.id) AS tiene_foto
+       FROM donaciones d
+       ${UNIR_DESTINO}
+      WHERE d.estado = 'disponible'
+        AND d.hora_limite > now()
+        AND ($1::text IS NULL OR d.zona = $1)
+      ORDER BY d.hora_limite ASC, d.id ASC`,
     [zona]
   );
   return r.rows;
@@ -146,10 +159,11 @@ async function tomarDonacion(codigo, voluntarioId) {
 async function motivoNoDisponible(codigo, voluntarioId) {
   const r = await consultar(
     `SELECT d.*, v.nombre AS voluntario_nombre, (d.hora_limite <= now()) AS vencida,
-            donante.nombre AS donante_nombre, donante.telefono AS donante_telefono
+            donante.nombre AS donante_nombre, donante.telefono AS donante_telefono, ${COLUMNAS_DESTINO}
        FROM donaciones d
        JOIN usuarios donante ON donante.id = d.donante_id
        LEFT JOIN usuarios v ON v.id = d.voluntario_id
+       ${UNIR_DESTINO}
       WHERE d.codigo = $1`,
     [codigo]
   );
@@ -174,11 +188,13 @@ async function obtenerDetalle(codigo) {
             donante.nombre AS donante_nombre, donante.telefono AS donante_telefono,
             voluntario.nombre AS voluntario_nombre, voluntario.telefono AS voluntario_telefono,
             org.nombre AS organizacion_nombre, org.telefono AS organizacion_telefono,
-            (d.estado = 'disponible' AND d.hora_limite <= now()) AS vencida
+            (d.estado = 'disponible' AND d.hora_limite <= now()) AS vencida, ${COLUMNAS_DESTINO},
+            (SELECT f.bytes FROM fotos_donacion f WHERE f.donacion_id = d.id) AS foto_bytes
        FROM donaciones d
        JOIN usuarios donante ON donante.id = d.donante_id
        LEFT JOIN usuarios voluntario ON voluntario.id = d.voluntario_id
        LEFT JOIN organizaciones org ON org.id = d.organizacion_id
+       ${UNIR_DESTINO}
       WHERE d.codigo = $1`,
     [codigo]
   );
@@ -202,9 +218,10 @@ async function obtenerDetalle(codigo) {
 async function listarRecogidasDe(voluntarioId) {
   const r = await consultar(
     `SELECT d.codigo, d.tipo_alimento, d.cantidad, d.unidad, d.punto_recogida, d.zona, d.hora_limite, d.tomada_en,
-            donante.nombre AS donante_nombre, donante.telefono AS donante_telefono
+            donante.nombre AS donante_nombre, donante.telefono AS donante_telefono, ${COLUMNAS_DESTINO}
        FROM donaciones d
        JOIN usuarios donante ON donante.id = d.donante_id
+       ${UNIR_DESTINO}
       WHERE d.voluntario_id = $1 AND d.estado = 'asignada'
       ORDER BY d.hora_limite ASC, d.id ASC`,
     [voluntarioId]

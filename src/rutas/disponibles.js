@@ -3,6 +3,7 @@ const express = require('express');
 const { requerirRol } = require('../middleware/autenticacion');
 const { listarDisponibles } = require('../servicios/donaciones');
 const { formatearFechaHora, tiempoRestante } = require('../utilidades/fechas');
+const { vencePronto } = require('../servicios/por-vencer');
 
 const router = express.Router();
 
@@ -20,6 +21,7 @@ router.get('/disponibles', requerirRol('voluntario'), async (req, res, next) => 
       cantidad: Number(d.cantidad),
       horaLimiteTexto: formatearFechaHora(d.hora_limite),
       restante: tiempoRestante(d.hora_limite, ahora),
+      vencePronto: vencePronto(d.hora_limite, ahora), // CA-21.5
     }));
 
     res.render('disponibles', { donaciones, zonaVoluntario: zona, verTodas });

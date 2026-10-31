@@ -10,7 +10,7 @@
   'use strict';
 
   var CLAVE = 'rescate-donaciones-pendientes';
-  var CAMPOS = ['tipo_alimento', 'cantidad', 'unidad', 'punto_recogida', 'hora_limite', 'donante_id'];
+  var CAMPOS = ['tipo_alimento', 'cantidad', 'unidad', 'punto_recogida', 'hora_limite', 'donante_id', 'kg_aproximados'];
 
   // Identificador único de cada donación guardada. Con él, enviarla dos veces no la duplica (CA-08.3).
   function idAleatorio() {
@@ -275,8 +275,10 @@
       var campos = {};
       CAMPOS.forEach(function (nombre) { campos[nombre] = textoDe(formulario, nombre); });
       cola.guardar(formulario.getAttribute('data-usuario'), campos);
+      // CA-23.5: la foto no se guarda en el teléfono (no cabe en la memoria del navegador): se avisa.
+      var teniaFoto = textoDe(formulario, 'foto') !== '';
 
-      ['tipo_alimento', 'cantidad', 'hora_limite', 'donante_id'].forEach(function (nombre) {
+      ['tipo_alimento', 'cantidad', 'hora_limite', 'donante_id', 'kg_aproximados', 'foto'].forEach(function (nombre) {
         if (formulario.elements[nombre]) formulario.elements[nombre].value = '';
       });
       var boton = formulario.querySelector('button[type="submit"]');
@@ -286,7 +288,9 @@
         boton.removeAttribute('aria-busy');
         if (boton.dataset.textoOriginal) boton.textContent = boton.dataset.textoOriginal;
       }
-      mensajeExito = 'Guardada en tu teléfono. Se enviará cuando haya señal.';
+      mensajeExito = teniaFoto
+        ? 'Guardada en tu teléfono sin la foto (las fotos solo se envían con señal). Se enviará cuando haya señal.'
+        : 'Guardada en tu teléfono. Se enviará cuando haya señal.';
       usuarioActual = Number(formulario.getAttribute('data-usuario')) || usuarioActual;
       dibujarAviso();
       raiz.scrollTo(0, 0);
@@ -337,7 +341,12 @@
       function (evento) {
         var formulario = evento.target;
         if (formulario && formulario.getAttribute && formulario.getAttribute('action') === '/salir' && raiz.caches) {
-          raiz.caches.delete('rescate-paginas-v1');
+          // Se borra la de cualquier versión: el nombre cambia cada vez que sube la VERSION de sw.js.
+          raiz.caches.keys().then(function (nombres) {
+            nombres.forEach(function (nombre) {
+              if (nombre.indexOf('rescate-paginas-') === 0) raiz.caches.delete(nombre);
+            });
+          });
         }
       },
       true

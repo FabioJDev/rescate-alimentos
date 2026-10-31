@@ -12,6 +12,8 @@ const {
   cambiarActivo,
 } = require('../servicios/usuarios');
 const { listarZonasActivas } = require('../servicios/zonas');
+const { listarOrganizaciones } = require('../servicios/entregas');
+const { formatearFechaHora } = require('../utilidades/fechas');
 
 const router = express.Router();
 const soloCoordinadora = requerirRol('coordinadora');
@@ -34,13 +36,31 @@ function noExiste(res) {
 // Formulario de crear (usuario = null) o de editar (usuario = el que se edita).
 async function mostrarFormulario(res, estado, { usuario = null, valores, errores = {} }) {
   const zonas = (await listarZonasActivas()).map((z) => z.nombre);
-  res.status(estado).render('usuario-formulario', { usuario, valores, errores, zonas, roles: ROLES, nombresDeRol: NOMBRES_DE_ROL });
+  const organizaciones = await listarOrganizaciones();
+  res.status(estado).render('usuario-formulario', {
+    usuario,
+    valores,
+    errores,
+    zonas,
+    organizaciones,
+    roles: ROLES,
+    nombresDeRol: NOMBRES_DE_ROL,
+  });
+}
+
+// Lo que se puede elegir en el formulario: zonas activas y organizaciones activas (CA-19.1).
+async function opcionesParaValidar() {
+  return [(await listarZonasActivas()).map((z) => z.nombre), await listarOrganizaciones()];
 }
 
 async function mostrarLista(req, res, { estado = 200, error = null } = {}) {
   const rol = ROLES.includes(req.query.rol) ? req.query.rol : null;
   res.status(estado).render('usuarios', {
-    usuarios: await listarUsuarios({ rol }),
+    // CA-18.5: si aceptó el aviso de privacidad y cuándo.
+    usuarios: (await listarUsuarios({ rol })).map((u) => ({
+      ...u,
+      privacidadTexto: u.privacidad_aceptada_en ? `aceptado el ${formatearFechaHora(u.privacidad_aceptada_en)}` : 'sin aceptar',
+    })),
     rol,
     roles: ROLES,
     nombresDeRol: NOMBRES_DE_ROL,
@@ -60,7 +80,7 @@ router.get('/usuarios', soloCoordinadora, async (req, res, next) => {
 
 router.get('/usuarios/nuevo', soloCoordinadora, async (req, res, next) => {
   try {
-    await mostrarFormulario(res, 200, { valores: { nombre: '', rol: '', zona: '', telefono: '', direccion: '' } });
+    await mostrarFormulario(res, 200, { valores: { nombre: '', rol: '', zona: '', telefono: '', direccion: '', organizacion_id: '' } });
   } catch (error) {
     next(error);
   }
@@ -70,8 +90,7 @@ router.get('/usuarios/nuevo', soloCoordinadora, async (req, res, next) => {
 // en claro, así que no se puede volver a ver: si se pierde, se restablece (CMP-11).
 router.post('/usuarios', soloCoordinadora, async (req, res, next) => {
   try {
-    const zonas = (await listarZonasActivas()).map((z) => z.nombre);
-    const { errores, valores, datos } = validarUsuario(req.body, zonas);
+    const { errores, valores, datos } = validarUsuario(req.body, ...(await opcionesParaValidar()));
     if (Object.keys(errores).length > 0) return mostrarFormulario(res, 400, { valores, errores });
 
     const resultado = await crearUsuario(datos);
@@ -93,6 +112,7 @@ router.get('/usuarios/:id(\\d+)/editar', soloCoordinadora, async (req, res, next
       zona: usuario.zona || '',
       telefono: usuario.telefono || '',
       direccion: usuario.direccion || '',
+      organizacion_id: usuario.organizacion_id ? String(usuario.organizacion_id) : '',
     };
     await mostrarFormulario(res, 200, { usuario, valores });
   } catch (error) {
@@ -106,8 +126,7 @@ router.post('/usuarios/:id(\\d+)', soloCoordinadora, async (req, res, next) => {
     const usuario = await buscarUsuario(req.params.id);
     if (!usuario) return noExiste(res);
 
-    const zonas = (await listarZonasActivas()).map((z) => z.nombre);
-    const { errores, valores, datos } = validarUsuario(req.body, zonas);
+    const { errores, valores, datos } = validarUsuario(req.body, ...(await opcionesParaValidar()));
     if (Object.keys(errores).length > 0) return mostrarFormulario(res, 400, { usuario, valores, errores });
 
     const yo = req.session.usuario;

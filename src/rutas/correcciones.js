@@ -43,6 +43,7 @@ router.get('/donaciones/:codigo(D-\\d+)/corregir', donanteOCoordinadora, async (
       unidad: d.unidad,
       punto_recogida: d.punto_recogida,
       hora_limite: fechaParaCampo(d.hora_limite),
+      kg_aproximados: d.kg_aproximados === null ? '' : String(Number(d.kg_aproximados)),
     };
     mostrarFormulario(res, 200, { donacion: d, valores, editaHora: d.estado === 'disponible' });
   } catch (error) {

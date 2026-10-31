@@ -3,7 +3,7 @@
 // necesitan al servidor (CMP-03), así que cualquier otra pantalla sin conexión muestra «Sin conexión».
 //
 // Si cambia algún archivo de la lista, se sube el número de la versión para que los teléfonos lo renueven.
-const VERSION = 'v2';
+const VERSION = 'v6';
 const CACHE_PAGINAS = `rescate-paginas-${VERSION}`; // la pantalla «Publicar donación» (se borra al salir)
 const CACHE_ESTATICOS = `rescate-estaticos-${VERSION}`;
 

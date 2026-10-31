@@ -76,6 +76,19 @@ async function obtenerReporte(desde, hasta) {
     )
   ).rows.map((f) => ({ unidad: f.unidad, cantidad: Number(f.cantidad) }));
 
+  // CA-22.3: kilos aproximados entregados = kg declarados + pesos aproximados de lo que vino en otras unidades.
+  // Se cuenta aparte cuántas entregas no tienen peso aproximado, para no presentar el total como completo.
+  const kilos = (
+    await consultar(
+      `SELECT coalesce(sum(CASE WHEN d.unidad = 'kg' THEN d.cantidad ELSE d.kg_aproximados END), 0) AS kilos,
+              count(*) FILTER (WHERE d.unidad <> 'kg' AND d.kg_aproximados IS NULL)::int AS sin_peso
+         FROM donaciones d
+        WHERE d.estado = 'entregada' AND ${EN_PERIODO}`,
+      parametros
+    )
+  ).rows[0];
+  const kilosAproximados = { kilos: Number(kilos.kilos), sinPeso: kilos.sin_peso };
+
   // CA-07.3: entregas por organización y donaciones por tipo de alimento.
   const porOrganizacion = (
     await consultar(
@@ -101,7 +114,7 @@ async function obtenerReporte(desde, hasta) {
     )
   ).rows;
 
-  return { conteos, porUnidad, porOrganizacion, porTipo };
+  return { conteos, porUnidad, kilosAproximados, porOrganizacion, porTipo };
 }
 
 // CA-07.7: una fila por donación del periodo, para el archivo CSV.
@@ -110,7 +123,7 @@ async function listarParaCsv(desde, hasta) {
     `SELECT d.codigo, d.estado, d.tipo_alimento, d.cantidad, d.unidad, d.zona, d.hora_limite,
             (d.estado = 'disponible' AND d.hora_limite <= now()) AS vencida,
             donante.nombre AS donante, voluntario.nombre AS voluntario, org.nombre AS organizacion,
-            d.recibido_por, d.creada_en, d.tomada_en, d.entregada_en
+            d.recibido_por, d.creada_en, d.tomada_en, d.entregada_en, d.kg_aproximados
        FROM donaciones d
        JOIN usuarios donante ON donante.id = d.donante_id
        LEFT JOIN usuarios voluntario ON voluntario.id = d.voluntario_id
@@ -142,6 +155,7 @@ const ENCABEZADOS = [
   'Tipo de alimento',
   'Cantidad declarada',
   'Unidad',
+  'Kg aproximados',
   'Zona',
   'Donante',
   'Voluntario',
@@ -164,6 +178,7 @@ function aCsv(filas) {
         f.tipo_alimento,
         Number(f.cantidad),
         f.unidad,
+        f.unidad === 'kg' ? Number(f.cantidad) : f.kg_aproximados === null ? '' : Number(f.kg_aproximados),
         f.zona,
         f.donante,
         f.voluntario,
@@ -181,4 +196,13 @@ function aCsv(filas) {
   return `﻿${lineas.join('\r\n')}\r\n`;
 }
 
-module.exports = { leerPeriodo, obtenerReporte, listarParaCsv, aCsv, hoyEnColombia };
+// CA-20.5: el CSV de atenciones (personas por día), con las mismas reglas de celdas y la marca BOM para Excel.
+function atencionesACsv(filas) {
+  const lineas = [['Fecha', 'Organización', 'Personas atendidas', 'Registró', 'Corrigió'].map(celda).join(',')];
+  for (const f of filas) {
+    lineas.push([f.fecha, f.organizacion, f.personas, f.registrada_por, f.corregida_por].map(celda).join(','));
+  }
+  return `﻿${lineas.join('\r\n')}\r\n`;
+}
+
+module.exports = { leerPeriodo, obtenerReporte, listarParaCsv, aCsv, atencionesACsv, hoyEnColombia };

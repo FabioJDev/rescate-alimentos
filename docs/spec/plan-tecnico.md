@@ -63,6 +63,18 @@ Con la administración (CMP-09 a CMP-15) el modelo gana:
 
 Nada se borra: usuarios, zonas y organizaciones se **desactivan**, porque el historial apunta a ellos (RNF-05).
 
+Con la seguridad y los requerimientos que faltaban (CMP-16 a CMP-23):
+
+- **`usuarios`**: privacidad_aceptada_en (CMP-18), rol `organizacion` y organizacion_id (CMP-19).
+- **`intentos_ingreso`** (CMP-16): clave (`nombre:<nombre escrito>` u `origen:<dirección IP>`), fallos, desde cuándo se
+  cuentan y bloqueado_hasta. Se cuenta por el nombre **escrito**, exista o no el usuario, para que el bloqueo no revele
+  qué nombres existen (CA-16.6). Vive en la base para que un reinicio de Render no borre el conteo.
+- **`donaciones`**: destino_organizacion_id (CMP-19), kg_aproximados (CMP-22).
+- **`movimientos`**: tipos `solicitud` y `retiro_solicitud` (CMP-19).
+- **`atenciones`** (CMP-20): id, organizacion_id, fecha, personas, registrada_por_id, registrada_en, corregida_por_id,
+  corregida_en. **Única por (organizacion_id, fecha)**: es lo que impide el doble conteo.
+- **`fotos_donacion`** (CMP-23): donacion_id, tipo, datos (bytea), bytes. Ver ADR-007.
+
 ## 4. Integraciones
 
 Ninguna externa obligatoria: sin mapas, sin SMS, sin notificaciones. Por costo, y porque la geolocalización
@@ -108,6 +120,8 @@ Ninguna. Si aparece alguna, se argumenta en esta sección.
 - [ADR-003 · Identificación con nombre + PIN](../decisiones/ADR-003-identificacion-nombre-pin.md)
 - [ADR-004 · Registrar sin conexión con una cola en el teléfono](../decisiones/ADR-004-modo-sin-conexion.md)
 - [ADR-005 · Administración por la coordinadora con PIN temporal](../decisiones/ADR-005-administracion-pin-temporal.md)
+- [ADR-006 · Seguridad básica: intentos, origen de los formularios, cabeceras y errores](../decisiones/ADR-006-seguridad-basica.md)
+- [ADR-007 · Fotos achicadas en el teléfono y guardadas en la base de datos](../decisiones/ADR-007-fotos-en-la-base-de-datos.md)
 
 ## Tareas de la administración
 
@@ -123,3 +137,20 @@ Ninguna. Si aparece alguna, se argumenta en esta sección.
 | T-15.1 · Teléfono de contacto | CMP-15 | `feat/CMP-15-contacto` |
 | T-ADM.3 · Arranque seguro en producción | Sección 5 | `infra/arranque-seguro` |
 | T-ADM.4 · Manual de operación actualizado | — | `docs/manual-administracion` |
+
+## Tareas de seguridad y requerimientos pendientes
+
+| Tarea | Comportamiento | Rama |
+|---|---|---|
+| T-SEG.0 · Especificación de seguridad y requerimientos | CMP-16 a CMP-23, T-SEG.1, T-SEG.2 | `docs/especificacion-seguridad-requerimientos` |
+| T-16.1 · Límite de intentos de ingreso | CMP-16 | `feat/CMP-16-intentos` |
+| T-SEG.1 · Formularios de otros sitios y cabeceras | T-SEG.1 | `infra/T-SEG.1-cabeceras` |
+| T-SEG.2 · Registro de errores con código | T-SEG.2 | `infra/T-SEG.2-errores` |
+| T-17.1 · Nombres de usuario distinguibles | CMP-17 | `feat/CMP-17-nombres` |
+| T-18.1 · Aviso de privacidad | CMP-18 | `feat/CMP-18-privacidad` |
+| T-19.1 · Organizaciones con usuario | CMP-19 | `feat/CMP-19-organizaciones-usuarias` |
+| T-20.1 · Personas atendidas | CMP-20 | `feat/CMP-20-personas-atendidas` |
+| T-21.1 · Por vencer y WhatsApp | CMP-21 | `feat/CMP-21-por-vencer` |
+| T-22.1 · Kilos aproximados | CMP-22 | `feat/CMP-22-kilos` |
+| T-23.1 · Foto opcional | CMP-23 | `feat/CMP-23-foto` |
+| T-SEG.3 · Manual de operación actualizado | — | `docs/manual-seguridad-requerimientos` |

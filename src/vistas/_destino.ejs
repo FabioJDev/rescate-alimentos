@@ -1,0 +1,4 @@
+<%# CMP-19 (CA-19.7): a dónde llevar la donación, si una organización la pidió. Recibe { d }. %>
+<% if (d.destino_nombre) { %>
+  <p class="destino">Llevar a: <strong><%= d.destino_nombre %></strong>, <%= d.destino_direccion %> · <%- include('_telefono', { telefono: d.destino_telefono, sinTelefono: 'sin teléfono registrado' }) %></p>
+<% } %>

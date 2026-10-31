@@ -6,6 +6,8 @@ const session = require('express-session');
 const PgStore = require('connect-pg-simple')(session);
 const { pool } = require('./db/conexion');
 const { requerirSesion } = require('./middleware/autenticacion');
+const { cabeceras, verificarOrigen } = require('./middleware/seguridad');
+const { manejarError } = require('./middleware/errores');
 const rutasAutenticacion = require('./rutas/autenticacion');
 const rutasDonaciones = require('./rutas/donaciones');
 const rutasDisponibles = require('./rutas/disponibles');
@@ -22,6 +24,12 @@ const rutasPin = require('./rutas/pin');
 const rutasOrganizaciones = require('./rutas/organizaciones');
 const rutasCorrecciones = require('./rutas/correcciones');
 const rutasIntervenciones = require('./rutas/intervenciones');
+const rutasPrivacidad = require('./rutas/privacidad');
+const rutasRecepcion = require('./rutas/recepcion');
+const rutasAtenciones = require('./rutas/atenciones');
+const rutasPorVencer = require('./rutas/por-vencer');
+const rutasFotos = require('./rutas/fotos');
+const { contarPorVencer } = require('./servicios/por-vencer');
 
 const app = express();
 const enProduccion = process.env.NODE_ENV === 'production';
@@ -30,13 +38,20 @@ if (!process.env.SESSION_SECRET) {
   throw new Error('Falta la variable de entorno SESSION_SECRET (ver .env.example).');
 }
 
-// Render pone un proxy delante: hay que confiar en él para que la cookie «secure» funcione.
-if (enProduccion) app.set('trust proxy', 1);
+// Render pone un proxy delante: hay que confiar en él para que la cookie «secure» funcione y para saber la dirección
+// real de quien entra (CMP-16 cuenta los intentos por origen). Se confía solo en el primer proxy.
+app.set('trust proxy', 1);
 
 // Las páginas se generan en el servidor con EJS (alternativa B: liviano para redes 3G).
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'vistas'));
 
+// T-SEG.1: cabeceras de seguridad en todas las respuestas, también en estilos y scripts.
+app.use(cabeceras({ enProduccion }));
+
+// CMP-23: los formularios de donaciones pueden traer una foto (hasta 400 KB, que en texto base64 son ~550 KB).
+// Solo ahí se permite un envío más grande; el resto sigue con el límite normal.
+app.use('/donaciones', express.urlencoded({ extended: false, limit: '700kb' }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'publico')));
 
@@ -67,9 +82,22 @@ app.use((req, res, next) => {
   next();
 });
 
+// T-SEG.1: ningún formulario enviado desde otra página web cambia nada (ADR-006).
+app.use(verificarOrigen);
+
+// CA-18.2 y CA-18.4: quien no ha aceptado el aviso de privacidad solo puede leerlo, aceptarlo o salir. Va antes que el
+// PIN temporal: primero se acepta el aviso y después se cambia el PIN. El teléfono recibe 401 («falta ingresar»).
+const PERMITIDAS_SIN_PRIVACIDAD = ['/privacidad', '/privacidad/aceptar', '/salir', '/salud', '/sin-conexion'];
+app.use((req, res, next) => {
+  const usuario = req.session && req.session.usuario;
+  if (!usuario || usuario.privacidadAceptada || PERMITIDAS_SIN_PRIVACIDAD.includes(req.path)) return next();
+  if (req.path.startsWith('/api/')) return res.status(401).json({ estado: 'sin_sesion' });
+  res.redirect('/privacidad');
+});
+
 // CA-11.4 y CA-11.5: con un PIN temporal pendiente solo se puede cambiar el PIN o salir. El JavaScript del
 // teléfono recibe 401 («falta ingresar»), así lo guardado sin conexión sigue pendiente y no se pierde.
-const PERMITIDAS_CON_PIN_TEMPORAL = ['/mi-pin', '/salir', '/salud', '/sin-conexion'];
+const PERMITIDAS_CON_PIN_TEMPORAL = ['/mi-pin', '/salir', '/salud', '/sin-conexion', '/privacidad', '/privacidad/aceptar'];
 app.use((req, res, next) => {
   const usuario = req.session && req.session.usuario;
   if (!usuario || !usuario.debeCambiarPin || PERMITIDAS_CON_PIN_TEMPORAL.includes(req.path)) return next();
@@ -98,22 +126,27 @@ app.use(rutasPin);
 app.use(rutasOrganizaciones);
 app.use(rutasCorrecciones);
 app.use(rutasIntervenciones);
+app.use(rutasPrivacidad);
+app.use(rutasRecepcion);
+app.use(rutasAtenciones);
+app.use(rutasPorVencer);
+app.use(rutasFotos);
 
 // Pantalla de inicio: los accesos de cada rol. Muestra una vez el aviso de la última acción (por ejemplo, PIN cambiado).
-app.get('/', requerirSesion, (req, res) => {
-  const aviso = req.session.aviso || null;
-  delete req.session.aviso;
-  res.render('inicio', { usuario: req.session.usuario, aviso });
+app.get('/', requerirSesion, async (req, res, next) => {
+  try {
+    const aviso = req.session.aviso || null;
+    delete req.session.aviso;
+    const usuario = req.session.usuario;
+    // CA-21.1: la coordinadora ve cuántas donaciones están por vencer.
+    const porVencer = usuario.rol === 'coordinadora' ? await contarPorVencer() : 0;
+    res.render('inicio', { usuario, aviso, porVencer });
+  } catch (error) {
+    next(error);
+  }
 });
 
-// Errores no previstos: se muestran en español y no se filtra información interna.
-// eslint-disable-next-line no-unused-vars
-app.use((error, req, res, next) => {
-  console.error(error);
-  res.status(500).render('error', {
-    titulo: 'Algo salió mal',
-    mensaje: 'Intenta de nuevo en un momento.',
-  });
-});
+// Errores no previstos: el usuario ve un código y el registro guarda el detalle (T-SEG.2).
+app.use(manejarError);
 
 module.exports = app;

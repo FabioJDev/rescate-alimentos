@@ -19,7 +19,8 @@
   <% } %>
 
   <form method="post" action="<%= usuario ? '/usuarios/' + usuario.id : '/usuarios' %>" novalidate>
-    <label for="nombre">Nombre (con este nombre se ingresa)</label>
+    <label for="nombre">Nombre y apellido (con este nombre se ingresa)</label>
+    <p class="nota">Debe ser único. Si hay dos personas con el mismo nombre, agrega el apellido o un apodo (por ejemplo, «Ana Pérez» o «Ana del Norte»).</p>
     <input id="nombre" name="nombre" type="text" maxlength="80" value="<%= valores.nombre %>" required>
     <% if (errores.nombre) { %><p class="error-campo" role="alert"><%= errores.nombre %></p><% } %>
 
@@ -32,7 +33,7 @@
     </select>
     <% if (errores.rol) { %><p class="error-campo" role="alert"><%= errores.rol %></p><% } %>
 
-    <label for="telefono">Teléfono (obligatorio para comercios y voluntarios)</label>
+    <label for="telefono">Teléfono (obligatorio para comercios, voluntarios y organizaciones)</label>
     <input id="telefono" name="telefono" type="tel" inputmode="tel" maxlength="25" value="<%= valores.telefono %>">
     <% if (errores.telefono) { %><p class="error-campo" role="alert"><%= errores.telefono %></p><% } %>
 
@@ -44,6 +45,15 @@
       <% }) %>
     </select>
     <% if (errores.zona) { %><p class="error-campo" role="alert"><%= errores.zona %></p><% } %>
+
+    <label for="organizacion_id">Organización a la que pertenece (solo para el rol «Organización receptora»)</label>
+    <select id="organizacion_id" name="organizacion_id">
+      <option value="">Ninguna</option>
+      <% organizaciones.forEach((o) => { %>
+        <option value="<%= o.id %>" <%= valores.organizacion_id === String(o.id) ? 'selected' : '' %>><%= o.nombre %></option>
+      <% }) %>
+    </select>
+    <% if (errores.organizacion_id) { %><p class="error-campo" role="alert"><%= errores.organizacion_id %></p><% } %>
 
     <label for="direccion">Dirección del comercio (solo comercios; es el punto de recogida por defecto)</label>
     <input id="direccion" name="direccion" type="text" maxlength="150" value="<%= valores.direccion %>">

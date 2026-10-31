@@ -881,3 +881,37 @@ a.telefono {
 .contactos {
   padding-left: 1.2rem;
 }
+
+/* CMP-19: a dónde llevar una donación que pidió una organización. */
+.destino {
+  padding: 0.4rem 0.6rem;
+  border-left: 4px solid var(--bosque);
+  background: #eef5f0;
+}
+
+/* CMP-21: lo que vence pronto se destaca; el botón de WhatsApp lleva su color para reconocerlo. */
+.vence-pronto {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--remolacha);
+}
+
+.accion-urgente {
+  border-color: var(--remolacha);
+}
+
+.boton-whatsapp {
+  background: #1f8f4e;
+}
+
+/* CMP-23: vista previa de la foto antes de publicarla. */
+.campo-foto img {
+  display: block;
+  max-width: 100%;
+  max-height: 14rem;
+  margin-top: 0.5rem;
+  border-radius: 0.5rem;
+}

@@ -3,17 +3,32 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { consultar } = require('../db/conexion');
 const { cerrarSesionesDe } = require('./sesiones');
+const { limpiarNombre } = require('./intentos');
 
-const ROLES = ['donante', 'voluntario', 'coordinadora'];
-const NOMBRES_DE_ROL = { donante: 'Comercio (donante)', voluntario: 'Voluntario', coordinadora: 'Coordinadora' };
+const ROLES = ['donante', 'voluntario', 'coordinadora', 'organizacion'];
+
+// CMP-17: la misma normalización en JavaScript (lo que escribe la persona) y en SQL (lo guardado, migración 011).
+function normalizarNombre(texto) {
+  return (texto || '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+const NOMBRE_NORMALIZADO_SQL = "lower(translate(regexp_replace(trim(nombre), '\\s+', ' ', 'g'), 'ÁÉÍÓÚÜÑ', 'áéíóúüñ'))";
+const NOMBRES_DE_ROL = {
+  donante: 'Comercio (donante)',
+  voluntario: 'Voluntario',
+  coordinadora: 'Coordinadora',
+  organizacion: 'Organización receptora',
+};
 
 // Devuelve los datos públicos del usuario si el nombre y el PIN son correctos; si no, null.
 // No dice cuál de los dos falló, para no ayudar a adivinar nombres. Solo con el PIN correcto se dice que el
 // usuario está desactivado (CA-10.6): así no se revela a cualquiera qué nombres existen.
 async function autenticar(nombre, pin) {
+  // CA-17.1: se busca sin importar mayúsculas, tildes en mayúscula ni espacios de más (migración 011).
   const resultado = await consultar(
-    'SELECT id, nombre, rol, zona, pin_hash, activo, debe_cambiar_pin FROM usuarios WHERE nombre = $1',
-    [nombre]
+    `SELECT id, nombre, rol, zona, pin_hash, activo, debe_cambiar_pin, privacidad_aceptada_en, organizacion_id
+       FROM usuarios
+      WHERE ${NOMBRE_NORMALIZADO_SQL} = $1`,
+    [normalizarNombre(nombre)]
   );
   const usuario = resultado.rows[0];
   if (!usuario) return null;
@@ -29,7 +44,14 @@ async function autenticar(nombre, pin) {
     rol: usuario.rol,
     zona: usuario.zona,
     debeCambiarPin: usuario.debe_cambiar_pin,
+    privacidadAceptada: Boolean(usuario.privacidad_aceptada_en),
+    organizacionId: usuario.organizacion_id, // CMP-19: solo para el rol «organizacion»
   };
+}
+
+// CA-18.2: guarda la fecha y hora en que la persona aceptó el aviso de privacidad.
+async function aceptarPrivacidad(usuarioId) {
+  await consultar('UPDATE usuarios SET privacidad_aceptada_en = now() WHERE id = $1 AND privacidad_aceptada_en IS NULL', [usuarioId]);
 }
 
 // PIN temporal de 4 dígitos al azar (ADR-005). `crypto.randomInt` es seguro para esto; `Math.random` no.
@@ -40,17 +62,22 @@ function generarPin() {
 // CA-10.1: todos los usuarios, con filtro opcional por rol. Los activos primero.
 async function listarUsuarios({ rol = null } = {}) {
   const r = await consultar(
-    `SELECT id, nombre, rol, zona, telefono, direccion, activo
-       FROM usuarios
-      WHERE $1::text IS NULL OR rol = $1
-      ORDER BY activo DESC, nombre`,
+    `SELECT u.id, u.nombre, u.rol, u.zona, u.telefono, u.direccion, u.activo, u.privacidad_aceptada_en,
+            o.nombre AS organizacion_nombre
+       FROM usuarios u
+       LEFT JOIN organizaciones o ON o.id = u.organizacion_id
+      WHERE $1::text IS NULL OR u.rol = $1
+      ORDER BY u.activo DESC, u.nombre`,
     [ROLES.includes(rol) ? rol : null]
   );
   return r.rows;
 }
 
 async function buscarUsuario(id) {
-  const r = await consultar('SELECT id, nombre, rol, zona, telefono, direccion, activo FROM usuarios WHERE id = $1', [id]);
+  const r = await consultar(
+    'SELECT id, nombre, rol, zona, telefono, direccion, activo, organizacion_id FROM usuarios WHERE id = $1',
+    [id]
+  );
   return r.rows[0] || null;
 }
 
@@ -64,13 +91,15 @@ function validarTelefono(texto) {
   return { telefono, valido };
 }
 
-// CA-10.3 y CA-10.4: los datos obligatorios dependen del rol. `zonasActivas` son los nombres que se pueden elegir.
-function validarUsuario(cuerpo, zonasActivas) {
+// CA-10.3 y CA-10.4: los datos obligatorios dependen del rol. `zonasActivas` son los nombres que se pueden elegir y
+// `organizacionesActivas` las organizaciones a las que puede pertenecer un usuario con rol «organizacion» (CA-19.1).
+function validarUsuario(cuerpo, zonasActivas, organizacionesActivas = []) {
   const errores = {};
   const nombre = (cuerpo.nombre || '').trim().replace(/\s+/g, ' ');
   const rol = (cuerpo.rol || '').trim();
   const zonaTexto = (cuerpo.zona || '').trim();
   const direccionTexto = (cuerpo.direccion || '').trim();
+  const organizacionTexto = (cuerpo.organizacion_id || '').trim();
   const { telefono, valido: telefonoValido } = validarTelefono(cuerpo.telefono);
 
   if (!nombre) errores.nombre = 'Falta el nombre.';
@@ -80,33 +109,54 @@ function validarUsuario(cuerpo, zonasActivas) {
   else if (!ROLES.includes(rol)) errores.rol = 'Elige un rol de la lista.';
 
   const esDonante = rol === 'donante';
-  const necesitaZonaYTelefono = rol === 'donante' || rol === 'voluntario';
+  const esOrganizacion = rol === 'organizacion';
+  const necesitaZona = rol === 'donante' || rol === 'voluntario';
+  const necesitaTelefono = necesitaZona || esOrganizacion;
 
   if (!telefonoValido) errores.telefono = 'El teléfono debe tener entre 7 y 15 números.';
-  else if (necesitaZonaYTelefono && !telefono) errores.telefono = 'Falta el teléfono.';
+  else if (necesitaTelefono && !telefono) errores.telefono = 'Falta el teléfono.';
 
-  if (necesitaZonaYTelefono) {
+  if (necesitaZona) {
     if (!zonaTexto) errores.zona = 'Falta elegir la zona.';
     else if (!zonasActivas.includes(zonaTexto)) errores.zona = 'Elige una zona de la lista.';
   }
 
   if (esDonante && !direccionTexto) errores.direccion = 'Falta la dirección del comercio.';
 
+  // CA-19.1: el usuario de una organización elige a cuál pertenece (solo las activas).
+  let organizacionId = null;
+  if (esOrganizacion) {
+    const organizacion = organizacionesActivas.find((o) => String(o.id) === organizacionTexto);
+    if (!organizacionTexto) errores.organizacion_id = 'Falta elegir la organización.';
+    else if (!organizacion) errores.organizacion_id = 'Elige una organización de la lista.';
+    else organizacionId = organizacion.id;
+  }
+
   return {
     errores,
-    valores: { nombre, rol, zona: zonaTexto, telefono: (cuerpo.telefono || '').trim(), direccion: direccionTexto },
-    // La coordinadora no tiene zona; solo los comercios tienen dirección.
+    valores: {
+      nombre,
+      rol,
+      zona: zonaTexto,
+      telefono: (cuerpo.telefono || '').trim(),
+      direccion: direccionTexto,
+      organizacion_id: organizacionTexto,
+    },
+    // La coordinadora y las organizaciones no tienen zona propia; solo los comercios tienen dirección.
     datos: {
       nombre,
       rol,
       telefono,
-      zona: necesitaZonaYTelefono ? zonaTexto : null,
+      zona: necesitaZona ? zonaTexto : null,
       direccion: esDonante ? direccionTexto : null,
+      organizacionId,
     },
   };
 }
 
-const MENSAJE_NOMBRE_REPETIDO = 'Ya existe un usuario con ese nombre.';
+// CA-17.2: con el nombre se ingresa, así que no puede repetirse; se sugiere cómo distinguirlo.
+const MENSAJE_NOMBRE_REPETIDO =
+  'Ya existe un usuario con ese nombre. Agrega el apellido o un apodo (por ejemplo, «Ana Pérez» o «Ana del Norte»).';
 
 // CA-10.7: un voluntario con donaciones asignadas no puede dejar de ser voluntario activo.
 async function contarAsignadas(usuarioId) {
@@ -126,10 +176,10 @@ async function crearUsuario(datos) {
   const pinHash = await bcrypt.hash(pin, 10);
   try {
     const r = await consultar(
-      `INSERT INTO usuarios (nombre, rol, pin_hash, zona, direccion, telefono, debe_cambiar_pin)
-       VALUES ($1, $2, $3, $4, $5, $6, TRUE)
+      `INSERT INTO usuarios (nombre, rol, pin_hash, zona, direccion, telefono, organizacion_id, debe_cambiar_pin)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)
        RETURNING id, nombre, rol`,
-      [datos.nombre, datos.rol, pinHash, datos.zona, datos.direccion, datos.telefono]
+      [datos.nombre, datos.rol, pinHash, datos.zona, datos.direccion, datos.telefono, datos.organizacionId || null]
     );
     return { usuario: r.rows[0], pin };
   } catch (e) {
@@ -154,8 +204,8 @@ async function editarUsuario(id, datos, quienEdita) {
 
   try {
     await consultar(
-      'UPDATE usuarios SET nombre = $1, rol = $2, zona = $3, direccion = $4, telefono = $5 WHERE id = $6',
-      [datos.nombre, datos.rol, datos.zona, datos.direccion, datos.telefono, id]
+      'UPDATE usuarios SET nombre = $1, rol = $2, zona = $3, direccion = $4, telefono = $5, organizacion_id = $6 WHERE id = $7',
+      [datos.nombre, datos.rol, datos.zona, datos.direccion, datos.telefono, datos.organizacionId || null, id]
     );
   } catch (e) {
     if (e.code === '23505') return { errores: { nombre: MENSAJE_NOMBRE_REPETIDO } };
@@ -215,6 +265,7 @@ async function restablecerPin(id, quienRestablece) {
   const pinHash = await bcrypt.hash(pin, 10);
   await consultar('UPDATE usuarios SET pin_hash = $1, debe_cambiar_pin = TRUE WHERE id = $2', [pinHash, id]);
   await cerrarSesionesDe(id);
+  await limpiarNombre(usuario.nombre); // CA-16.4: restablecer el PIN desbloquea
   return { usuario, pin };
 }
 
@@ -232,4 +283,5 @@ module.exports = {
   cambiarActivo,
   cambiarPin,
   restablecerPin,
+  aceptarPrivacidad,
 };

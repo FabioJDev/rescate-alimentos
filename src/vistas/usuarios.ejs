@@ -30,8 +30,9 @@
       <% usuarios.forEach((u) => { %>
         <li class="tarjeta">
           <p class="tarjeta-titulo"><%= u.nombre %><%= u.activo ? '' : ' (desactivado)' %></p>
-          <p><%= nombresDeRol[u.rol] %><%= u.zona ? ' · zona ' + u.zona : '' %></p>
+          <p><%= nombresDeRol[u.rol] %><%= u.zona ? ' · zona ' + u.zona : '' %><%= u.organizacion_nombre ? ' · ' + u.organizacion_nombre : '' %></p>
           <p>Teléfono: <%= u.telefono || 'sin registrar' %></p>
+          <p>Aviso de privacidad: <%= u.privacidadTexto %></p>
           <% if (u.direccion) { %><p>Dirección: <%= u.direccion %></p><% } %>
           <p><a href="/usuarios/<%= u.id %>/editar">Editar datos</a> · <a href="/usuarios/<%= u.id %>/restablecer-pin">Restablecer PIN</a></p>
           <form method="post" action="/usuarios/<%= u.id %>/<%= u.activo ? 'desactivar' : 'activar' %>">

@@ -370,3 +370,15 @@ describe('CMP-08 · Registrar una donación sin conexión · cola en el teléfon
     expect(await filasDe(reenvio.id_local)).toHaveLength(1);
   });
 });
+
+describe('CMP-08 · Pantalla guardada al salir (ADR-004)', () => {
+  test('ADR-004 · al salir se borra la pantalla guardada de cualquier versión del service worker', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const script = fs.readFileSync(path.join(__dirname, '../src/publico/sin-conexion.js'), 'utf8');
+    // Si el nombre llevara la versión fija («rescate-paginas-v1»), dejaría de borrarse al subir la VERSION de sw.js
+    // y en un celular compartido la siguiente persona vería la pantalla de la anterior.
+    expect(script).not.toMatch(/rescate-paginas-v\d/);
+    expect(script).toContain("indexOf('rescate-paginas-') === 0");
+  });
+});

@@ -6,6 +6,7 @@
   <title>Publicar donación · Rescate de Alimentos</title>
   <link rel="stylesheet" href="/estilos.css">
   <script src="/interaccion.js" defer></script>
+  <script src="/foto.js" defer></script>
 </head>
 <body>
   <%- include('_marca') %>
@@ -49,6 +50,11 @@
     </select>
     <% if (errores.unidad) { %><p class="error-campo" role="alert"><%= errores.unidad %></p><% } %>
 
+    <%# CA-22.1: opcional; con la unidad kg no hace falta (el peso es la cantidad). %>
+    <label for="kg_aproximados">Peso aproximado en kg (opcional, si la unidad no es kg)</label>
+    <input id="kg_aproximados" name="kg_aproximados" type="text" inputmode="decimal" value="<%= valores.kg_aproximados || '' %>">
+    <% if (errores.kg_aproximados) { %><p class="error-campo" role="alert"><%= errores.kg_aproximados %></p><% } %>
+
     <label for="punto_recogida">Punto de recogida<% if (comercios) { %> (si lo dejas vacío, se usa la dirección del comercio)<% } %></label>
     <input id="punto_recogida" name="punto_recogida" type="text" value="<%= valores.punto_recogida %>" <%= comercios ? '' : 'required' %>>
     <% if (errores.punto_recogida) { %><p class="error-campo" role="alert"><%= errores.punto_recogida %></p><% } %>
@@ -56,6 +62,17 @@
     <label for="hora_limite">Hora límite para recoger</label>
     <input id="hora_limite" name="hora_limite" type="datetime-local" value="<%= valores.hora_limite %>" required>
     <% if (errores.hora_limite) { %><p class="error-campo" role="alert"><%= errores.hora_limite %></p><% } %>
+
+    <%# CA-23.1: opcional. El teléfono la achica antes de enviarla (foto.js); viaja en el campo oculto «foto». %>
+    <div class="campo-foto" data-foto>
+      <label for="elegir_foto">Foto (opcional)</label>
+      <input id="elegir_foto" type="file" accept="image/jpeg,image/png,image/webp">
+      <input type="hidden" name="foto" value="">
+      <img alt="Vista previa de la foto" hidden>
+      <p class="nota" data-foto-estado role="status"></p>
+      <button type="button" class="secundario" data-foto-quitar hidden>Quitar foto</button>
+      <% if (errores.foto) { %><p class="error-campo" role="alert"><%= errores.foto %></p><% } %>
+    </div>
 
     <button type="submit">Publicar donación</button>
   </form>

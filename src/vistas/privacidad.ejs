@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aviso de privacidad · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <% if (!debeAceptar) { %><%- include('_marca', { volverA: locals.usuarioActual ? '/' : '/ingreso', volverNombre: locals.usuarioActual ? 'Inicio' : 'Ingresar' }) %><% } %>
+  <h1>Aviso de privacidad</h1>
+
+  <% if (debeAceptar) { %>
+    <p class="aviso" role="status">Antes de usar la página, lee cómo cuidamos tus datos y pulsa «Acepto» al final.</p>
+  <% } %>
+
+  <%# Texto base según la Ley 1581 de 2012 y el Decreto 1377 de 2013. La fundación debe revisarlo antes de usarlo. %>
+  <h2>Quién es responsable</h2>
+  <p>La <strong>Fundación Mesa Común</strong> es la responsable de los datos que se guardan en esta página, que usa para
+    coordinar el rescate de alimentos con comercios, voluntarios y organizaciones receptoras.</p>
+
+  <h2>Qué datos guardamos</h2>
+  <ul>
+    <li>Tu nombre, tu teléfono y tu zona.</li>
+    <li>Si eres un comercio, su dirección (es el punto de recogida).</li>
+    <li>Lo que haces en la página: qué donaciones registras, tomas o entregas y cuándo.</li>
+  </ul>
+  <p>No pedimos documento de identidad. <strong>No guardamos datos de las personas que reciben los alimentos</strong>:
+    las organizaciones solo informan cuántas personas atendieron.</p>
+
+  <h2>Para qué los usamos</h2>
+  <ul>
+    <li>Coordinar las recogidas y entregas, y que nunca vayan dos voluntarios al mismo sitio.</li>
+    <li>Llevar el registro de origen y movimiento del alimento que exige la normativa sanitaria.</li>
+    <li>Preparar informes con cifras totales para los cooperantes que financian la fundación.</li>
+  </ul>
+
+  <h2>Quién los ve</h2>
+  <p>El equipo de coordinación de la fundación. Tu teléfono solo lo ve quien lo necesita para una donación concreta (por
+    ejemplo, el voluntario que va a recoger donde un comercio). No vendemos ni entregamos tus datos a nadie más.</p>
+
+  <h2>Cuánto tiempo</h2>
+  <p>Mientras participes en la red. El registro de las donaciones se conserva el tiempo que exija la normativa sanitaria
+    aunque dejes de participar; tu usuario se desactiva, no se borra, para no perder ese registro.</p>
+
+  <h2>Tus derechos</h2>
+  <p>Puedes conocer, actualizar y corregir tus datos, pedir que se dejen de usar o que se borren (cuando la ley lo
+    permita) y retirar esta autorización. Para hacerlo, habla con la coordinadora de la fundación, que debe responderte
+    en un máximo de 15 días hábiles.</p>
+
+  <% if (debeAceptar) { %>
+    <form method="post" action="/privacidad/aceptar">
+      <button type="submit">Acepto que la fundación use mis datos así</button>
+    </form>
+    <form class="salir" method="post" action="/salir">
+      <button type="submit" class="secundario">No acepto, salir</button>
+    </form>
+  <% } %>
+</body>
+</html>

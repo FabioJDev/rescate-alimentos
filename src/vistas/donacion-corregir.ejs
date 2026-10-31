@@ -38,6 +38,10 @@
     </select>
     <% if (errores.unidad) { %><p class="error-campo" role="alert"><%= errores.unidad %></p><% } %>
 
+    <label for="kg_aproximados">Peso aproximado en kg (opcional, si la unidad no es kg)</label>
+    <input id="kg_aproximados" name="kg_aproximados" type="text" inputmode="decimal" value="<%= valores.kg_aproximados || '' %>">
+    <% if (errores.kg_aproximados) { %><p class="error-campo" role="alert"><%= errores.kg_aproximados %></p><% } %>
+
     <label for="punto_recogida">Punto de recogida</label>
     <input id="punto_recogida" name="punto_recogida" type="text" value="<%= valores.punto_recogida %>" required>
     <% if (errores.punto_recogida) { %><p class="error-campo" role="alert"><%= errores.punto_recogida %></p><% } %>

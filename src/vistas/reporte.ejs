@@ -49,6 +49,13 @@
       </ul>
       <p class="nota">Solo cuenta lo entregado. Las cantidades son declaradas por quien dona (nadie pesa el alimento) y no se
         suman unidades distintas entre sí.</p>
+
+      <%# CA-22.3 %>
+      <p>Kilos aproximados entregados: <strong data-kilos><%= reporte.kilosAproximados.kilos.toLocaleString('es-CO') %> kg</strong></p>
+      <% if (reporte.kilosAproximados.sinPeso > 0) { %>
+        <p class="nota"><span data-sin-peso><%= reporte.kilosAproximados.sinPeso %></span> entrega(s) en otras unidades no tienen peso aproximado y no están en ese total.</p>
+      <% } %>
+      <p class="nota">Son kilos declarados por los comercios, no pesados.</p>
     <% } %>
 
     <h2>Entregas por organización</h2>
@@ -70,6 +77,24 @@
     </ul>
 
     <p><a class="boton" href="/reporte.csv?desde=<%= periodo.desde %>&amp;hasta=<%= periodo.hasta %>">Descargar CSV</a></p>
+  <% } %>
+
+  <% if (!error && locals.atenciones) { %>
+    <%# CA-20.5: una cifra por organización y por día; una persona que vino dos días cuenta dos veces. %>
+    <h2>Personas atendidas</h2>
+    <p>Atenciones (personas por día) en el periodo: <strong data-atenciones-total><%= atenciones.total.toLocaleString('es-CO') %></strong></p>
+    <% if (atenciones.porOrganizacion.length === 0) { %>
+      <p class="vacio">Ninguna organización registró personas atendidas en este periodo.</p>
+    <% } else { %>
+      <ul class="resumen">
+        <% atenciones.porOrganizacion.forEach((o) => { %>
+          <li><%= o.nombre %>: <strong data-atenciones="<%= o.nombre %>"><%= o.personas.toLocaleString('es-CO') %></strong> (<%= o.dias %> día(s) reportados)</li>
+        <% }) %>
+      </ul>
+      <p class="nota">Cada organización reporta una cifra por día, así que un mismo reporte no se suma dos veces. Una persona que
+        vino dos días distintos cuenta dos veces: son atenciones, no personas distintas.</p>
+      <p><a class="boton boton-secundario" href="/reporte/atenciones.csv?desde=<%= periodo.desde %>&amp;hasta=<%= periodo.hasta %>">Descargar CSV de personas atendidas</a></p>
+    <% } %>
   <% } %>
 </body>
 </html>

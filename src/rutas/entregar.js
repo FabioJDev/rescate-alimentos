@@ -42,7 +42,9 @@ router.get('/donaciones/:codigo(D-\\d+)/entregar', soloVoluntarios, async (req, 
   try {
     const info = await motivoEntrega(req.params.codigo, req.session.usuario.id);
     if (info.motivo !== 'puede') return mostrarRechazo(res, info.motivo, info.donacion);
-    await mostrarFormulario(res, 200, info.donacion, { organizacion_id: '', recibido_por: '' }, {});
+    // CA-19.7: si una organización la pidió, ya viene elegida (se puede cambiar si no la reciben).
+    const destino = info.donacion.destino_organizacion_id ? String(info.donacion.destino_organizacion_id) : '';
+    await mostrarFormulario(res, 200, info.donacion, { organizacion_id: destino, recibido_por: '' }, {});
   } catch (error) {
     next(error);
   }
