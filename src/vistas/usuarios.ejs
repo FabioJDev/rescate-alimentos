@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Usuarios · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca') %>
+  <h1>Usuarios</h1>
+
+  <% if (aviso) { %><p class="exito" role="status"><%= aviso %></p><% } %>
+  <% if (error) { %><p class="error" role="alert"><%= error %></p><% } %>
+
+  <p><a class="boton" href="/usuarios/nuevo">Crear usuario</a></p>
+
+  <nav class="fichas" aria-label="Filtrar por rol">
+    <a href="/usuarios" <%= rol === null ? 'class=filtro-activo' : '' %>>Todos</a>
+    <% roles.forEach((r) => { %>
+      <a href="/usuarios?rol=<%= r %>" <%= rol === r ? 'class=filtro-activo' : '' %>><%= nombresDeRol[r] %></a>
+    <% }) %>
+  </nav>
+
+  <% if (usuarios.length === 0) { %>
+    <p class="vacio">No hay usuarios con ese rol.</p>
+  <% } else { %>
+    <ul class="lista-donaciones">
+      <% usuarios.forEach((u) => { %>
+        <li class="tarjeta">
+          <p class="tarjeta-titulo"><%= u.nombre %><%= u.activo ? '' : ' (desactivado)' %></p>
+          <p><%= nombresDeRol[u.rol] %><%= u.zona ? ' · zona ' + u.zona : '' %></p>
+          <p>Teléfono: <%= u.telefono || 'sin registrar' %></p>
+          <% if (u.direccion) { %><p>Dirección: <%= u.direccion %></p><% } %>
+          <p><a href="/usuarios/<%= u.id %>/editar">Editar datos</a></p>
+          <form method="post" action="/usuarios/<%= u.id %>/<%= u.activo ? 'desactivar' : 'activar' %>">
+            <button type="submit" class="secundario"><%= u.activo ? 'Desactivar' : 'Activar' %></button>
+          </form>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</body>
+</html>

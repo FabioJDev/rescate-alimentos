@@ -23,7 +23,7 @@ async function listarZonasConUso() {
   const r = await consultar(
     `SELECT z.id, z.nombre, z.activa,
             (SELECT count(*)::int FROM usuarios u
-              WHERE lower(trim(u.zona)) = lower(trim(z.nombre))) AS usuarios,
+              WHERE u.activo AND lower(trim(u.zona)) = lower(trim(z.nombre))) AS usuarios,
             (SELECT count(*)::int FROM organizaciones o
               WHERE lower(trim(o.zona)) = lower(trim(z.nombre))) AS organizaciones
        FROM zonas z

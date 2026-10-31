@@ -25,6 +25,10 @@ router.post('/ingreso', async (req, res, next) => {
     if (!usuario) {
       return res.status(401).render('ingreso', { error: MENSAJE_INGRESO_FALLIDO, nombre });
     }
+    // CA-10.6: un usuario desactivado no entra, aunque su PIN sea correcto.
+    if (usuario.desactivado) {
+      return res.status(403).render('ingreso', { error: 'Tu usuario está desactivado. Habla con la coordinadora.', nombre });
+    }
 
     // Se regenera la sesión al ingresar para no reutilizar una sesión anterior.
     req.session.regenerate((errorSesion) => {

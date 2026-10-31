@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= usuario ? 'Editar usuario' : 'Crear usuario' %> · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/usuarios', volverNombre: 'Usuarios' }) %>
+  <h1><%= usuario ? 'Editar a «' + usuario.nombre + '»' : 'Crear usuario' %></h1>
+
+  <% if (Object.keys(errores).length > 0) { %>
+    <p class="error" role="alert">No se guardó. Revisa los campos marcados.</p>
+  <% } %>
+  <% if (!usuario) { %>
+    <p class="nota">Al guardar se genera un PIN temporal de 4 números. La persona lo cambia la primera vez que entra.</p>
+  <% } %>
+
+  <form method="post" action="<%= usuario ? '/usuarios/' + usuario.id : '/usuarios' %>" novalidate>
+    <label for="nombre">Nombre (con este nombre se ingresa)</label>
+    <input id="nombre" name="nombre" type="text" maxlength="80" value="<%= valores.nombre %>" required>
+    <% if (errores.nombre) { %><p class="error-campo" role="alert"><%= errores.nombre %></p><% } %>
+
+    <label for="rol">Rol</label>
+    <select id="rol" name="rol" required>
+      <option value="">Elige un rol</option>
+      <% roles.forEach((r) => { %>
+        <option value="<%= r %>" <%= valores.rol === r ? 'selected' : '' %>><%= nombresDeRol[r] %></option>
+      <% }) %>
+    </select>
+    <% if (errores.rol) { %><p class="error-campo" role="alert"><%= errores.rol %></p><% } %>
+
+    <label for="telefono">Teléfono (obligatorio para comercios y voluntarios)</label>
+    <input id="telefono" name="telefono" type="tel" inputmode="tel" maxlength="25" value="<%= valores.telefono %>">
+    <% if (errores.telefono) { %><p class="error-campo" role="alert"><%= errores.telefono %></p><% } %>
+
+    <label for="zona">Zona (obligatoria para comercios y voluntarios)</label>
+    <select id="zona" name="zona">
+      <option value="">Sin zona</option>
+      <% zonas.forEach((z) => { %>
+        <option value="<%= z %>" <%= valores.zona === z ? 'selected' : '' %>><%= z %></option>
+      <% }) %>
+    </select>
+    <% if (errores.zona) { %><p class="error-campo" role="alert"><%= errores.zona %></p><% } %>
+
+    <label for="direccion">Dirección del comercio (solo comercios; es el punto de recogida por defecto)</label>
+    <input id="direccion" name="direccion" type="text" maxlength="150" value="<%= valores.direccion %>">
+    <% if (errores.direccion) { %><p class="error-campo" role="alert"><%= errores.direccion %></p><% } %>
+
+    <button type="submit"><%= usuario ? 'Guardar cambios' : 'Crear usuario' %></button>
+  </form>
+</body>
+</html>

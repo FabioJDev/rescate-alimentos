@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PIN temporal · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/usuarios', volverNombre: 'Usuarios' }) %>
+  <h1><%= nuevo ? 'Usuario creado' : 'PIN restablecido' %></h1>
+
+  <p class="exito" role="status">
+    <%= nuevo ? '«' + usuario.nombre + '» ya puede entrar.' : 'El PIN anterior de «' + usuario.nombre + '» ya no sirve.' %>
+  </p>
+
+  <div class="tarjeta">
+    <p>Nombre para entrar: <strong><%= usuario.nombre %></strong></p>
+    <p>PIN temporal: <strong class="pin-temporal"><%= pin %></strong></p>
+  </div>
+
+  <p>Dáselo a la persona en persona o por llamada. <strong>Este PIN no se vuelve a mostrar.</strong> La primera vez
+    que entre, la aplicación le pedirá cambiarlo por uno que solo ella conozca.</p>
+
+  <p><a class="boton" href="/usuarios">Volver a usuarios</a></p>
+</body>
+</html>

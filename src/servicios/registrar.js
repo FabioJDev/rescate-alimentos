@@ -4,9 +4,9 @@ const { consultar } = require('../db/conexion');
 const { validarDonacion } = require('./validar-donacion');
 const { registrarDonacion } = require('./donaciones');
 
-// Los comercios entre los que puede elegir la coordinadora.
+// Los comercios entre los que puede elegir la coordinadora. Los desactivados no aparecen (CA-10.6).
 async function listarComercios() {
-  const r = await consultar("SELECT id, nombre, zona, direccion FROM usuarios WHERE rol = 'donante' ORDER BY nombre");
+  const r = await consultar("SELECT id, nombre, zona, direccion FROM usuarios WHERE rol = 'donante' AND activo ORDER BY nombre");
   return r.rows;
 }
 
