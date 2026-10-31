@@ -2,6 +2,9 @@
 
 Equipo Overflow · Caso: Red de Rescate de Alimentos · Fundación Mesa Común.
 
+El núcleo del MVP (entrega 3B) son CMP-01 a CMP-05. CMP-06 a CMP-08 se agregaron en la 3C y CMP-09 a CMP-23 después
+(administración, seguridad y requerimientos del Módulo 1 que faltaban). Cada uno dice de dónde viene.
+
 Esta especificación es la fuente de verdad. Si algo cambia, se cambia primero aquí (con su razón) y después
 el código. Los IDs (CMP-0X y CA-0X.Y) son estables: nunca se renumeran. Se escribe en presente.
 
@@ -32,6 +35,9 @@ aparte: va de asignada a entregada en una sola acción, para cumplir el máximo 
   pesa el alimento y solo un comercio tiene báscula (restricción del Módulo 2).
 - **Punto de recogida:** por defecto la dirección del comercio, editable. La zona sale del comercio.
 - **Hora límite:** fecha y hora (zona horaria America/Bogota).
+
+*(Después se agregaron dos campos **opcionales**, sin cambiar los 4 obligatorios: el peso aproximado en kg cuando la
+unidad no es kg (CMP-22) y una foto (CMP-23).)*
 
 ## Actores
 
@@ -191,6 +197,8 @@ alimento) y por eso se dice así en el reporte y no se suman unidades distintas 
 - **CA-07.7** Dada la coordinadora, cuando pulsa «Descargar CSV», entonces recibe un archivo con una fila por
   donación del periodo (código, estado, tipo, cantidad, unidad, zona, donante, voluntario, organización,
   quién recibió y las fechas de registro, toma y entrega) que se abre bien en Excel, con tildes y ñ.
+  *(Cambio con CMP-22: el archivo agrega la columna «Kg aproximados», que trae la cantidad si la unidad es kg o el
+  peso aproximado que declaró el comercio. Las personas atendidas tienen su propio CSV, CA-20.5.)*
 
 ## CMP-08 · Registrar una donación sin conexión
 
@@ -395,7 +403,9 @@ encuentra el lugar o el comercio cerró; el comercio no sabe quién viene.
   donante, del voluntario y de la organización que recibió.
 - **CA-15.4** Dado cualquier otro usuario, cuando abre «Donaciones disponibles» o el detalle de una donación que no
   es suya, entonces no ve ningún teléfono: el del comercio solo lo ve el voluntario asignado y el del voluntario
-  solo lo ve el donante de esa donación (RNF-04).
+  solo lo ve el donante de esa donación (RNF-04). *(Cambio con CMP-19: el voluntario también ve el teléfono de la
+  organización que pidió la donación, para coordinar la entrega (CA-19.7), y esa organización ve el del voluntario que
+  se la trae (CA-19.5). Los teléfonos de personas siguen sin mostrarse a nadie más.)*
 
 ---
 
@@ -589,6 +599,9 @@ envía la coordinadora, CMP-21) y asignación automática de destino (el destino
 una donación, el reporte del periodo (RF-07) y el modo sin conexión para registrar (RNF-01) quedaron fuera del MVP y
 se agregaron en la 3C como CMP-06, CMP-07 y CMP-08. La administración se agregó como CMP-09 a CMP-15, y la seguridad y
 los requerimientos que faltaban como CMP-16 a CMP-23 y T-SEG.1 y T-SEG.2: ver [plan técnico](plan-tecnico.md).
+
+Pendiente, todavía sin especificar: **solicitar acceso** desde la página de ingreso, con aprobación de la coordinadora
+(tarjeta #107; será CMP-24). Hasta entonces no hay registro libre: los usuarios los crea la coordinadora (ADR-005).
 
 ## Tabla de trazabilidad
 
