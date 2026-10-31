@@ -109,14 +109,17 @@ Para quien reciba el proyecto y quiera seguir construyéndolo.
 
 - [Manual de operación](docs/manual-operacion.md): para la coordinadora, los comercios y los voluntarios (sin términos técnicos).
 - [Pantallas del MVP](docs/ux/pantallas.md): cada pantalla con su comportamiento y capturas.
-- [Constitución del proyecto](docs/spec/constitucion.md): equipo, convenciones y definiciones de Listo y Terminado.
+- [Constitución del proyecto](docs/spec/constitucion.md): equipo, convenciones, uso de IA y definiciones de Listo y Terminado.
 - [Especificación del MVP](docs/spec/comportamientos.md): comportamientos y criterios de aceptación.
 - [Plan técnico](docs/spec/plan-tecnico.md): arquitectura, modelo de datos y despliegue.
 - [Decisiones de arquitectura](docs/decisiones/): ADR.
 - [Cómo revisar un PR](docs/qa/como-revisar.md) y [plan de pruebas](docs/qa/plan-de-pruebas.md).
 
-## Revisión del trabajo
+## Uso de asistentes de IA
 
-Todo lo que se escribe lo revisa el equipo. Ningún pull request se integra sin que otra persona lo verifique
+- **Claude (chat):** para planear y redactar la especificación, el plan técnico y los documentos.
+- **Claude Code:** para generar código, pruebas, configuración de CI y despliegue.
+
+Todo lo generado lo revisa el equipo. Ningún pull request se integra sin que otra persona lo verifique
 contra sus criterios de aceptación, y cualquier integrante debe poder explicar cualquier parte del
-proyecto.
+proyecto. La reflexión final del módulo se escribe sin IA.
