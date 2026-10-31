@@ -16,6 +16,7 @@ function mensajeDeRechazo(motivo, donacion) {
   if (motivo === 'no_asignada') {
     return 'Esta donación todavía no ha sido tomada, así que no se puede registrar su entrega.';
   }
+  if (motivo === 'cancelada') return 'Esta donación ya fue cancelada.';
   if (motivo === 'otro_voluntario') {
     return 'Esta donación la tomó otro voluntario. Solo quien la tomó puede registrar su entrega.';
   }

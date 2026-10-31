@@ -3,7 +3,7 @@
 // consulta SQL con la hora de la base de datos.
 function etiquetaDeEstado(donacion) {
   if (donacion.vencida) return 'Vencida (no recogida)';
-  return { disponible: 'Disponible', asignada: 'Asignada', entregada: 'Entregada' }[donacion.estado];
+  return { disponible: 'Disponible', asignada: 'Asignada', entregada: 'Entregada', cancelada: 'Cancelada' }[donacion.estado];
 }
 
 // Clase de CSS para colorear el estado.

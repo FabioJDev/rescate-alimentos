@@ -12,7 +12,8 @@
     "dev": "node --watch src/servidor.js",
     "test": "jest --runInBand",
     "db:migrar": "node src/db/migrar.js",
-    "db:semilla": "node src/db/semilla.js"
+    "db:semilla": "node src/db/semilla.js",
+    "db:primera-coordinadora": "node src/db/primera-coordinadora.js"
   },
   "license": "UNLICENSED",
   "dependencies": {

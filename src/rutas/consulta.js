@@ -4,6 +4,7 @@ const { requerirSesion } = require('../middleware/autenticacion');
 const { obtenerDetalle } = require('../servicios/donaciones');
 const { formatearFechaHora } = require('../utilidades/fechas');
 const { etiquetaDeEstado } = require('../utilidades/estados');
+const { puedeCambiar } = require('../servicios/correcciones');
 
 const router = express.Router();
 
@@ -23,12 +24,43 @@ function frasesDelHistorial(donacion, historial) {
     if (paso.tipo === 'registro') return { cuando, texto: `Registrada por ${paso.usuario_nombre}` };
     if (paso.tipo === 'toma') return { cuando, texto: `Tomada por ${paso.usuario_nombre}` };
     // CA-06.6: soltar una donación también queda en el historial.
-    if (paso.tipo === 'liberacion') return { cuando, texto: `Soltada por ${paso.usuario_nombre}` };
+    // CA-14.1: si la liberó la coordinadora, el detalle dice a quién se la quitó.
+    if (paso.tipo === 'liberacion') {
+      return { cuando, texto: paso.detalle ? `Liberada por ${paso.usuario_nombre} (${paso.detalle})` : `Soltada por ${paso.usuario_nombre}` };
+    }
+    if (paso.tipo === 'asignacion') return { cuando, texto: paso.detalle };
+    // CA-13.1 y CA-13.6: las correcciones dicen qué cambió y las cancelaciones, por qué.
+    if (paso.tipo === 'correccion') return { cuando, texto: `Corregida por ${paso.usuario_nombre}. ${paso.detalle}` };
+    if (paso.tipo === 'cancelacion') return { cuando, texto: `Cancelada por ${paso.usuario_nombre}. Motivo: ${paso.detalle}` };
+    // CA-14.4: quien entregó es el voluntario; si la registró la coordinadora en su nombre, también se dice.
+    const registro = paso.usuario_nombre !== donacion.voluntario_nombre ? `. Registrada por ${paso.usuario_nombre}` : '';
     return {
       cuando,
-      texto: `Entregada a ${donacion.organizacion_nombre}. Recibió: ${donacion.recibido_por}. Entregó: ${paso.usuario_nombre}`,
+      texto: `Entregada a ${donacion.organizacion_nombre}. Recibió: ${donacion.recibido_por}. Entregó: ${donacion.voluntario_nombre}${registro}`,
     };
   });
+}
+
+// CA-15.3 y CA-15.4: los teléfonos que puede ver quien abre el detalle. La coordinadora ve todos; el voluntario
+// asignado, el del comercio; el donante, el del voluntario que va a recoger. Nadie más ve ninguno (RNF-04).
+function contactosVisibles(donacion, usuario) {
+  const contacto = (etiqueta, nombre, telefono) => ({ etiqueta, nombre, telefono });
+  if (usuario.rol === 'coordinadora') {
+    const lista = [contacto('Donante', donacion.donante_nombre, donacion.donante_telefono)];
+    if (donacion.voluntario_nombre) lista.push(contacto('Voluntario', donacion.voluntario_nombre, donacion.voluntario_telefono));
+    if (donacion.organizacion_nombre) {
+      lista.push(contacto('Organización que recibió', donacion.organizacion_nombre, donacion.organizacion_telefono));
+    }
+    return lista;
+  }
+  if (donacion.estado !== 'asignada') return [];
+  if (usuario.rol === 'voluntario' && donacion.voluntario_id === usuario.id) {
+    return [contacto('Comercio', donacion.donante_nombre, donacion.donante_telefono)];
+  }
+  if (usuario.rol === 'donante' && donacion.donante_id === usuario.id) {
+    return [contacto('Voluntario que va a recogerla', donacion.voluntario_nombre, donacion.voluntario_telefono)];
+  }
+  return [];
 }
 
 function mostrarNoExiste(res) {
@@ -52,11 +84,18 @@ router.get('/donaciones/:codigo(D-\\d+)', requerirSesion, async (req, res, next)
     if (!detalle) return mostrarNoExiste(res);
 
     const { donacion, historial } = detalle;
+    const usuario = req.session.usuario;
+    const contactos = contactosVisibles(donacion, usuario);
+    // Los teléfonos no llegan a la vista salvo en `contactos`: así no se muestran por error (CA-15.4).
+    const { donante_telefono, voluntario_telefono, organizacion_telefono, ...datosSinTelefonos } = donacion;
     res.render('donacion-detalle', {
-      donacion: { ...donacion, cantidad: Number(donacion.cantidad) },
+      contactos,
+      donacion: { ...datosSinTelefonos, cantidad: Number(donacion.cantidad) },
       estadoTexto: etiquetaDeEstado(donacion),
       horaLimite: formatearFechaHora(donacion.hora_limite),
       historial: frasesDelHistorial(donacion, historial),
+      puedeCorregir: puedeCambiar('corregir', donacion, usuario),
+      puedeCancelar: puedeCambiar('cancelar', donacion, usuario),
     });
   } catch (error) {
     next(error);

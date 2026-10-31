@@ -15,6 +15,7 @@ function mensajeDeRechazo(motivo, donacion) {
     return `Esta donación ya fue entregada el ${formatearFechaHora(donacion.entregada_en)} a ${donacion.organizacion_nombre}; no se puede soltar.`;
   }
   if (motivo === 'no_asignada') return 'Esta donación no está asignada a nadie.';
+  if (motivo === 'cancelada') return 'Esta donación ya fue cancelada.';
   if (motivo === 'otro_voluntario') {
     return 'Esta donación la tomó otro voluntario. Solo quien la tomó puede soltarla.';
   }

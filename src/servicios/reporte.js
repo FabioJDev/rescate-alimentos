@@ -56,7 +56,8 @@ async function obtenerReporte(desde, hasta) {
               count(*) FILTER (WHERE d.estado = 'disponible' AND d.hora_limite > now())::int AS disponibles,
               count(*) FILTER (WHERE d.estado = 'asignada')::int AS asignadas,
               count(*) FILTER (WHERE d.estado = 'entregada')::int AS entregadas,
-              count(*) FILTER (WHERE d.estado = 'disponible' AND d.hora_limite <= now())::int AS vencidas
+              count(*) FILTER (WHERE d.estado = 'disponible' AND d.hora_limite <= now())::int AS vencidas,
+              count(*) FILTER (WHERE d.estado = 'cancelada')::int AS canceladas
          FROM donaciones d
         WHERE ${EN_PERIODO}`,
       parametros
@@ -88,11 +89,12 @@ async function obtenerReporte(desde, hasta) {
     )
   ).rows;
 
+  // Las canceladas no cuentan: no hubo alimento que rescatar (cambio de CA-07.1 con CMP-13).
   const porTipo = (
     await consultar(
       `SELECT d.tipo_alimento AS tipo, count(*)::int AS donaciones
          FROM donaciones d
-        WHERE ${EN_PERIODO}
+        WHERE d.estado <> 'cancelada' AND ${EN_PERIODO}
         GROUP BY d.tipo_alimento
         ORDER BY donaciones DESC, d.tipo_alimento`,
       parametros

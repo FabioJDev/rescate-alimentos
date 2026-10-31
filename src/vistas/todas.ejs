@@ -17,6 +17,7 @@
     <a href="/todas?estado=asignada" <%= estado === 'asignada' ? 'class=filtro-activo' : '' %>>Asignadas</a>
     <a href="/todas?estado=entregada" <%= estado === 'entregada' ? 'class=filtro-activo' : '' %>>Entregadas</a>
     <a href="/todas?estado=vencida" <%= estado === 'vencida' ? 'class=filtro-activo' : '' %>>Vencidas</a>
+    <a href="/todas?estado=cancelada" <%= estado === 'cancelada' ? 'class=filtro-activo' : '' %>>Canceladas</a>
   </nav>
 
   <% if (donaciones.length === 0) { %>

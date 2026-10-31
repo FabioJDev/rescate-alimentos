@@ -13,6 +13,8 @@
     <p class="saludo">Hola, <strong><%= usuario.nombre %></strong> (<%= usuario.rol %>).</p>
   </header>
 
+  <% if (locals.aviso) { %><p class="exito" role="status"><%= aviso %></p><% } %>
+
   <%# Los iconos son solo adorno (aria-hidden): el texto de cada acceso dice lo mismo. %>
   <nav class="acciones" aria-label="Acciones">
     <% if (usuario.rol === 'donante') { %>
@@ -61,12 +63,22 @@
   <% if (usuario.rol === 'coordinadora') { %>
     <h2>Administración</h2>
     <nav class="acciones" aria-label="Administración">
+      <a class="accion" href="/usuarios">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6M16 4.5a3.5 3.5 0 010 7M18 14.5c2 .7 3.5 2.6 3.5 5.5"/></svg>
+        Usuarios
+      </a>
+      <a class="accion" href="/organizaciones">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg>
+        Organizaciones
+      </a>
       <a class="accion" href="/zonas">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-7-6.5-7-12a7 7 0 0114 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
         Zonas
       </a>
     </nav>
   <% } %>
+
+  <p><a class="boton boton-secundario" href="/mi-pin">Cambiar mi PIN</a></p>
 
   <form class="salir" method="post" action="/salir">
     <button type="submit" class="secundario">Salir</button>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cambiar mi PIN · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <% if (!temporal) { %><%- include('_marca') %><% } %>
+  <h1>Cambiar mi PIN</h1>
+
+  <% if (temporal) { %>
+    <p class="aviso" role="status">Entraste con un PIN temporal. Cámbialo por uno que solo tú conozcas para seguir.</p>
+  <% } %>
+  <% if (Object.keys(errores).length > 0) { %>
+    <p class="error" role="alert">No se cambió el PIN. Revisa los campos marcados.</p>
+  <% } %>
+
+  <form method="post" action="/mi-pin" novalidate>
+    <label for="pin_actual">PIN actual<%= temporal ? ' (el temporal que te dieron)' : '' %></label>
+    <input id="pin_actual" name="pin_actual" type="password" inputmode="numeric" maxlength="4" required autocomplete="current-password">
+    <% if (errores.pin_actual) { %><p class="error-campo" role="alert"><%= errores.pin_actual %></p><% } %>
+
+    <label for="pin_nuevo">PIN nuevo (4 números)</label>
+    <input id="pin_nuevo" name="pin_nuevo" type="password" inputmode="numeric" maxlength="4" required autocomplete="new-password">
+    <% if (errores.pin_nuevo) { %><p class="error-campo" role="alert"><%= errores.pin_nuevo %></p><% } %>
+
+    <label for="pin_repetido">Escribe otra vez el PIN nuevo</label>
+    <input id="pin_repetido" name="pin_repetido" type="password" inputmode="numeric" maxlength="4" required autocomplete="new-password">
+    <% if (errores.pin_repetido) { %><p class="error-campo" role="alert"><%= errores.pin_repetido %></p><% } %>
+
+    <button type="submit">Cambiar PIN</button>
+  </form>
+
+  <form class="salir" method="post" action="/salir">
+    <button type="submit" class="secundario">Salir</button>
+  </form>
+</body>
+</html>

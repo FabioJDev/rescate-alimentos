@@ -142,11 +142,13 @@ async function tomarDonacion(codigo, voluntarioId) {
 }
 
 // Explica por qué una donación no se puede tomar (o si todavía se puede). No modifica nada.
-// motivo: 'no_existe' | 'ya_es_tuya' | 'ya_tomada' | 'vencida' | 'disponible'
+// motivo: 'no_existe' | 'cancelada' | 'ya_es_tuya' | 'ya_tomada' | 'vencida' | 'disponible'
 async function motivoNoDisponible(codigo, voluntarioId) {
   const r = await consultar(
-    `SELECT d.*, v.nombre AS voluntario_nombre, (d.hora_limite <= now()) AS vencida
+    `SELECT d.*, v.nombre AS voluntario_nombre, (d.hora_limite <= now()) AS vencida,
+            donante.nombre AS donante_nombre, donante.telefono AS donante_telefono
        FROM donaciones d
+       JOIN usuarios donante ON donante.id = d.donante_id
        LEFT JOIN usuarios v ON v.id = d.voluntario_id
       WHERE d.codigo = $1`,
     [codigo]
@@ -154,6 +156,7 @@ async function motivoNoDisponible(codigo, voluntarioId) {
   const donacion = r.rows[0];
 
   if (!donacion) return { motivo: 'no_existe' };
+  if (donacion.estado === 'cancelada') return { motivo: 'cancelada', donacion };
   if (donacion.estado !== 'disponible') {
     // CA-03.5: si ya la tomó esta misma persona (doble clic o reintento), no es un error.
     if (donacion.voluntario_id === voluntarioId) return { motivo: 'ya_es_tuya', donacion };
@@ -168,9 +171,9 @@ async function motivoNoDisponible(codigo, voluntarioId) {
 async function obtenerDetalle(codigo) {
   const r = await consultar(
     `SELECT d.*,
-            donante.nombre AS donante_nombre,
-            voluntario.nombre AS voluntario_nombre,
-            org.nombre AS organizacion_nombre,
+            donante.nombre AS donante_nombre, donante.telefono AS donante_telefono,
+            voluntario.nombre AS voluntario_nombre, voluntario.telefono AS voluntario_telefono,
+            org.nombre AS organizacion_nombre, org.telefono AS organizacion_telefono,
             (d.estado = 'disponible' AND d.hora_limite <= now()) AS vencida
        FROM donaciones d
        JOIN usuarios donante ON donante.id = d.donante_id
@@ -183,7 +186,7 @@ async function obtenerDetalle(codigo) {
   if (!donacion) return null;
 
   const movimientos = await consultar(
-    `SELECT m.tipo, m.ocurrido_en, u.nombre AS usuario_nombre
+    `SELECT m.tipo, m.ocurrido_en, m.detalle, u.nombre AS usuario_nombre
        FROM movimientos m
        JOIN usuarios u ON u.id = m.usuario_id
       WHERE m.donacion_id = $1
@@ -194,13 +197,16 @@ async function obtenerDetalle(codigo) {
   return { donacion, historial: movimientos.rows };
 }
 
-// «Mis recogidas»: las donaciones que este voluntario tomó y todavía no entregó.
+// «Mis recogidas»: las donaciones que este voluntario tomó y todavía no entregó, con el teléfono del comercio
+// para poder llamarlo (CA-15.1).
 async function listarRecogidasDe(voluntarioId) {
   const r = await consultar(
-    `SELECT codigo, tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite, tomada_en
-       FROM donaciones
-      WHERE voluntario_id = $1 AND estado = 'asignada'
-      ORDER BY hora_limite ASC, id ASC`,
+    `SELECT d.codigo, d.tipo_alimento, d.cantidad, d.unidad, d.punto_recogida, d.zona, d.hora_limite, d.tomada_en,
+            donante.nombre AS donante_nombre, donante.telefono AS donante_telefono
+       FROM donaciones d
+       JOIN usuarios donante ON donante.id = d.donante_id
+      WHERE d.voluntario_id = $1 AND d.estado = 'asignada'
+      ORDER BY d.hora_limite ASC, d.id ASC`,
     [voluntarioId]
   );
   return r.rows;

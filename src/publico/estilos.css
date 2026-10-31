@@ -854,3 +854,30 @@ body:has(> h1.hero)::after {
   font-size: 0.9rem;
   color: #444;
 }
+
+/* PIN temporal (CMP-10 y CMP-11): grande y espaciado para dictarlo por teléfono sin equivocarse. */
+.pin-temporal {
+  font-size: 2rem;
+  letter-spacing: 0.4em;
+}
+
+/* Donación cancelada (CMP-13): gris, porque ya no hay nada que hacer con ella. */
+.tarjeta-estado-cancelada {
+  --color-estado: #6b6b6b;
+}
+
+.estado-cancelada {
+  background: #e6e6e6;
+}
+
+/* Teléfonos de contacto (CMP-15): enlace grande para llamar con el dedo. */
+a.telefono {
+  display: inline-block;
+  min-height: 2.75rem;
+  padding: 0.5rem 0;
+  font-weight: 700;
+}
+
+.contactos {
+  padding-left: 1.2rem;
+}

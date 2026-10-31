@@ -17,6 +17,11 @@ const rutasSincronizar = require('./rutas/sincronizar');
 const rutasReporte = require('./rutas/reporte');
 const rutasSoltar = require('./rutas/soltar');
 const rutasZonas = require('./rutas/zonas');
+const rutasUsuarios = require('./rutas/usuarios');
+const rutasPin = require('./rutas/pin');
+const rutasOrganizaciones = require('./rutas/organizaciones');
+const rutasCorrecciones = require('./rutas/correcciones');
+const rutasIntervenciones = require('./rutas/intervenciones');
 
 const app = express();
 const enProduccion = process.env.NODE_ENV === 'production';
@@ -62,6 +67,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// CA-11.4 y CA-11.5: con un PIN temporal pendiente solo se puede cambiar el PIN o salir. El JavaScript del
+// teléfono recibe 401 («falta ingresar»), así lo guardado sin conexión sigue pendiente y no se pierde.
+const PERMITIDAS_CON_PIN_TEMPORAL = ['/mi-pin', '/salir', '/salud', '/sin-conexion'];
+app.use((req, res, next) => {
+  const usuario = req.session && req.session.usuario;
+  if (!usuario || !usuario.debeCambiarPin || PERMITIDAS_CON_PIN_TEMPORAL.includes(req.path)) return next();
+  if (req.path.startsWith('/api/')) return res.status(401).json({ estado: 'sin_sesion' });
+  res.redirect('/mi-pin');
+});
+
 // Ruta de salud: sirve para comprobar que el servidor está arriba (también en Render).
 app.get('/salud', (req, res) => {
   res.json({ estado: 'ok' });
@@ -78,10 +93,17 @@ app.use(rutasSincronizar);
 app.use(rutasReporte);
 app.use(rutasSoltar);
 app.use(rutasZonas);
+app.use(rutasUsuarios);
+app.use(rutasPin);
+app.use(rutasOrganizaciones);
+app.use(rutasCorrecciones);
+app.use(rutasIntervenciones);
 
-// Pantalla de inicio: por ahora solo saluda; cada comportamiento agrega aquí su enlace.
+// Pantalla de inicio: los accesos de cada rol. Muestra una vez el aviso de la última acción (por ejemplo, PIN cambiado).
 app.get('/', requerirSesion, (req, res) => {
-  res.render('inicio', { usuario: req.session.usuario });
+  const aviso = req.session.aviso || null;
+  delete req.session.aviso;
+  res.render('inicio', { usuario: req.session.usuario, aviso });
 });
 
 // Errores no previstos: se muestran en español y no se filtra información interna.

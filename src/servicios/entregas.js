@@ -1,8 +1,9 @@
 // CMP-04 · Registrar la entrega a la organización receptora.
 const { pool, consultar } = require('../db/conexion');
 
+// Solo las activas: una organización desactivada no se puede elegir al entregar (CA-12.5).
 async function listarOrganizaciones() {
-  const r = await consultar('SELECT id, nombre, zona, refrigeracion FROM organizaciones ORDER BY nombre');
+  const r = await consultar('SELECT id, nombre, zona, refrigeracion, telefono FROM organizaciones WHERE activa ORDER BY nombre');
   return r.rows;
 }
 
@@ -19,6 +20,7 @@ async function motivoEntrega(codigo, voluntarioId) {
   const donacion = r.rows[0];
 
   if (!donacion) return { motivo: 'no_existe' };
+  if (donacion.estado === 'cancelada') return { motivo: 'cancelada', donacion };
   if (donacion.estado === 'entregada') return { motivo: 'ya_entregada', donacion };
   if (donacion.estado !== 'asignada') return { motivo: 'no_asignada', donacion };
   if (donacion.voluntario_id !== voluntarioId) return { motivo: 'otro_voluntario', donacion };
@@ -53,7 +55,9 @@ function validarEntrega(cuerpo, organizaciones) {
 // (ADR-001): solo cambia si sigue «asignada» y es de este voluntario. La fecha y hora las pone el servidor
 // (now()); el usuario no las puede escribir. El movimiento va en la misma transacción (RNF-05).
 // CA-04.6: no se mira la hora límite; aplica a la recogida, no a la entrega.
-async function registrarEntrega({ codigo, voluntarioId, organizacionId, recibidoPor }) {
+// CA-14.4: si la registra la coordinadora en nombre del voluntario, `registradaPorId` es ella: el movimiento
+// dice quién la registró y la donación sigue diciendo qué voluntario la entregó.
+async function registrarEntrega({ codigo, voluntarioId, organizacionId, recibidoPor, registradaPorId = null }) {
   let entregada = null;
 
   const cliente = await pool.connect();
@@ -73,7 +77,7 @@ async function registrarEntrega({ codigo, voluntarioId, organizacionId, recibido
     } else {
       await cliente.query("INSERT INTO movimientos (donacion_id, tipo, usuario_id) VALUES ($1, 'entrega', $2)", [
         actualizada.rows[0].id,
-        voluntarioId,
+        registradaPorId || voluntarioId,
       ]);
       await cliente.query('COMMIT');
       entregada = actualizada.rows[0];

@@ -2,7 +2,7 @@
 const { consultar } = require('../db/conexion');
 
 // Filtros de estado que se pueden pedir. «vencida» se calcula (disponible + hora límite cumplida), no se guarda.
-const FILTROS = ['disponible', 'asignada', 'entregada', 'vencida'];
+const FILTROS = ['disponible', 'asignada', 'entregada', 'vencida', 'cancelada'];
 
 const COLUMNAS = `d.codigo, d.tipo_alimento, d.cantidad, d.unidad, d.estado, d.hora_limite, d.creada_en,
                   donante.nombre AS donante_nombre,
@@ -19,7 +19,7 @@ async function listarTodas({ estado = null } = {}) {
       WHERE $1::text IS NULL
          OR ($1 = 'vencida'    AND d.estado = 'disponible' AND d.hora_limite <= now())
          OR ($1 = 'disponible' AND d.estado = 'disponible' AND d.hora_limite >  now())
-         OR ($1 IN ('asignada', 'entregada') AND d.estado = $1)
+         OR ($1 IN ('asignada', 'entregada', 'cancelada') AND d.estado = $1)
       ORDER BY d.creada_en DESC, d.id DESC
       LIMIT 200`,
     [filtro]
@@ -28,11 +28,13 @@ async function listarTodas({ estado = null } = {}) {
 }
 
 // CA-05.6: las donaciones de un donante (las que él registró y las que la coordinadora registró a su nombre).
+// CA-15.2: con el nombre y el teléfono del voluntario que va a recogerla.
 async function listarDeDonante(donanteId) {
   const r = await consultar(
-    `SELECT ${COLUMNAS}
+    `SELECT ${COLUMNAS}, voluntario.nombre AS voluntario_nombre, voluntario.telefono AS voluntario_telefono
        FROM donaciones d
        JOIN usuarios donante ON donante.id = d.donante_id
+       LEFT JOIN usuarios voluntario ON voluntario.id = d.voluntario_id
       WHERE d.donante_id = $1
       ORDER BY d.creada_en DESC, d.id DESC
       LIMIT 200`,

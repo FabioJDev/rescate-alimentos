@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Restablecer PIN · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/usuarios', volverNombre: 'Usuarios' }) %>
+  <h1>¿Restablecer el PIN de «<%= usuario.nombre %>»?</h1>
+
+  <p>Se genera un PIN temporal nuevo y el anterior deja de servir. Si tiene la aplicación abierta en algún
+    celular, tendrá que volver a entrar, y al hacerlo deberá cambiar el PIN temporal por uno propio.</p>
+
+  <form method="post" action="/usuarios/<%= usuario.id %>/restablecer-pin">
+    <button type="submit">Sí, restablecer el PIN</button>
+  </form>
+
+  <p><a class="boton boton-secundario" href="/usuarios">No, volver</a></p>
+</body>
+</html>

@@ -30,4 +30,19 @@ function tiempoRestante(horaLimite, ahora = new Date()) {
   return resto === 0 ? `${horas} h` : `${horas} h ${resto} min`;
 }
 
-module.exports = { ZONA, horaBogotaAIso, formatearFechaHora, formatearHora, tiempoRestante };
+// Lo contrario de horaBogotaAIso: una fecha como valor de un <input type="datetime-local"> en hora de
+// Colombia («2026-10-29T18:30»), para mostrar en el formulario de corregir la hora que ya tenía (CMP-13).
+function fechaParaCampo(fecha) {
+  const texto = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: ZONA,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(fecha);
+  return texto.replace(' ', 'T');
+}
+
+module.exports = { ZONA, horaBogotaAIso, formatearFechaHora, formatearHora, tiempoRestante, fechaParaCampo };

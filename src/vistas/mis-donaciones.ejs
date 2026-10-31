@@ -20,6 +20,9 @@
           <p class="tarjeta-titulo"><%= d.codigo %> · <%= d.tipo_alimento %> · <%= d.cantidad %> <%= d.unidad %></p>
           <p class="estado <%= d.estadoClase %>"><strong><%= d.estadoTexto %></strong></p>
           <p>Hora límite: <%= d.horaLimiteTexto %></p>
+          <% if (d.estado === 'asignada') { %>
+            <p>Va a recogerla: <strong><%= d.voluntario_nombre %></strong> · <%- include('_telefono', { telefono: d.voluntario_telefono, sinTelefono: 'sin teléfono registrado' }) %></p>
+          <% } %>
           <p><a href="/donaciones/<%= d.codigo %>">Ver estado e historial</a></p>
         </li>
       <% }) %>

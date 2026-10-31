@@ -347,8 +347,11 @@ no tiene el alimento la donación queda «disponible» y un voluntario puede ir 
   entonces se rechaza con «Esta donación ya fue entregada el [fecha] a [organización]» o «Esta donación ya fue
   cancelada».
 - **CA-13.8** Dados un donante que corrige o cancela y un voluntario que toma la misma donación al mismo tiempo,
-  entonces exactamente una acción gana; si ganó la toma, el donante recibe el rechazo de CA-13.4 (misma garantía que
-  ADR-001).
+  entonces la donación nunca queda en un estado inconsistente: si la toma llegó primero, la corrección o la
+  cancelación se rechaza con CA-13.4; entre cancelar y tomar exactamente una gana, y si ganó la cancelación el
+  voluntario ve «Esta donación fue cancelada. No vayas al punto de recogida.» (misma garantía que ADR-001).
+  *(Precisado al construir: una corrección que llega antes de la toma no impide tomarla, porque la donación sigue
+  disponible; solo cancelar y tomar se excluyen.)*
 - **CA-13.9** Dada una donación cancelada, cuando se consulta, entonces el detalle la muestra «Cancelada» con su
   motivo, «Todas las donaciones» se puede filtrar por «Canceladas» y el reporte la cuenta aparte (CA-07.1).
 - **CA-13.10** Dado un voluntario, cuando intenta corregir o cancelar una donación, entonces se rechaza (RNF-04).

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Organizaciones · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca') %>
+  <h1>Organizaciones receptoras</h1>
+
+  <% if (aviso) { %><p class="exito" role="status"><%= aviso %></p><% } %>
+
+  <p><a class="boton" href="/organizaciones/nueva">Crear organización</a></p>
+
+  <% if (organizaciones.length === 0) { %>
+    <p class="vacio">Todavía no hay organizaciones.</p>
+  <% } else { %>
+    <ul class="lista-donaciones">
+      <% organizaciones.forEach((o) => { %>
+        <li class="tarjeta">
+          <p class="tarjeta-titulo"><%= o.nombre %><%= o.activa ? '' : ' (desactivada)' %></p>
+          <p><%= o.direccion %> · zona <%= o.zona %></p>
+          <p>Refrigeración: <%= o.refrigeracion ? 'sí' : 'no' %> · Teléfono: <%= o.telefono || 'sin registrar' %></p>
+          <p><a href="/organizaciones/<%= o.id %>/editar">Editar datos</a></p>
+          <form method="post" action="/organizaciones/<%= o.id %>/<%= o.activa ? 'desactivar' : 'activar' %>">
+            <button type="submit" class="secundario"><%= o.activa ? 'Desactivar' : 'Activar' %></button>
+          </form>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</body>
+</html>

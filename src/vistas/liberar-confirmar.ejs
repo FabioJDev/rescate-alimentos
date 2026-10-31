@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Liberar <%= donacion.codigo %> · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/donaciones/' + donacion.codigo, volverNombre: 'Donación ' + donacion.codigo }) %>
+  <h1>¿Liberar la donación <%= donacion.codigo %>?</h1>
+
+  <div class="tarjeta tarjeta-estado-asignada">
+    <p class="tarjeta-titulo"><%= donacion.tipo_alimento %> · <%= Number(donacion.cantidad) %> <%= donacion.unidad %></p>
+    <p>La tiene: <strong><%= donacion.voluntario_nombre %></strong></p>
+  </div>
+
+  <p>Deja de ser de <%= donacion.voluntario_nombre %> y vuelve a la lista de donaciones disponibles para que otro
+    voluntario la tome. Avísale a <%= donacion.voluntario_nombre %> que ya no tiene que recogerla.</p>
+
+  <form method="post" action="/donaciones/<%= donacion.codigo %>/liberar">
+    <input type="hidden" name="voluntario_actual" value="<%= donacion.voluntario_id %>">
+    <button type="submit">Sí, liberar la donación</button>
+  </form>
+
+  <p><a class="boton boton-secundario" href="/donaciones/<%= donacion.codigo %>">No, volver</a></p>
+</body>
+</html>

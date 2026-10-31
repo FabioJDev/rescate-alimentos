@@ -1,0 +1,6 @@
+<%# CMP-15: un teléfono como enlace para llamar desde el celular. Recibe { telefono, sinTelefono }. %>
+<% if (telefono) { %>
+  <a class="telefono" href="tel:<%= telefono.replace(/[^\d+]/g, '') %>"><%= telefono %></a>
+<% } else { %>
+  <span class="nota"><%= sinTelefono %></span>
+<% } %>
