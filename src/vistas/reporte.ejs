@@ -71,5 +71,23 @@
 
     <p><a class="boton" href="/reporte.csv?desde=<%= periodo.desde %>&amp;hasta=<%= periodo.hasta %>">Descargar CSV</a></p>
   <% } %>
+
+  <% if (!error && locals.atenciones) { %>
+    <%# CA-20.5: una cifra por organización y por día; una persona que vino dos días cuenta dos veces. %>
+    <h2>Personas atendidas</h2>
+    <p>Atenciones (personas por día) en el periodo: <strong data-atenciones-total><%= atenciones.total.toLocaleString('es-CO') %></strong></p>
+    <% if (atenciones.porOrganizacion.length === 0) { %>
+      <p class="vacio">Ninguna organización registró personas atendidas en este periodo.</p>
+    <% } else { %>
+      <ul class="resumen">
+        <% atenciones.porOrganizacion.forEach((o) => { %>
+          <li><%= o.nombre %>: <strong data-atenciones="<%= o.nombre %>"><%= o.personas.toLocaleString('es-CO') %></strong> (<%= o.dias %> día(s) reportados)</li>
+        <% }) %>
+      </ul>
+      <p class="nota">Cada organización reporta una cifra por día, así que un mismo reporte no se suma dos veces. Una persona que
+        vino dos días distintos cuenta dos veces: son atenciones, no personas distintas.</p>
+      <p><a class="boton boton-secundario" href="/reporte/atenciones.csv?desde=<%= periodo.desde %>&amp;hasta=<%= periodo.hasta %>">Descargar CSV de personas atendidas</a></p>
+    <% } %>
+  <% } %>
 </body>
 </html>

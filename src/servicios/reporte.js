@@ -181,4 +181,13 @@ function aCsv(filas) {
   return `﻿${lineas.join('\r\n')}\r\n`;
 }
 
-module.exports = { leerPeriodo, obtenerReporte, listarParaCsv, aCsv, hoyEnColombia };
+// CA-20.5: el CSV de atenciones (personas por día), con las mismas reglas de celdas y la marca BOM para Excel.
+function atencionesACsv(filas) {
+  const lineas = [['Fecha', 'Organización', 'Personas atendidas', 'Registró', 'Corrigió'].map(celda).join(',')];
+  for (const f of filas) {
+    lineas.push([f.fecha, f.organizacion, f.personas, f.registrada_por, f.corregida_por].map(celda).join(','));
+  }
+  return `﻿${lineas.join('\r\n')}\r\n`;
+}
+
+module.exports = { leerPeriodo, obtenerReporte, listarParaCsv, aCsv, atencionesACsv, hoyEnColombia };
