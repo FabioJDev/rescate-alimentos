@@ -1,21 +1,36 @@
 // CMP-21 · «Por vencer» y «Avisar» (solo la coordinadora, CA-21.7).
 const express = require('express');
 const { requerirRol } = require('../middleware/autenticacion');
-const { listarPorVencer, buscarParaAvisar, avisosPara, vencePronto } = require('../servicios/por-vencer');
+const {
+  listarPorVencer,
+  listarSinEntrega,
+  recordatorioSinEntrega,
+  buscarParaAvisar,
+  avisosPara,
+  vencePronto,
+} = require('../servicios/por-vencer');
 const { formatearFechaHora, tiempoRestante } = require('../utilidades/fechas');
 
 const router = express.Router();
 const soloCoordinadora = requerirRol('coordinadora');
 
-// CA-21.2.
+// CA-21.2 y CA-21.8.
 router.get('/por-vencer', soloCoordinadora, async (req, res, next) => {
   try {
+    const ahora = new Date();
     const donaciones = (await listarPorVencer()).map((d) => ({
       ...d,
       cantidad: Number(d.cantidad),
-      restante: tiempoRestante(d.hora_limite),
+      restante: tiempoRestante(d.hora_limite, ahora),
     }));
-    res.render('por-vencer', { donaciones });
+    const sinEntrega = (await listarSinEntrega()).map((d) => ({
+      ...d,
+      cantidad: Number(d.cantidad),
+      // Tiempo desde la hora límite hasta ahora (los argumentos van al revés que en «restante»).
+      vencioHace: tiempoRestante(ahora, d.hora_limite),
+      enlace: recordatorioSinEntrega(d),
+    }));
+    res.render('por-vencer', { donaciones, sinEntrega });
   } catch (error) {
     next(error);
   }

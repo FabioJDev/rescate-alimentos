@@ -110,6 +110,12 @@ En el inicio, **Por vencer** dice cuántas donaciones sin entregar tienen **una 
 3. Pulsa **Enviar por WhatsApp** junto a cada persona: se abre WhatsApp con el mensaje ya escrito (y, para los voluntarios,
    el enlace para tomarla). Revísalo y envíalo desde tu WhatsApp. Si alguien no tiene teléfono registrado, la página lo dice.
 
+**Tomadas sin entrega.** Debajo, en la misma pantalla, están las donaciones que alguien tomó, ya pasaron su hora límite y
+nadie registró la entrega. En el inicio, junto a «Por vencer», dice **sin entrega: N** si hay alguna. Lo más común es que la
+hayan entregado y olvidado registrarla: pulsa **Recordarle por WhatsApp** y, si confirma que sí la entregó, entra a **Ver
+detalle** y usa **Registrar entrega en su nombre**. Si no pudo recogerla, **Liberar**. Así el reporte del periodo cuenta
+bien lo que se rescató.
+
 ### Cuando una donación se traba
 
 En el detalle de una donación **asignada**, la coordinadora tiene tres botones:

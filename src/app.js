@@ -32,6 +32,7 @@ const rutasFotos = require('./rutas/fotos');
 const rutasSolicitudes = require('./rutas/solicitudes');
 const { contarPorVencer } = require('./servicios/por-vencer');
 const { contarPendientes: contarSolicitudesPendientes } = require('./servicios/solicitudes');
+const { contarSinEntrega } = require('./servicios/por-vencer');
 
 const app = express();
 const enProduccion = process.env.NODE_ENV === 'production';
@@ -145,7 +146,9 @@ app.get('/', requerirSesion, async (req, res, next) => {
     // CA-24.7: y cuántas solicitudes de acceso esperan revisión.
     const porVencer = usuario.rol === 'coordinadora' ? await contarPorVencer() : 0;
     const solicitudesPendientes = usuario.rol === 'coordinadora' ? await contarSolicitudesPendientes() : 0;
-    res.render('inicio', { usuario, aviso, porVencer, solicitudesPendientes });
+    // CA-21.9: y cuántas tomadas siguen sin entrega después de su hora límite.
+    const sinEntrega = usuario.rol === 'coordinadora' ? await contarSinEntrega() : 0;
+    res.render('inicio', { usuario, aviso, porVencer, solicitudesPendientes, sinEntrega });
   } catch (error) {
     next(error);
   }
