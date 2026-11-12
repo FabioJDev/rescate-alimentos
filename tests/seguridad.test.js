@@ -85,6 +85,16 @@ describe('T-SEG.1 · Formularios de otros sitios y cabeceras de seguridad', () =
     const estilos = await request(app).get('/estilos.css');
     expect(estilos.headers['x-content-type-options']).toBe('nosniff');
   });
+
+  test('CA-SEG.3 · ninguna vista tiene JavaScript en línea (la política lo bloquearía en silencio)', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const carpeta = path.join(__dirname, '..', 'src', 'vistas');
+    const conJsEnLinea = fs
+      .readdirSync(carpeta)
+      .filter((archivo) => /\son[a-z]+\s*=/i.test(fs.readFileSync(path.join(carpeta, archivo), 'utf8')));
+    expect(conJsEnLinea).toEqual([]);
+  });
 });
 
 describe('T-SEG.2 · Registro de errores con código', () => {
