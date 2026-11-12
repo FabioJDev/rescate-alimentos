@@ -24,7 +24,7 @@ Necesitas Node.js 20 o superior y una base de datos PostgreSQL (local o en Neon)
 4. Cargar los datos de demostración: `npm run db:semilla`
    (para borrar todo y volver a cargarlos: `npm run db:semilla -- --reiniciar`)
 5. Arrancar: `npm start` y abrir http://localhost:3000
-6. Pruebas automáticas: `npm test` (necesitan la base de datos del paso 2)
+6. Pruebas automáticas: `npm test` (necesitan la base de datos del paso 2). Para ver qué prueba cubre cada criterio: `npm run cobertura:criterios`
 
 **Usuarios de demostración** (los PIN son solo para demostración):
 
@@ -116,6 +116,8 @@ Para quien reciba el proyecto y quiera seguir construyéndolo.
 - [Plan técnico](docs/spec/plan-tecnico.md): arquitectura, modelo de datos y despliegue.
 - [Decisiones de arquitectura](docs/decisiones/): ADR.
 - [Cómo revisar un PR](docs/qa/como-revisar.md) y [plan de pruebas](docs/qa/plan-de-pruebas.md).
+- [Cobertura por criterio](docs/qa/cobertura-por-criterio.md): qué pruebas nombran a cada uno de los criterios. Se genera
+  con `npm run cobertura:criterios`, que falla si alguno se queda sin prueba.
 
 ## Uso de asistentes de IA
 

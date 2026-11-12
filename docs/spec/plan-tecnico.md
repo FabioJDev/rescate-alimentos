@@ -75,6 +75,21 @@ Con la seguridad y los requerimientos que faltaban (CMP-16 a CMP-23):
   corregida_en. **Única por (organizacion_id, fecha)**: es lo que impide el doble conteo.
 - **`fotos_donacion`** (CMP-23): donacion_id, tipo, datos (bytea), bytes. Ver ADR-007.
 
+Con lo agregado el 12 de noviembre (CMP-24, CMP-25 y mejoras):
+
+- **`solicitudes_acceso`** (CMP-24, migración 017): id, nombre, telefono, rol (`donante` | `voluntario` |
+  `organizacion`), zona, direccion, organizacion_id, estado (`pendiente` | `aprobada` | `rechazada`), motivo_rechazo,
+  creada_en, resuelta_en, resuelta_por_id, usuario_creado_id. Un índice único parcial impide dos solicitudes pendientes
+  con el mismo nombre (CA-24.5). El límite de 5 solicitudes por hora por origen (CA-24.12) reutiliza `intentos_ingreso`
+  con la clave `solicitud:<dirección IP>`: no necesitó tabla nueva.
+- **Índices** (migración 018): sobre `donaciones` para cada lista frecuente (por fecha de creación, por comercio, por
+  voluntario con asignadas, por organización con entregadas y por destino). No cambian ningún resultado.
+- **`registro_administracion`** (CMP-25, migración 019): id, ocurrido_en, usuario_id, accion, detalle. Las acciones
+  sobre las donaciones siguen en `movimientos`; esta tabla es para usuarios, PIN, zonas, organizaciones y solicitudes.
+  Nunca guarda un PIN.
+- «Tomadas sin entrega» (CA-21.8) **se calcula, no se guarda**, igual que «vencida»: una donación `asignada` con la
+  `hora_limite` cumplida.
+
 ## 4. Integraciones
 
 Ninguna externa obligatoria: sin mapas, sin SMS, sin notificaciones. Por costo, y porque la geolocalización
@@ -154,3 +169,20 @@ Ninguna. Si aparece alguna, se argumenta en esta sección.
 | T-22.1 · Kilos aproximados | CMP-22 | `feat/CMP-22-kilos` |
 | T-23.1 · Foto opcional | CMP-23 | `feat/CMP-23-foto` |
 | T-SEG.3 · Manual de operación actualizado | — | `docs/manual-seguridad-requerimientos` |
+
+## Tareas del 12 de noviembre (después del corte de la 3C)
+
+Cada una entró por su propio pull request, con la especificación cambiada primero.
+
+| Tarea | Criterios | Pull request |
+|---|---|---|
+| Vence pronto en rojo | CA-21.5 | #109 |
+| Elegir cualquier zona activa | CA-02.6 | #110, arreglo en #112 |
+| Solicitar acceso | CA-24.1 a CA-24.11 | #111 (cierra la tarjeta #107) |
+| Mensaje de hora límite con fecha y hora | CA-01.3 | #113 |
+| Límite de solicitudes e historial de resueltas | CA-24.12 y CA-24.13 | #114 |
+| «Todas las donaciones» por páginas | CA-05.7 | #115 |
+| Índices de la base de datos | — | #116 |
+| Tomadas sin entrega | CA-21.8 y CA-21.9 | #117 |
+| CSV para Excel en español | CA-07.7 | #118 |
+| Registro de cambios | CA-25.1 a CA-25.6 | #119 |
