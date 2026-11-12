@@ -460,6 +460,9 @@ límite, se adivina en minutos.
   avisa a la coordinadora con este código: [código]» y nunca ve detalles internos.
 - **CA-SEG.5** Dado un error inesperado, cuando ocurre, entonces el registro del servidor (Logs de Render) guarda una
   línea con el mismo código, la fecha, la ruta, el usuario (si había sesión) y el error, para encontrarlo después.
+- **CA-SEG.6** Dada una dirección que no existe (escrita mal o de un enlace viejo), cuando se abre, entonces responde
+  «No encontramos esa página» en español, con el acceso para volver, y no la página del servidor en inglés («Cannot GET
+  …»). *(Nuevo: la guía de la 3C pide una sola lengua en toda la interfaz, y esa página era la única en inglés.)*
 
 ## CMP-17 · Nombres de usuario fáciles de distinguir y de escribir
 
@@ -697,7 +700,7 @@ acceso desde la página de ingreso se agregó como CMP-24, y el registro de las 
 | CMP-14 | CA-14.1 a CA-14.7 | RF-03, RF-08, RF-09, RNF-05 | 2 · Coordinación de recogida | `tests/cmp-14.test.js` |
 | CMP-15 | CA-15.1 a CA-15.4 | RF-03, RNF-04 | 2 · Coordinación de recogida | `tests/cmp-15.test.js` |
 | CMP-16 | CA-16.1 a CA-16.6 | RNF-04 | 5 · Responsabilidad sanitaria | `tests/cmp-16.test.js` |
-| T-SEG.1 y T-SEG.2 | CA-SEG.1 a CA-SEG.5 | RNF-04, RNF-08 | — | `tests/seguridad.test.js` |
+| T-SEG.1 y T-SEG.2 | CA-SEG.1 a CA-SEG.6 | RNF-04, RNF-08 | — | `tests/seguridad.test.js` |
 | CMP-17 | CA-17.1 a CA-17.3 | RNF-03, RNF-04 | — | `tests/cmp-17.test.js` |
 | CMP-18 | CA-18.1 a CA-18.5 | RNF-04 | — | `tests/cmp-18.test.js` |
 | CMP-19 | CA-19.1 a CA-19.9 | RF-04, RF-05 | 3 · Planeación en la recepción | `tests/cmp-19.test.js` |
