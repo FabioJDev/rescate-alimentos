@@ -7,6 +7,10 @@ Este documento separa con cuidado **qué se ejecutó** y **quién lo verificó**
 automáticas las corre el CI; la verificación independiente a mano la tiene que hacer una persona distinta de quien
 escribió el código. La verificación independiente se hizo el 29 de octubre de 2026 y está en la sección 5, con lo que sí se probó y lo que no.
 
+La tabla completa de **los 173 criterios** (CMP-01 a CMP-25 y T-SEG), con qué archivo y cuántas pruebas nombran a cada uno, está
+en [`cobertura-por-criterio.md`](cobertura-por-criterio.md). No se edita a mano: se genera con `npm run cobertura:criterios`,
+que además falla si algún criterio se queda sin prueba.
+
 ## 1. Estrategia
 
 | Tipo | Con qué | Qué cubre |
@@ -29,6 +33,9 @@ octubre, se había corrido con los CMP-01 a CMP-05 (9 archivos y 107 pruebas). E
 | Archivos de prueba | 12 de 12 pasan |
 | Pruebas | **134 de 134 pasan**, 0 fallan |
 | CI en `main` | check «pruebas» en verde en el último commit |
+
+Última ejecución en el CI: 12 de noviembre de 2026 sobre `main` (commit 4121a3f, con CMP-01 a CMP-25): **31 archivos y
+287 pruebas, todas pasan**.
 
 ## 3. Cobertura por criterio
 
@@ -55,6 +62,7 @@ demostración (Panadería La Espiga `4444`, Ana `1111`, Bruno `2222`, Marcela `0
 | CA-02.3 | 2 | Por defecto la zona de Ana; «Ver todas las zonas» muestra también las del Sur |
 | CA-02.4 | 1 | Abrir el detalle de una donación vencida: «Vencida (no recogida)» |
 | CA-02.5 | 1 | Voluntario cuya zona no tiene donaciones: «No hay donaciones disponibles en este momento» |
+| CA-02.6 | 2 | En «Ver zona», elegir una zona distinta de la de Ana: la lista muestra solo esa zona; una zona inexistente en la dirección vuelve a la de Ana |
 
 ### CMP-03 · Tomar una donación (`tests/cmp-03.test.js` y `tests/cmp-03-concurrencia.test.js`)
 
@@ -88,6 +96,7 @@ demostración (Panadería La Espiga `4444`, Ana `1111`, Bruno `2222`, Marcela `0
 | CA-05.4 | 2 | Buscar `D-9999`: «No existe una donación con ese código» |
 | CA-05.5 | 8 | Marcela → Todas las donaciones → filtros Disponibles, Asignadas, Entregadas y Vencidas |
 | CA-05.6 | 5 | Panadería → Mis donaciones: solo las suyas, con su estado |
+| CA-05.7 | 4 | Con más de 50 donaciones: «página 1 de N», «Más antiguas» y «Más recientes»; el filtro se mantiene al cambiar de página |
 
 ### CMP-06 · Soltar una donación tomada (`tests/cmp-06.test.js`)
 
@@ -112,7 +121,7 @@ demostración (Panadería La Espiga `4444`, Ana `1111`, Bruno `2222`, Marcela `0
 | CA-07.4 | 1 | Poner «hasta» antes que «desde», o una fecha inválida: mensaje claro y sin datos |
 | CA-07.5 | 1 | Un periodo sin donaciones (por ejemplo enero de 2026): «No hay donaciones en este periodo» |
 | CA-07.6 | 1 | Ana o la panadería abren `/reporte` o `/reporte.csv`: «No tienes permiso» |
-| CA-07.7 | 1 | «Descargar CSV»: una fila por donación y las tildes bien; abrirlo en Excel |
+| CA-07.7 | 2 | «Descargar CSV»: una fila por donación y las tildes bien; abrirlo con doble clic en Excel en español: cada dato en su columna (separador punto y coma, decimales con coma) |
 
 ### CMP-08 · Registrar una donación sin conexión (`tests/cmp-08.test.js`)
 
@@ -128,6 +137,13 @@ Para quitar la señal en Chrome: herramientas de desarrollo (F12) → pestaña N
 | CA-08.6 | 1 | Sin conexión, abrir otra pantalla (por ejemplo `/`): «Sin conexión» |
 | CA-08.7 | 1 | Ana (voluntaria) intenta sincronizar: 403 |
 
+### CMP-09 a CMP-25 y T-SEG
+
+Administración (CMP-09 a CMP-15), seguridad y requerimientos del Módulo 1 (CMP-16 a CMP-23, T-SEG.1 y T-SEG.2), solicitar
+acceso (CMP-24) y registro de cambios (CMP-25): cada criterio, con sus archivos y cantidad de pruebas, está en
+[`cobertura-por-criterio.md`](cobertura-por-criterio.md). Los pasos a mano de cada uno están en el
+[manual de operación](../manual-operacion.md).
+
 ### Otras pruebas (no ligadas a un CA)
 
 | Archivo | Qué comprueba |
@@ -135,6 +151,7 @@ Para quitar la señal en Chrome: herramientas de desarrollo (F12) → pestaña N
 | `tests/salud.test.js` | La ruta `/salud` responde (la usa Render) |
 | `tests/base-de-datos.test.js` | Las tablas y las restricciones del modelo de datos (por ejemplo, que la base rechace una cantidad cero) |
 | `tests/autenticacion.test.js` | Ingreso con nombre y PIN, sesión, salida y control por rol |
+| `tests/arranque.test.js` | El arranque seguro en producción: sin semilla y con la primera coordinadora (T-ADM.3) |
 
 ## 4. Lo que se comprobó a mano hasta ahora (no es verificación independiente)
 
@@ -193,12 +210,24 @@ notas están en mi computador, fuera del repositorio.
 Ningún criterio de CMP-01 a CMP-08 quedó sin verificar. Quedan fuera la carga y el rendimiento en red 3G y la accesibilidad
 (ver la sección 6).
 
+#### Después del 29 de octubre (sin verificación independiente registrada aquí)
+
+Lo que se construyó o cambió después no tiene todavía una fila en la tabla de arriba. Cada cambio entró por un pull request
+con el check «pruebas» en verde (quién aprobó cada uno está en GitHub), pero eso no reemplaza recorrerlo a mano en la URL
+desplegada:
+
+- CMP-09 a CMP-23, T-SEG.1 y T-SEG.2 (31 de octubre).
+- CMP-24 y CMP-25, y los criterios nuevos o cambiados CA-01.3, CA-02.6, CA-05.7, CA-07.7, CA-21.8 y CA-21.9 (12 de noviembre).
+
+Quien los verifique agrega su fila en la tabla de la sección 5.
+
 ## 6. Riesgos y lo que este plan no cubre
 
 - **Modo sin conexión** (RNF-01): existe desde CMP-08 y tiene 12 pruebas automáticas. En la URL se probó en Chrome, con la
   conexión cortada desde las herramientas de desarrollo.
 - **Carga y rendimiento en red 3G** (RNF-07): no se midió; las páginas son livianas por diseño, pero no hay medición.
-- **Seguridad del ingreso:** el PIN de 4 dígitos no tiene límite de intentos ni protección CSRF con tokens (ver ADR-003).
+- **Seguridad del ingreso:** el PIN es de 4 dígitos (ADR-003). Desde CMP-16 hay límite de intentos (5 por nombre y 20 por
+  origen, 15 minutos) y desde T-SEG.1 se rechazan los formularios enviados desde otros sitios (ADR-006). No hay tokens CSRF.
 - **Accesibilidad:** no se hizo una auditoría; los estados van escritos y no solo en color.
 - **Dispositivos reales:** solo se probó con la vista de celular del navegador.
 - **Datos compartidos en las pruebas:** las pruebas crean sus propios datos con una marca única, pero comparten la base de datos de

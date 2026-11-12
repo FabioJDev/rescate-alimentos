@@ -3,7 +3,12 @@
 Equipo Overflow · Caso: Red de Rescate de Alimentos · Fundación Mesa Común.
 
 El núcleo del MVP (entrega 3B) son CMP-01 a CMP-05. CMP-06 a CMP-08 se agregaron en la 3C y CMP-09 a CMP-23 después
-(administración, seguridad y requerimientos del Módulo 1 que faltaban). Cada uno dice de dónde viene.
+(administración, seguridad y requerimientos del Módulo 1 que faltaban). El 12 de noviembre se agregaron CMP-24 (solicitar
+acceso) y CMP-25 (registro de cambios), y criterios nuevos en CMP-02, CMP-05 y CMP-21. Cada uno dice de dónde viene, y
+cada criterio cambiado dice qué cambió y por qué.
+
+Cada criterio tiene al menos una prueba automática que lo nombra: ver
+[`docs/qa/cobertura-por-criterio.md`](../qa/cobertura-por-criterio.md) (se genera con `npm run cobertura:criterios`).
 
 Esta especificación es la fuente de verdad. Si algo cambia, se cambia primero aquí (con su razón) y después
 el código. Los IDs (CMP-0X y CA-0X.Y) son estables: nunca se renumeran. Se escribe en presente.
@@ -43,6 +48,7 @@ unidad no es kg (CMP-22) y una foto (CMP-23).)*
 
 Donante (comercio), Voluntario y Coordinadora (Marcela y su equipo). Las organizaciones receptoras son datos
 (destino de la entrega); no inician sesión en el MVP. *(Desde CMP-19 sí inician sesión con el rol «organización».)*
+Quien todavía no tiene cuenta puede pedirla desde la página de ingreso (CMP-24); la coordinadora decide.
 
 ---
 
@@ -676,6 +682,19 @@ una donación, el reporte del periodo (RF-07) y el modo sin conexión para regis
 se agregaron en la 3C como CMP-06, CMP-07 y CMP-08. La administración se agregó como CMP-09 a CMP-15, y la seguridad y
 los requerimientos que faltaban como CMP-16 a CMP-23 y T-SEG.1 y T-SEG.2: ver [plan técnico](plan-tecnico.md). Solicitar
 acceso desde la página de ingreso se agregó como CMP-24, y el registro de las acciones de administración como CMP-25.
+
+**Pendiente, todavía sin especificar** (lo que haría falta para darlo por terminado):
+
+- **Topes al registrar.** Hoy la cantidad solo tiene que ser mayor que cero y la hora límite, futura: un error de dedo
+  («2000» en vez de «20», o el año 2062) entra al reporte. Haría falta un criterio en CMP-01 con un tope que pida revisar
+  la cantidad y una hora límite máxima de pocos días.
+- **«Mis donaciones» por páginas.** Muestra las últimas 200; un comercio que dona tres veces por semana llega ahí en más
+  de un año. Haría falta un criterio en CMP-05 igual a CA-05.7.
+- **Respaldo de los datos.** No hay una rutina escrita para recuperar datos borrados o dañados. Haría falta una tarea de
+  operación (descargar los CSV cada mes y cómo pedir una restauración en Neon) y una sección en el manual.
+- **Página de «no existe» en español.** Una dirección mal escrita muestra la página por defecto del servidor en inglés.
+- **Mantener Render despierto.** El plan gratis se duerme a los 15 minutos; se decidió no agregar una consulta periódica
+  por ahora (ver ADR-002).
 
 ## Tabla de trazabilidad
 

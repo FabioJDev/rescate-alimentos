@@ -11,6 +11,7 @@
     "start": "node src/servidor.js",
     "dev": "node --watch src/servidor.js",
     "test": "jest --runInBand",
+    "cobertura:criterios": "node scripts/cobertura-por-criterio.js",
     "db:migrar": "node src/db/migrar.js",
     "db:semilla": "node src/db/semilla.js",
     "db:primera-coordinadora": "node src/db/primera-coordinadora.js"

@@ -4,7 +4,8 @@ Artefacto del UX Designer (Fabio Jordan). Lista las pantallas reales del MVP, co
 criterios de aceptación (CA) que cubre cada una. Derivadas de los wireframes del Módulo 1.
 
 Las capturas son de la aplicación funcionando, en vista de celular (360 × 760 px), con los datos de la semilla de
-demostración, tomadas el 28 de octubre de 2026.
+demostración, tomadas el 28 de octubre de 2026. Las pantallas agregadas después (CMP-06 a CMP-25) están al final, en
+«Pantallas agregadas después del MVP», con su ruta y sus criterios, todavía sin captura.
 
 ## Principios de diseño
 
@@ -13,23 +14,30 @@ personas con poca familiaridad tecnológica (Módulo 1).
 
 - **Pocos pasos (RNF-03).** Desde la pantalla de partida: publicar una donación son 3 pasos (abrir, llenar, enviar);
   tomarla son 2 (pulsar «Tomar», confirmar); registrar su entrega son 3 (pulsar «Registrar entrega», llenar, confirmar).
-- **Livianas (RNF-02 y RNF-07).** Las páginas se generan en el servidor con HTML y CSS; no llevan JavaScript ni
-  imágenes, para que carguen rápido con datos limitados o red 3G.
+- **Livianas (RNF-02 y RNF-07).** Las páginas se generan en el servidor con HTML y CSS, para que carguen rápido con datos
+  limitados o red 3G. El poco JavaScript que hay (`interaccion.js`, el modo sin conexión de CMP-08 y achicar la foto de
+  CMP-23) va en archivos aparte y solo mejora la comodidad: si no carga, todo sigue funcionando. Ninguna vista lleva
+  JavaScript en línea (lo bloquea la política de seguridad y lo vigila una prueba, CA-SEG.3).
 - **Móvil primero.** Una sola columna, campos y botones grandes (alto mínimo de 48 px) y texto de 17,6 px.
 - **Errores claros y junto al campo.** El mensaje dice qué falta y la pantalla conserva lo ya escrito (CA-01.2, CA-04.3).
 - **El estado no depende solo del color.** Siempre va escrito («Disponible», «Asignada», «Entregada», «Vencida (no
   recogida)»); el color solo refuerza.
-- **Confirmar antes de tomar.** En el MVP un voluntario no puede soltar una donación (decisión de alcance de CMP-03),
-  por eso «Tomar» pide una confirmación.
+- **Confirmar antes de tomar.** En el MVP un voluntario no podía soltar una donación (decisión de alcance de CMP-03),
+  por eso «Tomar» pide una confirmación. Desde la 3C puede soltarla (CMP-06), también con confirmación.
+- **La urgencia se ve en rojo.** Lo que vence en una hora o menos se marca en rojo con «Vence pronto» (CA-21.5), igual
+  en las listas del voluntario y de la organización.
 - **Todo en español**, con las palabras del caso (donación, recogida, comercio).
 
 ## Mapa de navegación por rol
 
 | Rol | Pantallas a las que llega desde el inicio |
 |---|---|
+| Sin cuenta | Ingresar · Solicitar acceso (CMP-24) · Aviso de privacidad |
 | Donante (comercio) | Publicar donación · Mis donaciones · Buscar donación |
-| Voluntario | Donaciones disponibles → Tomar → Mis recogidas → Registrar entrega · Buscar donación |
-| Coordinadora | Registrar donación de un comercio · Todas las donaciones · Buscar donación |
+| Voluntario | Donaciones disponibles (con «Ver zona») → Tomar → Mis recogidas → Registrar entrega o soltar · Buscar donación |
+| Organización receptora | Donaciones para recibir → Pedir · Vienen para nosotros · Recibidas · Personas atendidas |
+| Coordinadora | Por vencer y tomadas sin entrega · Registrar donación de un comercio · Todas las donaciones · Reporte del periodo · Personas atendidas · Buscar donación |
+| Coordinadora (Administración) | Usuarios · Organizaciones · Zonas · Solicitudes de acceso · Registro de cambios |
 
 Todas las pantallas del detalle de una donación están a un enlace de distancia («Ver estado e historial»).
 
@@ -207,19 +215,46 @@ y vencidas).
 
 <img src="capturas/18-todas-las-donaciones.jpg" width="260" alt="Lista de todas las donaciones con filtro por estado">
 
+## Pantallas agregadas después del MVP
+
+Todavía sin captura. Todas siguen los mismos principios de arriba.
+
+| Pantalla | Rol | Ruta | CMP / CA |
+|---|---|---|---|
+| Soltar una donación (confirmar) | Voluntario | `/donaciones/:codigo/soltar` | CMP-06 |
+| Reporte del periodo y CSV | Coordinadora | `/reporte`, `/reporte.csv` | CMP-07 · CSV con punto y coma para Excel en español (CA-07.7) |
+| Sin conexión | Todos | `/sin-conexion` | CMP-08 · CA-08.6 |
+| Zonas, Usuarios, Organizaciones | Coordinadora | `/zonas`, `/usuarios`, `/organizaciones` | CMP-09, CMP-10, CMP-12 |
+| Cambiar mi PIN · Restablecer PIN | Todos · Coordinadora | `/mi-pin`, `/usuarios/:id/restablecer-pin` | CMP-11 |
+| Corregir o cancelar una donación | Donante · Coordinadora | `/donaciones/:codigo/corregir`, `…/cancelar` | CMP-13 |
+| Liberar, asignar o entregar en nombre de otro | Coordinadora | desde el detalle de la donación | CMP-14 |
+| Aviso de privacidad | Todos | `/privacidad` | CMP-18 |
+| Donaciones para recibir · Vienen para nosotros · Recibidas | Organización | `/para-recibir`, `/vienen`, `/recibidas` | CMP-19 |
+| Personas atendidas | Organización · Coordinadora | `/personas-atendidas` | CMP-20 |
+| Por vencer y tomadas sin entrega · Avisar por WhatsApp | Coordinadora | `/por-vencer`, `/donaciones/:codigo/avisar` | CMP-21 · CA-21.8 y CA-21.9 |
+| Foto de la donación | Todos con sesión | desde el detalle | CMP-23 |
+| Solicitar acceso · Solicitud enviada | Sin cuenta | `/solicitar-acceso` | CMP-24 · CA-24.1 a CA-24.6 y CA-24.12 |
+| Solicitudes de acceso (pendientes y resueltas) · Rechazar | Coordinadora | `/solicitudes` | CMP-24 · CA-24.7 a CA-24.13 |
+| Registro de cambios | Coordinadora | `/registro-cambios` | CMP-25 |
+
+Cambios en pantallas que ya estaban: «Donaciones disponibles» tiene el selector «Ver zona» (CA-02.6) y la pastilla del
+tiempo restante en rojo cuando vence pronto (CA-21.5); «Todas las donaciones» va por páginas de 50 (CA-05.7).
+
 ## Relación con los wireframes del Módulo 1
 
-| Wireframe del Módulo 1 | En el MVP |
-|---|---|
-| 1. Publicar donación (Donante) | Construida: «Publicar donación» |
-| 2. Donaciones cercanas (Organización receptora) | No se construyó: las organizaciones receptoras son datos y no inician sesión en el MVP (ver «Actores» en la especificación). El equivalente para el voluntario es «Donaciones disponibles». |
-| 3. Mis recogidas de hoy (Voluntario) | Construida: «Mis recogidas». Muestra todas las pendientes, no solo las de hoy. |
-| 4. Reporte del periodo (Fundación) | Fuera del alcance del MVP (RF-07); queda en el backlog de la 3C. |
+| Wireframe del Módulo 1 | En el MVP | Después |
+|---|---|---|
+| 1. Publicar donación (Donante) | Construida: «Publicar donación» | Con peso aproximado y foto opcionales (CMP-22 y CMP-23) |
+| 2. Donaciones cercanas (Organización receptora) | No se construyó: las organizaciones eran datos y no iniciaban sesión | Construida en CMP-19: «Donaciones para recibir», filtrada por refrigeración |
+| 3. Mis recogidas de hoy (Voluntario) | Construida: «Mis recogidas». Muestra todas las pendientes, no solo las de hoy. | Con «soltar» (CMP-06) y el tiempo restante en rojo |
+| 4. Reporte del periodo (Fundación) | Fuera del alcance del MVP (RF-07) | Construido en CMP-07, con kilos aproximados (CMP-22) y personas atendidas (CMP-20) |
 
 ## Limitaciones conocidas
 
-- **Tema oscuro.** Los estilos no fijan el color de fondo ni del texto. Al capturar, una de las pantallas salió con texto
-  negro sobre fondo oscuro cuando el navegador estaba en tema oscuro. Se corrige en un PR aparte.
+- **Tema oscuro.** Corregido en el PR #52: los estilos fijan fondo claro y texto oscuro aunque el teléfono esté en tema
+  oscuro.
+- **Páginas que no existen.** Una dirección mal escrita muestra la página por defecto del servidor, en inglés («Cannot
+  GET …»). Falta una página propia en español.
 - **Hora límite.** Usa el selector de fecha y hora del propio navegador. No se probó en teléfonos reales, solo en la vista
   de celular del navegador.
 - **Capturas.** Salen del entorno local con datos de demostración, no de la URL desplegada.
