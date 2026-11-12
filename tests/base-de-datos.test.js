@@ -61,4 +61,18 @@ describe('Modelo de datos', () => {
     const aplicadas = await migrar();
     expect(aplicadas).toEqual([]);
   });
+
+  test('Esquema · las listas frecuentes de donaciones tienen índice', async () => {
+    const r = await consultar("SELECT indexname FROM pg_indexes WHERE tablename = 'donaciones'");
+    const indices = r.rows.map((f) => f.indexname);
+    expect(indices).toEqual(
+      expect.arrayContaining([
+        'idx_donaciones_creada',
+        'idx_donaciones_donante',
+        'idx_donaciones_voluntario_asignada',
+        'idx_donaciones_organizacion_entregada',
+        'idx_donaciones_destino',
+      ])
+    );
+  });
 });
