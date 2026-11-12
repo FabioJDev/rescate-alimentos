@@ -207,7 +207,7 @@ describe('CMP-01 · Rechazos al registrar', () => {
     const envio = await agente.post('/donaciones').type('form').send(datosValidos({ hora_limite: haceUnaHora }));
 
     expect(envio.status).toBe(400);
-    expect(envio.text).toContain('La hora límite debe ser posterior a la hora actual');
+    expect(envio.text).toContain('La fecha y hora límite deben ser posteriores a la fecha y hora actuales');
     expect(await contarDonaciones()).toBe(antes);
   });
 
@@ -220,7 +220,7 @@ describe('CMP-01 · Rechazos al registrar', () => {
     const envio = await agente.post('/donaciones').type('form').send(datosValidos({ hora_limite: esteMinuto }));
 
     expect(envio.status).toBe(400);
-    expect(envio.text).toContain('La hora límite debe ser posterior a la hora actual');
+    expect(envio.text).toContain('La fecha y hora límite deben ser posteriores a la fecha y hora actuales');
     expect(await contarDonaciones()).toBe(antes);
   });
 

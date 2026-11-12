@@ -41,7 +41,7 @@ demostración (Panadería La Espiga `4444`, Ana `1111`, Bruno `2222`, Marcela `0
 |---|---|---|
 | CA-01.1 | 3 | Panadería → Publicar donación → llenar los 4 datos con hora límite futura → se ve el código y el estado «disponible» |
 | CA-01.2 | 6 | Dejar un campo vacío (por ejemplo el tipo) y publicar: no se registra, dice cuál falta y conserva lo escrito |
-| CA-01.3 | 2 | Hora límite de ayer: «La hora límite debe ser posterior a la hora actual» |
+| CA-01.3 | 2 | Hora límite de ayer: «La fecha y hora límite deben ser posteriores a la fecha y hora actuales» |
 | CA-01.4 | 5 | Cantidad `0`, `-3`, `muchas` y vacía: cada una con su mensaje; `5,5` se acepta |
 | CA-01.5 | 9 | Marcela → Registrar donación de un comercio → elegir comercio → en el historial dice «Registrada por Marcela» y el comercio la ve en «Mis donaciones» |
 | CA-01.6 | 1 | Que todo esté en una sola pantalla con 4 campos obligatorios |
