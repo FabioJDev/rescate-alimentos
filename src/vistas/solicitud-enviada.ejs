@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solicitud enviada · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/ingreso', volverNombre: 'Ingresar' }) %>
+  <h1>Solicitud enviada</h1>
+
+  <p class="exito" role="status">Gracias, <strong><%= nombre %></strong>. Tu solicitud quedó registrada.</p>
+  <p>La coordinadora la va a revisar. Si la aprueba, te va a avisar por teléfono el PIN temporal con el que puedes
+    entrar la primera vez.</p>
+
+  <p><a class="boton" href="/ingreso">Volver a ingresar</a></p>
+</body>
+</html>

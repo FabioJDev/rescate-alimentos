@@ -19,7 +19,9 @@
       <% donaciones.forEach((d) => { %>
         <li class="tarjeta<%= d.estado === 'asignada' ? ' tarjeta-estado-asignada' : '' %>">
           <p class="tarjeta-titulo"><%= d.tipo_alimento %> · <%= d.cantidad %> <%= d.unidad %></p>
-          <p>Zona <%= d.zona %> · <%= d.estado === 'asignada' ? 'Ya va un voluntario a recogerla' : 'Quedan ' + d.restante + ' para recogerla' %></p>
+          <p>Zona <%= d.zona %> · <%= d.estado === 'asignada' ? 'Ya va un voluntario a recogerla' : '' %>
+            <% if (d.estado !== 'asignada') { %><span class="restante<%= d.vencePronto ? ' vence-pronto' : '' %>">Quedan <%= d.restante %> para recogerla</span><% } %>
+          </p>
           <a class="boton" href="/donaciones/<%= d.codigo %>/pedir">Pedir para nosotros</a>
           <p><a href="/donaciones/<%= d.codigo %>">Ver detalle</a></p>
         </li>

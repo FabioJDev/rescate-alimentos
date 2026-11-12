@@ -73,6 +73,12 @@ async function listarUsuarios({ rol = null } = {}) {
   return r.rows;
 }
 
+// CA-24.4: si ya existe un usuario con ese nombre (activo o no), no tiene sentido dejar solicitar acceso con él.
+async function existeUsuarioConNombre(nombre) {
+  const r = await consultar(`SELECT 1 FROM usuarios WHERE ${NOMBRE_NORMALIZADO_SQL} = $1`, [normalizarNombre(nombre)]);
+  return r.rows.length > 0;
+}
+
 async function buscarUsuario(id) {
   const r = await consultar(
     'SELECT id, nombre, rol, zona, telefono, direccion, activo, organizacion_id FROM usuarios WHERE id = $1',
@@ -272,10 +278,13 @@ async function restablecerPin(id, quienRestablece) {
 module.exports = {
   ROLES,
   NOMBRES_DE_ROL,
+  normalizarNombre,
+  NOMBRE_NORMALIZADO_SQL,
   autenticar,
   generarPin,
   listarUsuarios,
   buscarUsuario,
+  existeUsuarioConNombre,
   validarTelefono,
   validarUsuario,
   crearUsuario,

@@ -33,6 +33,9 @@ Se entra con **nombre y PIN de 4 números**. Cada comercio, voluntario, organiza
 nombre se puede escribir con mayúsculas o minúsculas («ana pérez» o «ANA PÉREZ»). Al terminar, pulsar **Salir** (sobre todo
 si el celular es compartido, para no actuar a nombre de otra persona).
 
+- Quien todavía no tiene cuenta puede pulsar **Solicita acceso** en la pantalla de ingreso, dejar su nombre, teléfono,
+  el rol que necesita y su zona (o su organización). La solicitud queda esperando a que la coordinadora la revise; no
+  crea ninguna cuenta por sí sola (ver «Solicitudes de acceso» abajo).
 - La **primera vez** que alguien entra, la página le muestra el **aviso de privacidad** (qué datos guarda la fundación y
   para qué) y debe pulsar **Acepto**. Después le pide **cambiar el PIN** que le dieron por uno propio. Hasta hacer las dos
   cosas no puede usar nada más. Así nadie más conoce su PIN, ni siquiera la coordinadora.
@@ -68,6 +71,11 @@ Todo esto está en el inicio, en **Administración**. Solo la coordinadora lo ve
   anterior deja de servir.
 - **Organizaciones → Crear organización.** Nombre, dirección, zona, si tiene refrigeración y teléfono (opcional). Una
   organización **desactivada** ya no aparece al registrar entregas, pero sus entregas pasadas siguen en el reporte.
+- **Solicitudes de acceso.** En el inicio, bajo Administración, el número de solicitudes esperando (se resalta si hay
+  alguna). Cada una muestra el nombre, el rol pedido, el teléfono y la zona u organización. Para aceptarla, pulsa
+  **Aprobar**: se crea el usuario igual que si lo hubieras creado a mano y aparece el PIN temporal para dárselo a la
+  persona. Para no aceptarla, pulsa **Rechazar** y escribe un motivo corto (lo puedes usar para explicárselo por
+  teléfono). Ninguna de las dos se puede repetir una vez resuelta.
 
 ### Donaciones del día a día
 
@@ -157,8 +165,8 @@ se guarda sin señal**: la página te avisa y la donación se envía sin ella.
 1. **Donaciones disponibles.** Aparecen solo las que todavía sirven, de la más urgente a la menos urgente, con el tiempo que
    queda. Por defecto se ve **tu zona**; en el selector **Ver zona** puedes elegir **Todas las zonas** o cualquier otra
    zona en particular (por ejemplo, si vas a estar de paso por otra parte de la ciudad). Las que tienen una hora o menos
-   dicen **Vence pronto**. Si una organización ya la pidió, dice **Llevar a:** con su nombre, dirección y teléfono. Si
-   tiene foto, la puedes ver en **Ver detalle**.
+   se marcan en **rojo** con **Vence pronto**: es la señal de que hay que apurarse. Si una organización ya la pidió, dice
+   **Llevar a:** con su nombre, dirección y teléfono. Si tiene foto, la puedes ver en **Ver detalle**.
 2. Pulsar **Tomar** y luego **Sí, tomar esta donación**. A partir de ahí es tuya y nadie más puede tomarla. La página muestra
    el **teléfono del comercio** por si necesitas llamarlo.
 3. Si otra persona la tomó antes, la página lo dice con su nombre y la hora, y pide **no ir** al punto de recogida. No pasa nada:

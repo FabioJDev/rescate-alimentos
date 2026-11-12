@@ -102,6 +102,11 @@
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 21s-7-6.5-7-12a7 7 0 0114 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>
         Zonas
       </a>
+      <%# CA-24.7: cuántas solicitudes de acceso esperan revisión. %>
+      <a class="accion<%= locals.solicitudesPendientes > 0 ? ' accion-urgente' : '' %>" href="/solicitudes">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>
+        Solicitudes de acceso: <strong><%= locals.solicitudesPendientes || 0 %></strong>
+      </a>
     </nav>
   <% } %>
 
