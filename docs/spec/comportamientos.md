@@ -573,7 +573,10 @@ Una donación está **por vencer** si le faltan 60 minutos o menos para la hora 
 - **CA-21.4** Dada una asignada por vencer, cuando la coordinadora abre «Avisar», entonces ve botones de WhatsApp para
   el voluntario que la tomó y para el comercio, con un recordatorio ya escrito.
 - **CA-21.5** Dado un voluntario, cuando abre «Mis recogidas» o «Donaciones disponibles», entonces las que están por
-  vencer se marcan con «Vence pronto».
+  vencer se marcan con «Vence pronto» y su tiempo restante se pinta **en rojo**; las demás no. *(Cambio por lo
+  señalado el 31 de octubre: el tiempo restante se quedaba en naranja aunque faltara menos de una hora y la alerta no se
+  notaba. El producto se arregló primero, en el PR #109, sin cambiar este criterio; aquí se corrige el criterio y se
+  agrega su prueba.)*
 - **CA-21.6** Dado un usuario sin teléfono registrado, cuando aparece en «Avisar», entonces se muestra «Sin teléfono
   registrado» en vez del botón.
 - **CA-21.7** Dado un usuario que no es coordinadora, cuando intenta abrir «Por vencer», entonces se rechaza (RNF-04).
