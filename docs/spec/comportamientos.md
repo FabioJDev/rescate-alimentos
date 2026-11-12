@@ -624,6 +624,14 @@ autoservicio sin perder el control: nadie entra a la aplicación sin que la coor
   (por ejemplo, dos pestañas abiertas), entonces se rechaza: ya está resuelta.
 - **CA-24.11** Dado alguien que no es coordinadora, cuando intenta abrir «Solicitudes de acceso» o resolver una,
   entonces se rechaza (RNF-04). El formulario para solicitar, en cambio, no pide sesión: es antes de tener cuenta.
+- **CA-24.12** Dado un mismo origen (dirección de internet) que ya envió 5 solicitudes en la última hora, cuando
+  envía otra, entonces se rechaza con un mensaje que pide intentar más tarde o llamar a la coordinadora, y no se guarda
+  nada. *(El formulario es público: sin límite, cualquiera podría llenar la lista de la coordinadora con solicitudes
+  falsas. Cinco por hora alcanzan para una familia o un comercio que comparten conexión.)*
+- **CA-24.13** Dada la coordinadora, cuando abre «Solicitudes de acceso», entonces debajo de las pendientes ve las
+  resueltas de los últimos 60 días, de la más reciente a la más antigua, con su estado (aprobada o rechazada), quién la
+  resolvió y cuándo, y el motivo si se rechazó. *(Si alguien llama a preguntar por qué no le dieron acceso, la
+  coordinadora necesita poder consultarlo.)*
 
 ## Fuera del alcance del MVP
 
@@ -662,4 +670,4 @@ acceso desde la página de ingreso se agregó como CMP-24.
 | CMP-21 | CA-21.1 a CA-21.7 | RF-10 | 1 · Gestión de donaciones | `tests/cmp-21.test.js` |
 | CMP-22 | CA-22.1 a CA-22.4 | RF-07 | 4 · Trazabilidad y reportes | `tests/cmp-22.test.js` |
 | CMP-23 | CA-23.1 a CA-23.5 | RF-01, RNF-02 | 1 · Gestión de donaciones | `tests/cmp-23.test.js` |
-| CMP-24 | CA-24.1 a CA-24.11 | RNF-04, RNF-08 | 5 · Responsabilidad sanitaria | `tests/cmp-24.test.js` |
+| CMP-24 | CA-24.1 a CA-24.13 | RNF-04, RNF-08 | 5 · Responsabilidad sanitaria | `tests/cmp-24.test.js` |

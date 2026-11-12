@@ -42,6 +42,11 @@ beforeAll(async () => {
   coordinadora = await ingresar(marcela);
 });
 
+// CA-24.12: todas las pruebas envían desde 127.0.0.1; cada una empieza con el conteo de solicitudes en cero.
+beforeEach(async () => {
+  await consultar("DELETE FROM intentos_ingreso WHERE clave LIKE 'solicitud:%'");
+});
+
 afterAll(async () => {
   await pool.end();
 });
@@ -179,6 +184,54 @@ describe('CMP-24 · Solicitar acceso', () => {
 
     const usuarios = await consultar('SELECT count(*)::int AS total FROM usuarios WHERE nombre = $1', [nombre]);
     expect(usuarios.rows[0].total).toBe(1); // no se creó un segundo usuario
+  });
+
+  test('CA-24.12 · desde un mismo origen, la sexta solicitud en una hora se rechaza y no se guarda', async () => {
+    for (let i = 1; i <= 5; i += 1) {
+      const envio = await request(app)
+        .post('/solicitar-acceso')
+        .type('form')
+        .send({ nombre: `Límite ${i} ${marca}`, telefono: '3001112222', rol: 'voluntario', zona });
+      expect(envio.status).toBe(201);
+    }
+
+    const nombre = `Límite 6 ${marca}`;
+    const sexta = await request(app).post('/solicitar-acceso').type('form').send({ nombre, telefono: '3001112222', rol: 'voluntario', zona });
+    expect(sexta.status).toBe(429);
+    expect(sexta.text).toContain('Se enviaron demasiadas solicitudes desde esta conexión');
+    expect(await solicitudPorNombre(nombre)).toBeNull();
+  });
+
+  test('CA-24.12 · las solicitudes con errores no cuentan para el límite', async () => {
+    for (let i = 1; i <= 6; i += 1) {
+      await request(app).post('/solicitar-acceso').type('form').send({ nombre: '', telefono: '', rol: '' });
+    }
+    const valida = await request(app)
+      .post('/solicitar-acceso')
+      .type('form')
+      .send({ nombre: `Tras errores ${marca}`, telefono: '3001112222', rol: 'voluntario', zona });
+    expect(valida.status).toBe(201);
+  });
+
+  test('CA-24.13 · la coordinadora ve las resueltas con estado, quién, cuándo y el motivo', async () => {
+    const aprobada = `Historial aprobada ${marca}`;
+    const rechazada = `Historial rechazada ${marca}`;
+    await request(app).post('/solicitar-acceso').type('form').send({ nombre: aprobada, telefono: '3002223333', rol: 'voluntario', zona });
+    await request(app).post('/solicitar-acceso').type('form').send({ nombre: rechazada, telefono: '3004445555', rol: 'voluntario', zona });
+    await coordinadora.post(`/solicitudes/${(await solicitudPorNombre(aprobada)).id}/aprobar`);
+    await coordinadora
+      .post(`/solicitudes/${(await solicitudPorNombre(rechazada)).id}/rechazar`)
+      .type('form')
+      .send({ motivo: 'No vive en ninguna zona atendida' });
+
+    const lista = await coordinadora.get('/solicitudes');
+    expect(lista.text).toContain('Resueltas en los últimos 60 días');
+    expect(lista.text).toContain(`${aprobada} · Aprobada`);
+    expect(lista.text).toContain(`${rechazada} · Rechazada`);
+    expect(lista.text).toContain('Motivo: No vive en ninguna zona atendida');
+    expect(lista.text).toContain(`Por ${marcela.nombre}`);
+    // La más reciente (la rechazada) va primero.
+    expect(lista.text.indexOf(`${rechazada} · Rechazada`)).toBeLessThan(lista.text.indexOf(`${aprobada} · Aprobada`));
   });
 
   test('CA-24.11 · quien no es coordinadora no puede abrir «Solicitudes de acceso»', async () => {

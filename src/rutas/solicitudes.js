@@ -4,9 +4,12 @@ const { requerirRol } = require('../middleware/autenticacion');
 const {
   ROLES_SOLICITABLES,
   NOMBRES_DE_ROL_SOLICITABLE,
+  MENSAJE_DEMASIADAS_SOLICITUDES,
+  origenAlcanzoLimite,
   validarSolicitud,
   crearSolicitud,
   listarPendientes,
+  listarResueltas,
   buscarSolicitud,
   aprobarSolicitud,
   rechazarSolicitud,
@@ -22,10 +25,11 @@ async function opcionesParaValidar() {
   return [(await listarZonasActivas()).map((z) => z.nombre), await listarOrganizaciones()];
 }
 
-async function mostrarFormulario(res, estado, { valores, errores = {} }) {
+async function mostrarFormulario(res, estado, { valores, errores = {}, errorGeneral = null }) {
   res.status(estado).render('solicitud-acceso', {
     valores,
     errores,
+    errorGeneral,
     zonas: (await listarZonasActivas()).map((z) => z.nombre),
     organizaciones: await listarOrganizaciones(),
     roles: ROLES_SOLICITABLES,
@@ -42,13 +46,16 @@ router.get('/solicitar-acceso', async (req, res, next) => {
   }
 });
 
-// CA-24.3 a CA-24.6.
+// CA-24.3 a CA-24.6 y CA-24.12.
 router.post('/solicitar-acceso', async (req, res, next) => {
   try {
     const { errores, valores, datos } = validarSolicitud(req.body, ...(await opcionesParaValidar()));
+    if (await origenAlcanzoLimite(req.ip)) {
+      return mostrarFormulario(res, 429, { valores, errorGeneral: MENSAJE_DEMASIADAS_SOLICITUDES });
+    }
     if (Object.keys(errores).length > 0) return mostrarFormulario(res, 400, { valores, errores });
 
-    const resultado = await crearSolicitud(datos);
+    const resultado = await crearSolicitud(datos, req.ip);
     if (resultado.errores) return mostrarFormulario(res, 400, { valores, errores: resultado.errores });
 
     res.status(201).render('solicitud-enviada', { nombre: datos.nombre });
@@ -72,11 +79,12 @@ function tomarAviso(req) {
   return aviso;
 }
 
-// CA-24.7.
+// CA-24.7 y CA-24.13.
 router.get('/solicitudes', soloCoordinadora, async (req, res, next) => {
   try {
     const pendientes = (await listarPendientes()).map((s) => ({ ...s, creadaTexto: formatearFechaHora(s.creada_en) }));
-    res.render('solicitudes', { pendientes, aviso: tomarAviso(req), nombresDeRol: NOMBRES_DE_ROL_SOLICITABLE });
+    const resueltas = (await listarResueltas()).map((s) => ({ ...s, resueltaTexto: formatearFechaHora(s.resuelta_en) }));
+    res.render('solicitudes', { pendientes, resueltas, aviso: tomarAviso(req), nombresDeRol: NOMBRES_DE_ROL_SOLICITABLE });
   } catch (error) {
     next(error);
   }
