@@ -34,6 +34,37 @@ async function listarPorVencer() {
   return r.rows;
 }
 
+// CA-21.8: asignadas cuya hora límite ya pasó y que nadie registró como entregadas. Sin esto quedaban «asignadas» para
+// siempre sin que nadie se enterara.
+const CONDICION_SIN_ENTREGA = "d.estado = 'asignada' AND d.hora_limite <= now()";
+
+async function contarSinEntrega() {
+  const r = await consultar(`SELECT count(*)::int AS total FROM donaciones d WHERE ${CONDICION_SIN_ENTREGA}`);
+  return r.rows[0].total;
+}
+
+// De la que venció hace más tiempo a la más reciente.
+async function listarSinEntrega() {
+  const r = await consultar(
+    `SELECT d.codigo, d.tipo_alimento, d.cantidad, d.unidad, d.zona, d.hora_limite,
+            v.nombre AS voluntario_nombre, v.telefono AS voluntario_telefono
+       FROM donaciones d
+       JOIN usuarios v ON v.id = d.voluntario_id
+      WHERE ${CONDICION_SIN_ENTREGA}
+      ORDER BY d.hora_limite ASC, d.id ASC`
+  );
+  return r.rows;
+}
+
+// CA-21.8: el recordatorio para el voluntario que la tomó.
+function recordatorioSinEntrega(d) {
+  return enlaceWhatsApp(
+    d.voluntario_telefono,
+    `Hola ${d.voluntario_nombre}, la donación ${d.codigo} (${describir(d)}) que tomaste pasó su hora límite y no tiene ` +
+      'la entrega registrada. Si ya la entregaste, regístrala en la página; si no pudiste, avísanos para saber qué pasó.'
+  );
+}
+
 async function buscarParaAvisar(codigo) {
   const r = await consultar(
     `SELECT d.*, donante.nombre AS donante_nombre, donante.telefono AS donante_telefono,
@@ -114,6 +145,9 @@ module.exports = {
   vencePronto,
   contarPorVencer,
   listarPorVencer,
+  contarSinEntrega,
+  listarSinEntrega,
+  recordatorioSinEntrega,
   buscarParaAvisar,
   numeroWhatsApp,
   avisosPara,

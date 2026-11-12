@@ -566,6 +566,14 @@ Una donación está **por vencer** si le faltan 60 minutos o menos para la hora 
 - **CA-21.6** Dado un usuario sin teléfono registrado, cuando aparece en «Avisar», entonces se muestra «Sin teléfono
   registrado» en vez del botón.
 - **CA-21.7** Dado un usuario que no es coordinadora, cuando intenta abrir «Por vencer», entonces se rechaza (RNF-04).
+- **CA-21.8** Dada una donación asignada cuya hora límite ya pasó y que no tiene entrega registrada, cuando la
+  coordinadora abre «Por vencer», entonces aparece en «Tomadas sin entrega», de la que venció hace más tiempo a la más
+  reciente, con quién la tomó, su teléfono, cuánto hace que venció, un botón de WhatsApp con un recordatorio ya escrito
+  (si ya la entregó, que la registre; si no pudo, que avise) y el acceso a su detalle, donde puede registrar la entrega en
+  nombre del voluntario o liberarla (CMP-14). *(Sin esto, una donación que alguien recogió y olvidó registrar quedaba
+  «asignada» para siempre sin que nadie se enterara, y el reporte no la contaba como entregada.)*
+- **CA-21.9** Dada la coordinadora, cuando abre el inicio y hay tomadas sin entrega, entonces el acceso a «Por vencer»
+  se resalta y dice cuántas hay, además de las por vencer.
 
 ## CMP-22 · Kilos aproximados rescatados
 
@@ -672,7 +680,7 @@ acceso desde la página de ingreso se agregó como CMP-24.
 | CMP-18 | CA-18.1 a CA-18.5 | RNF-04 | — | `tests/cmp-18.test.js` |
 | CMP-19 | CA-19.1 a CA-19.9 | RF-04, RF-05 | 3 · Planeación en la recepción | `tests/cmp-19.test.js` |
 | CMP-20 | CA-20.1 a CA-20.6 | RF-07 | 4 · Trazabilidad y reportes | `tests/cmp-20.test.js` |
-| CMP-21 | CA-21.1 a CA-21.7 | RF-10 | 1 · Gestión de donaciones | `tests/cmp-21.test.js` |
+| CMP-21 | CA-21.1 a CA-21.9 | RF-10 | 1 · Gestión de donaciones | `tests/cmp-21.test.js` |
 | CMP-22 | CA-22.1 a CA-22.4 | RF-07 | 4 · Trazabilidad y reportes | `tests/cmp-22.test.js` |
 | CMP-23 | CA-23.1 a CA-23.5 | RF-01, RNF-02 | 1 · Gestión de donaciones | `tests/cmp-23.test.js` |
 | CMP-24 | CA-24.1 a CA-24.13 | RNF-04, RNF-08 | 5 · Responsabilidad sanitaria | `tests/cmp-24.test.js` |

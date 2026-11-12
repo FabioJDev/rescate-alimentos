@@ -127,4 +127,63 @@ describe('CMP-21 · Donaciones por vencer y recordatorio por WhatsApp', () => {
     expect((await agente.get('/por-vencer')).status).toBe(403);
     expect((await agente.get(`/donaciones/${codigo}/avisar`)).status).toBe(403);
   });
+
+  // La parte de la página «Por vencer» que viene después del título «Tomadas sin entrega».
+  async function seccionSinEntrega() {
+    const texto = (await (await ingresar('Marcela')).get('/por-vencer')).text;
+    return texto.slice(texto.indexOf('<h2>Tomadas sin entrega</h2>'));
+  }
+
+  test('CA-21.8 · una asignada con la hora límite cumplida aparece en «Tomadas sin entrega» con quién la tomó', async () => {
+    const vieja = await crearDonacion(-180, u.Ana);
+    const reciente = await crearDonacion(-20, u.Ana);
+    const seccion = await seccionSinEntrega();
+
+    expect(seccion).toContain(vieja);
+    expect(seccion).toContain(reciente);
+    expect(seccion.indexOf(vieja)).toBeLessThan(seccion.indexOf(reciente)); // la que venció hace más tiempo, primero
+    expect(seccion).toContain(`La tomó ${u.Ana.nombre}`);
+    expect(seccion).toMatch(/Venció hace (3 h|2 h 59 min)/);
+    expect(seccion).toContain(`href="/donaciones/${vieja}"`);
+
+    const enlace = /href="(https:\/\/wa\.me\/573001212121\?text=[^"]+)"/.exec(seccion)[1];
+    const mensaje = decodeURIComponent(enlace.split('?text=')[1]);
+    expect(mensaje).toContain(vieja);
+    expect(mensaje).toContain('no tiene la entrega registrada');
+  });
+
+  test('CA-21.8 · no aparecen las disponibles vencidas, las asignadas a tiempo ni las entregadas', async () => {
+    const disponibleVencida = await crearDonacion(-30);
+    const aTiempo = await crearDonacion(30, u.Ana);
+    const entregada = await crearDonacion(-30, u.Ana);
+    const org = await consultar("INSERT INTO organizaciones (nombre, direccion, zona) VALUES ($1, 'Calle 1', $2) RETURNING id", [
+      `Organización ${marca}`,
+      zona,
+    ]);
+    await consultar(
+      "UPDATE donaciones SET estado = 'entregada', organizacion_id = $1, recibido_por = 'Rosa', entregada_en = now() WHERE codigo = $2",
+      [org.rows[0].id, entregada]
+    );
+    const seccion = await seccionSinEntrega();
+
+    expect(seccion).not.toContain(`${disponibleVencida} ·`);
+    expect(seccion).not.toContain(`${aTiempo} ·`);
+    expect(seccion).not.toContain(`${entregada} ·`);
+  });
+
+  test('CA-21.8 · sin teléfono, se dice y no hay botón de WhatsApp', async () => {
+    const codigo = await crearDonacion(-15, u.SinTelefono);
+    const seccion = await seccionSinEntrega();
+    const tarjeta = seccion.slice(seccion.indexOf(`${codigo} ·`), seccion.indexOf('</li>', seccion.indexOf(`${codigo} ·`)));
+    expect(tarjeta).toContain('Sin teléfono registrado');
+    expect(tarjeta).not.toContain('wa.me');
+  });
+
+  test('CA-21.9 · el inicio cuenta las tomadas sin entrega', async () => {
+    await crearDonacion(-40, u.Ana);
+    const inicio = (await (await ingresar('Marcela')).get('/')).text;
+    const total = Number(/data-sin-entrega>(\d+)</.exec(inicio)[1]);
+    expect(total).toBeGreaterThanOrEqual(1);
+    expect(inicio).toContain('accion-urgente');
+  });
 });

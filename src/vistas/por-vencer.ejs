@@ -27,5 +27,27 @@
       <% }) %>
     </ul>
   <% } %>
+
+  <%# CA-21.8: alguien la tomó, pasó la hora límite y nadie registró la entrega. %>
+  <h2>Tomadas sin entrega</h2>
+  <p class="nota">Ya pasó su hora límite y nadie registró la entrega. Puede que la hayan entregado y olvidado registrarla.</p>
+  <% if (sinEntrega.length === 0) { %>
+    <p class="vacio">No hay donaciones tomadas sin entrega.</p>
+  <% } else { %>
+    <ul class="lista-donaciones">
+      <% sinEntrega.forEach((d) => { %>
+        <li class="tarjeta tarjeta-estado-vencida">
+          <p class="tarjeta-titulo"><%= d.codigo %> · <%= d.tipo_alimento %> · <%= d.cantidad %> <%= d.unidad %></p>
+          <p class="restante vence-pronto">Venció hace <%= d.vencioHace %></p>
+          <p>La tomó <%= d.voluntario_nombre %> · zona <%= d.zona %></p>
+          <p>Teléfono: <%- include('_telefono', { telefono: d.voluntario_telefono, sinTelefono: 'Sin teléfono registrado' }) %></p>
+          <% if (d.enlace) { %>
+            <a class="boton boton-whatsapp" href="<%= d.enlace %>" rel="noopener">Recordarle por WhatsApp</a>
+          <% } %>
+          <p><a href="/donaciones/<%= d.codigo %>">Ver detalle: registrar la entrega en su nombre o liberarla</a></p>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
 </body>
 </html>
