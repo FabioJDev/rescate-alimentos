@@ -12,6 +12,7 @@ const {
   retirarSolicitud,
 } = require('../servicios/recepcion');
 const { formatearFechaHora, formatearHora, tiempoRestante } = require('../utilidades/fechas');
+const { vencePronto } = require('../servicios/por-vencer');
 
 const router = express.Router();
 const soloOrganizaciones = requerirRol('organizacion');
@@ -38,6 +39,7 @@ const paraMostrar = (d) => ({
   cantidad: Number(d.cantidad),
   horaLimiteTexto: formatearFechaHora(d.hora_limite),
   restante: tiempoRestante(d.hora_limite),
+  vencePronto: vencePronto(d.hora_limite), // CA-21.5: misma alerta que en las demás listas.
 });
 
 // CA-19.2.
