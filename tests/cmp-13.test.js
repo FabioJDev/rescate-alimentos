@@ -132,7 +132,7 @@ describe('CMP-13 · Corregir o cancelar una donación', () => {
       .send({ tipo_alimento: 'Panadería', cantidad: '0', unidad: 'unidades', punto_recogida: 'Calle 10', hora_limite: enHoras(-1) });
     expect(mala.status).toBe(400);
     expect(mala.text).toContain('La cantidad debe ser mayor que cero.');
-    expect(mala.text).toContain('La hora límite debe ser posterior a la hora actual');
+    expect(mala.text).toContain('La fecha y hora límite deben ser posteriores a la fecha y hora actuales');
     expect(Number((await leer(d.codigo)).cantidad)).toBe(20);
 
     const vencida = await crearDonacion({ minutosLimite: -30 });

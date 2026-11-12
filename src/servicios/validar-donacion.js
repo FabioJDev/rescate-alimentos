@@ -69,7 +69,7 @@ function validarDonacion(cuerpo, ahora = new Date(), { comercios = null } = {}) 
     if (!horaLimite || Number.isNaN(new Date(horaLimite).getTime())) {
       errores.hora_limite = 'La hora límite no es una fecha y hora válidas.';
     } else if (new Date(horaLimite) <= ahora) {
-      errores.hora_limite = 'La hora límite debe ser posterior a la hora actual';
+      errores.hora_limite = 'La fecha y hora límite deben ser posteriores a la fecha y hora actuales';
     }
   }
 

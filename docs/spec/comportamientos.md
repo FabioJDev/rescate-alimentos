@@ -55,8 +55,9 @@ Donante (comercio), Voluntario y Coordinadora (Marcela y su equipo). Las organiz
   su fecha y hora de registro y su autor, y el donante ve el código de la donación (ej. D-0012).
 - **CA-01.2** Dado el formulario con un campo obligatorio vacío, cuando el donante envía, entonces no se
   registra nada, se indica qué campo falta y se conservan los datos ya escritos.
-- **CA-01.3** Dada una hora límite igual o anterior a la hora actual, cuando el donante envía, entonces se
-  rechaza con el mensaje «La hora límite debe ser posterior a la hora actual».
+- **CA-01.3** Dada una fecha y hora límite igual o anterior a la fecha y hora actuales, cuando el donante envía,
+  entonces se rechaza con el mensaje «La fecha y hora límite deben ser posteriores a la fecha y hora actuales».
+  *(Cambio: antes decía solo «hora»; el campo pide fecha y hora, y quien se equivoca de día no entendía el mensaje.)*
 - **CA-01.4** Dada una cantidad vacía, cero, negativa o no numérica, cuando el donante envía, entonces se
   rechaza con un mensaje claro.
 - **CA-01.5** Dado un comercio con teléfono básico que avisa por llamada, cuando la coordinadora registra la

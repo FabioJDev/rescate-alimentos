@@ -158,7 +158,7 @@ describe('CMP-08 · Registrar una donación sin conexión · servidor', () => {
     const a = await agente.post('/api/donaciones/sincronizar').send(vencida);
     expect(a.status).toBe(422);
     expect(a.body.estado).toBe('invalida');
-    expect(a.body.errores.hora_limite).toBe('La hora límite debe ser posterior a la hora actual');
+    expect(a.body.errores.hora_limite).toBe('La fecha y hora límite deben ser posteriores a la fecha y hora actuales');
     expect(await filasDe(vencida.id_local)).toHaveLength(0);
 
     const sinCantidad = pendiente({ cantidad: '0', tipo_alimento: '' });
@@ -299,7 +299,7 @@ describe('CMP-08 · Registrar una donación sin conexión · cola en el teléfon
   });
 
   test('CA-08.4 · una pendiente rechazada queda visible con su motivo hasta que se descarta', async () => {
-    const errores = { hora_limite: 'La hora límite debe ser posterior a la hora actual' };
+    const errores = { hora_limite: 'La fecha y hora límite deben ser posteriores a la fecha y hora actuales' };
     const { enviar } = servidor([{ status: 422, cuerpo: { estado: 'invalida', errores } }]);
     const cola = crearCola({ almacen: almacenFalso(), enviar });
     const item = cola.guardar(donante.id, campos());
