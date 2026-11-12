@@ -145,6 +145,10 @@ a la coordinadora por el canal actual. Liberar una donación se agregó después
   entonces puede filtrarla por estado.
 - **CA-05.6** Dado un donante con sesión iniciada, cuando abre «Mis donaciones», entonces ve el estado de
   cada una (le da confianza de que alguien va).
+- **CA-05.7** Dada la coordinadora, cuando abre la lista de todas las donaciones, entonces las ve de 50 en 50, de la
+  más reciente a la más antigua, con cuántas hay en total (con el filtro elegido) y «Más antiguas» / «Más recientes»
+  para pasar de página sin perder el filtro por estado. *(Antes solo se veían las últimas 200: al ritmo de 8 a 15
+  rescates por semana, a los tres meses las anteriores ya no aparecían en la lista.)*
 
 ## CMP-06 · Soltar una donación tomada
 
@@ -642,7 +646,7 @@ acceso desde la página de ingreso se agregó como CMP-24.
 | CMP-02 | CA-02.1 a CA-02.6 | RF-02, RF-08 | 2 · Coordinación de recogida | `tests/cmp-02.test.js` |
 | CMP-03 | CA-03.1 a CA-03.6 | RF-03, RF-08, RNF-05 | 2 · Coordinación de recogida | `tests/cmp-03.test.js` |
 | CMP-04 | CA-04.1 a CA-04.6 | RF-06, RF-08, RF-09, RNF-05 | 4 y 5 · Trazabilidad / Responsabilidad sanitaria | `tests/cmp-04.test.js` |
-| CMP-05 | CA-05.1 a CA-05.6 | RF-08, RF-06, RNF-05 | 5 · Responsabilidad sanitaria | `tests/cmp-05.test.js` |
+| CMP-05 | CA-05.1 a CA-05.7 | RF-08, RF-06, RNF-05 | 5 · Responsabilidad sanitaria | `tests/cmp-05.test.js` |
 | CMP-06 | CA-06.1 a CA-06.8 | RF-03, RF-08, RNF-05 | 2 · Coordinación de recogida | `tests/cmp-06.test.js` |
 | CMP-07 | CA-07.1 a CA-07.7 | RF-07, RNF-05 | 5 · Responsabilidad sanitaria | `tests/cmp-07.test.js` |
 | CMP-08 | CA-08.1 a CA-08.7 | RNF-01 | 1 · Gestión de donaciones | `tests/cmp-08.test.js` |

@@ -324,3 +324,67 @@ describe('CMP-05 · Listas de la coordinadora y del donante', () => {
     expect(mias.headers.location).toBe('/ingreso');
   });
 });
+
+describe('CMP-05 · Páginas de «Todas las donaciones»', () => {
+  // 55 donaciones más recientes que todas las demás: las 50 más nuevas llenan la página 1 y las 5 restantes abren la 2.
+  // Hora límite lejana para no contar como «por vencer» en otras pruebas.
+  const codigos = [];
+
+  beforeAll(async () => {
+    const base = Date.now() + 60 * 1000;
+    for (let i = 0; i < 55; i += 1) {
+      const r = await consultar(
+        `INSERT INTO donaciones (tipo_alimento, cantidad, unidad, punto_recogida, zona, hora_limite, donante_id,
+                                 registrada_por_id, creada_en)
+         VALUES ('Panadería', 1, 'kg', $1, $2, now() + interval '5 hours', $3, $3, $4)
+         RETURNING codigo`,
+        [`Punto página ${marca}`, zona, otroDonante.id, new Date(base - i * 1000)]
+      );
+      codigos.push(r.rows[0].codigo); // codigos[0] es la más reciente
+    }
+  });
+
+  const tarjeta = (codigo) => `<p class="tarjeta-titulo">${codigo} ·`;
+
+  test('CA-05.7 · la primera página muestra las 50 más recientes, el total y «Más antiguas»', async () => {
+    const agente = await ingresar(coordinadora);
+    const lista = await agente.get('/todas');
+
+    expect(lista.status).toBe(200);
+    for (const c of codigos.slice(0, 50)) expect(lista.text).toContain(tarjeta(c));
+    for (const c of codigos.slice(50)) expect(lista.text).not.toContain(tarjeta(c));
+    expect(lista.text).toMatch(/\d+ donación\(es\) · página 1 de \d+/);
+    expect(lista.text).toContain('href="/todas?pagina=2">Más antiguas');
+    expect(lista.text).not.toContain('Más recientes');
+  });
+
+  test('CA-05.7 · la segunda página sigue con las más antiguas y permite volver', async () => {
+    const agente = await ingresar(coordinadora);
+    const lista = await agente.get('/todas?pagina=2');
+
+    for (const c of codigos.slice(50)) expect(lista.text).toContain(tarjeta(c));
+    for (const c of codigos.slice(0, 50)) expect(lista.text).not.toContain(tarjeta(c));
+    expect(lista.text).toContain('href="/todas?pagina=1">« Más recientes');
+  });
+
+  test('CA-05.7 · al cambiar de página se conserva el filtro por estado', async () => {
+    const agente = await ingresar(coordinadora);
+    const lista = await agente.get('/todas?estado=disponible&pagina=2');
+
+    expect(lista.status).toBe(200);
+    expect(lista.text).toContain('href="/todas?estado=disponible&amp;pagina=1">« Más recientes');
+  });
+
+  test('CA-05.7 · una página que no existe muestra la última, y un número inválido muestra la primera', async () => {
+    const agente = await ingresar(coordinadora);
+
+    const lejana = await agente.get('/todas?pagina=99999');
+    expect(lejana.status).toBe(200);
+    expect(lejana.text).not.toContain('Más antiguas');
+    expect(lejana.text).toContain('« Más recientes');
+
+    const invalida = await agente.get('/todas?pagina=abc');
+    expect(invalida.status).toBe(200);
+    expect(invalida.text).toContain(tarjeta(codigos[0]));
+  });
+});

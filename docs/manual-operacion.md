@@ -83,7 +83,8 @@ Todo esto está en el inicio, en **Administración**. Solo la coordinadora lo ve
   comercio**, elegir el comercio y llenar lo mismo. Si se deja vacío el punto de recogida, se usa la dirección del comercio.
   La donación queda a nombre del comercio y se ve que la registraste tú.
 - **Todas las donaciones:** la lista completa, de la más reciente a la más antigua. Se puede filtrar por **Disponibles,
-  Asignadas, Entregadas, Vencidas o Canceladas**. **Ver estado e historial** abre el detalle de cada una.
+  Asignadas, Entregadas, Vencidas o Canceladas**. Se muestran de 50 en 50: al final están **Más antiguas** y **Más
+  recientes** para pasar de página (el filtro se mantiene). **Ver estado e historial** abre el detalle de cada una.
 - **Buscar donación por código:** el estado y el historial de una donación (quién la registró, quién la tomó, a quién se
   entregó, qué se corrigió y cuándo). Como coordinadora, en el detalle ves también los **teléfonos** del comercio, del
   voluntario y de la organización.
