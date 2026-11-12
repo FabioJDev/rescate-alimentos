@@ -122,7 +122,7 @@ async function tomarDonacion(codigo, voluntarioId) {
     const actualizada = await cliente.query(
       `UPDATE donaciones
           SET estado = 'asignada', voluntario_id = $1, tomada_en = now()
-        WHERE codigo = $2 AND estado = 'disponible' AND hora_limite > now()
+        WHERE codigo = $2 AND hora_limite > now()
         RETURNING *`,
       [voluntarioId, codigo]
     );
