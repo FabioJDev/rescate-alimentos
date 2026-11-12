@@ -96,6 +96,8 @@ Todo esto está en el inicio, en **Administración**. Solo la coordinadora lo ve
   para cajas, unidades o bultos; la página dice cuántas entregas no tienen peso), cuántas entregas recibió cada organización,
   cuántas donaciones hubo por tipo de alimento y las **personas atendidas**. Por defecto son los últimos 30 días; se pueden
   elegir otras fechas. **Descargar CSV** baja el detalle para abrirlo en Excel; las personas atendidas tienen su propio CSV.
+  En un Excel en español se abre con doble clic, con cada dato en su columna. En Google Sheets: **Archivo → Importar** y
+  elegir el separador **punto y coma**.
 - **Personas atendidas:** cada organización registra, una vez por día, cuántas personas atendió. Si una organización te lo
   dice por llamada, regístralo tú en **Personas atendidas** eligiendo la organización. La página **no suma dos veces** el
   mismo día: si ya hay una cifra, ofrece corregirla. En el reporte se llaman «atenciones (personas por día)»: una persona

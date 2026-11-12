@@ -141,12 +141,18 @@ function fechaParaCsv(fecha) {
   return new Intl.DateTimeFormat('sv-SE', { dateStyle: 'short', timeStyle: 'short', timeZone: ZONA }).format(fecha);
 }
 
+// CA-07.7: Excel en español de Colombia separa las columnas con punto y coma y usa coma decimal. Con comas, cada fila
+// quedaba entera en la primera columna.
+const SEPARADOR = ';';
+
 // Una celda del CSV. Entre comillas si hace falta. Si empieza con = + - @, Excel la leería como fórmula:
 // se le antepone un apóstrofo para que se muestre como texto (los nombres los escriben los usuarios).
+// Los números salen con coma decimal («5,5»).
 function celda(valor) {
+  if (typeof valor === 'number') return String(valor).replace('.', ',');
   let texto = valor === null || valor === undefined ? '' : String(valor);
   if (/^[=+\-@\t\r]/.test(texto)) texto = `'${texto}`;
-  return /[",\r\n]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto;
+  return /[";,\r\n]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto;
 }
 
 const ENCABEZADOS = [
@@ -169,7 +175,7 @@ const ENCABEZADOS = [
 
 // El archivo empieza con la marca BOM para que Excel lea bien las tildes y la ñ.
 function aCsv(filas) {
-  const lineas = [ENCABEZADOS.map(celda).join(',')];
+  const lineas = [ENCABEZADOS.map(celda).join(SEPARADOR)];
   for (const f of filas) {
     lineas.push(
       [
@@ -190,7 +196,7 @@ function aCsv(filas) {
         fechaParaCsv(f.entregada_en),
       ]
         .map(celda)
-        .join(',')
+        .join(SEPARADOR)
     );
   }
   return `﻿${lineas.join('\r\n')}\r\n`;
@@ -198,9 +204,9 @@ function aCsv(filas) {
 
 // CA-20.5: el CSV de atenciones (personas por día), con las mismas reglas de celdas y la marca BOM para Excel.
 function atencionesACsv(filas) {
-  const lineas = [['Fecha', 'Organización', 'Personas atendidas', 'Registró', 'Corrigió'].map(celda).join(',')];
+  const lineas = [['Fecha', 'Organización', 'Personas atendidas', 'Registró', 'Corrigió'].map(celda).join(SEPARADOR)];
   for (const f of filas) {
-    lineas.push([f.fecha, f.organizacion, f.personas, f.registrada_por, f.corregida_por].map(celda).join(','));
+    lineas.push([f.fecha, f.organizacion, f.personas, f.registrada_por, f.corregida_por].map(celda).join(SEPARADOR));
   }
   return `﻿${lineas.join('\r\n')}\r\n`;
 }
