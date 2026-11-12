@@ -108,6 +108,11 @@
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v6l4 2"/><circle cx="12" cy="12" r="9"/></svg>
         Solicitudes de acceso: <strong><%= locals.solicitudesPendientes || 0 %></strong>
       </a>
+      <%# CA-25.5: quién cambió qué en la administración. %>
+      <a class="accion" href="/registro-cambios">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Registro de cambios
+      </a>
     </nav>
   <% } %>
 

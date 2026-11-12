@@ -17,6 +17,7 @@ const {
 const { listarZonasActivas } = require('../servicios/zonas');
 const { listarOrganizaciones } = require('../servicios/entregas');
 const { formatearFechaHora } = require('../utilidades/fechas');
+const { registrarAccion } = require('../servicios/registro-administracion');
 
 const router = express.Router();
 const soloCoordinadora = requerirRol('coordinadora');
@@ -103,6 +104,11 @@ router.post('/solicitudes/:id(\\d+)/aprobar', soloCoordinadora, async (req, res,
       req.session.aviso = resultado.errores.nombre;
       return res.redirect('/solicitudes');
     }
+    await registrarAccion(
+      req.session.usuario,
+      'Aprobar solicitud',
+      `Aprobó la solicitud de acceso de «${resultado.usuario.nombre}» y creó su usuario (${NOMBRES_DE_ROL_SOLICITABLE[resultado.usuario.rol]}).`
+    );
     res.status(201).render('usuario-pin', { usuario: resultado.usuario, pin: resultado.pin, nuevo: true });
   } catch (error) {
     next(error);
@@ -131,6 +137,11 @@ router.post('/solicitudes/:id(\\d+)/rechazar', soloCoordinadora, async (req, res
     if (resultado.error) {
       return res.status(400).render('solicitud-rechazar', { solicitud: resultado.solicitud, error: resultado.error, motivo: req.body.motivo || '' });
     }
+    await registrarAccion(
+      req.session.usuario,
+      'Rechazar solicitud',
+      `Rechazó la solicitud de acceso de «${resultado.solicitud.nombre}». Motivo: ${resultado.motivo}`
+    );
     req.session.aviso = 'Solicitud rechazada.';
     res.redirect('/solicitudes');
   } catch (error) {

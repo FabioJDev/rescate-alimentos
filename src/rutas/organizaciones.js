@@ -10,6 +10,7 @@ const {
   cambiarActiva,
 } = require('../servicios/organizaciones');
 const { listarZonasActivas } = require('../servicios/zonas');
+const { registrarAccion } = require('../servicios/registro-administracion');
 
 const router = express.Router();
 const soloCoordinadora = requerirRol('coordinadora');
@@ -58,6 +59,7 @@ router.post('/organizaciones', soloCoordinadora, async (req, res, next) => {
 
     const resultado = await crearOrganizacion(datos);
     if (resultado.errores) return mostrarFormulario(res, 400, { valores, errores: resultado.errores });
+    await registrarAccion(req.session.usuario, 'Crear organización', `Creó la organización «${resultado.organizacion.nombre}».`);
     req.session.aviso = `Organización «${resultado.organizacion.nombre}» creada.`;
     res.redirect('/organizaciones');
   } catch (error) {
@@ -92,6 +94,11 @@ router.post('/organizaciones/:id(\\d+)', soloCoordinadora, async (req, res, next
 
     const resultado = await editarOrganizacion(organizacion.id, datos);
     if (resultado.errores) return mostrarFormulario(res, 400, { organizacion, valores, errores: resultado.errores });
+    await registrarAccion(
+      req.session.usuario,
+      'Editar organización',
+      `Editó los datos de la organización «${datos.nombre}»${organizacion.nombre !== datos.nombre ? ` (antes «${organizacion.nombre}»)` : ''}.`
+    );
     req.session.aviso = `Datos de «${datos.nombre}» guardados.`;
     res.redirect('/organizaciones');
   } catch (error) {
@@ -105,6 +112,11 @@ router.post('/organizaciones/:id(\\d+)/:accion(desactivar|activar)', soloCoordin
     const activa = req.params.accion === 'activar';
     const resultado = await cambiarActiva(req.params.id, activa);
     if (resultado.noExiste) return noExiste(res);
+    await registrarAccion(
+      req.session.usuario,
+      activa ? 'Reactivar organización' : 'Desactivar organización',
+      `${activa ? 'Reactivó' : 'Desactivó'} la organización «${resultado.organizacion.nombre}».`
+    );
     req.session.aviso = `«${resultado.organizacion.nombre}» ${activa ? 'activada' : 'desactivada'}.`;
     res.redirect('/organizaciones');
   } catch (error) {

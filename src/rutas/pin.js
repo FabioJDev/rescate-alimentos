@@ -2,6 +2,7 @@
 const express = require('express');
 const { requerirSesion, requerirRol } = require('../middleware/autenticacion');
 const { buscarUsuario, cambiarPin, restablecerPin } = require('../servicios/usuarios');
+const { registrarAccion } = require('../servicios/registro-administracion');
 
 const router = express.Router();
 const soloCoordinadora = requerirRol('coordinadora');
@@ -55,6 +56,8 @@ router.post('/usuarios/:id(\\d+)/restablecer-pin', soloCoordinadora, async (req,
     if (resultado.error) {
       return res.status(409).render('error', { titulo: 'No se restableció', mensaje: resultado.error, volverA: '/usuarios', volverNombre: 'Usuarios' });
     }
+    // CA-25.1: el PIN temporal nunca se registra.
+    await registrarAccion(req.session.usuario, 'Restablecer PIN', `Restableció el PIN de «${resultado.usuario.nombre}».`);
     res.render('usuario-pin', { usuario: resultado.usuario, pin: resultado.pin, nuevo: false });
   } catch (error) {
     next(error);

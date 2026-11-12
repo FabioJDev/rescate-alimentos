@@ -648,6 +648,26 @@ autoservicio sin perder el control: nadie entra a la aplicación sin que la coor
   resolvió y cuándo, y el motivo si se rechazó. *(Si alguien llama a preguntar por qué no le dieron acceso, la
   coordinadora necesita poder consultarlo.)*
 
+## CMP-25 · Registro de las acciones de administración
+
+**Origen:** RNF-05 (quién hizo qué y cuándo) · La coordinación la hacen tres personas (Marcela y dos compañeras). Los
+movimientos de las donaciones ya quedan en su historial (CMP-05), pero los cambios de administración no dejaban rastro:
+si alguien desactiva a un voluntario o cambia el nombre de una zona, las demás no sabían quién ni cuándo.
+
+- **CA-25.1** Dada una coordinadora, cuando crea, edita, desactiva o reactiva un usuario, o le restablece el PIN,
+  entonces queda registrado quién lo hizo, cuándo y a quién (sin guardar nunca el PIN).
+- **CA-25.2** Dada una coordinadora, cuando crea, renombra, desactiva o reactiva una zona, o crea, edita, desactiva o
+  reactiva una organización, entonces queda registrado quién, cuándo y qué cambió (en un cambio de nombre, el nombre
+  anterior y el nuevo).
+- **CA-25.3** Dada una coordinadora, cuando aprueba o rechaza una solicitud de acceso (CMP-24), entonces queda
+  registrado, con el motivo si la rechazó.
+- **CA-25.4** Dada una acción que no se completa (datos inválidos, nombre repetido, voluntario con donaciones
+  asignadas), cuando se rechaza, entonces no se registra nada.
+- **CA-25.5** Dada la coordinadora, cuando abre «Registro de cambios» desde Administración, entonces ve las últimas
+  100 acciones, de la más reciente a la más antigua, con fecha y hora, quién y qué hizo.
+- **CA-25.6** Dado alguien que no es coordinadora, cuando intenta abrir «Registro de cambios», entonces se rechaza
+  (RNF-04).
+
 ## Fuera del alcance del MVP
 
 Panel de indicadores, notificaciones automáticas por SMS o push (RF-10 se cubre con recordatorios por WhatsApp que
@@ -655,7 +675,7 @@ envía la coordinadora, CMP-21) y asignación automática de destino (el destino
 una donación, el reporte del periodo (RF-07) y el modo sin conexión para registrar (RNF-01) quedaron fuera del MVP y
 se agregaron en la 3C como CMP-06, CMP-07 y CMP-08. La administración se agregó como CMP-09 a CMP-15, y la seguridad y
 los requerimientos que faltaban como CMP-16 a CMP-23 y T-SEG.1 y T-SEG.2: ver [plan técnico](plan-tecnico.md). Solicitar
-acceso desde la página de ingreso se agregó como CMP-24.
+acceso desde la página de ingreso se agregó como CMP-24, y el registro de las acciones de administración como CMP-25.
 
 ## Tabla de trazabilidad
 
@@ -686,3 +706,4 @@ acceso desde la página de ingreso se agregó como CMP-24.
 | CMP-22 | CA-22.1 a CA-22.4 | RF-07 | 4 · Trazabilidad y reportes | `tests/cmp-22.test.js` |
 | CMP-23 | CA-23.1 a CA-23.5 | RF-01, RNF-02 | 1 · Gestión de donaciones | `tests/cmp-23.test.js` |
 | CMP-24 | CA-24.1 a CA-24.13 | RNF-04, RNF-08 | 5 · Responsabilidad sanitaria | `tests/cmp-24.test.js` |
+| CMP-25 | CA-25.1 a CA-25.6 | RNF-04, RNF-05 | 5 · Responsabilidad sanitaria | `tests/cmp-25.test.js` |

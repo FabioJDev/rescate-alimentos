@@ -2,6 +2,7 @@
 const express = require('express');
 const { requerirRol } = require('../middleware/autenticacion');
 const { listarZonasConUso, buscarZona, crearZona, renombrarZona, cambiarActiva } = require('../servicios/zonas');
+const { registrarAccion } = require('../servicios/registro-administracion');
 
 const router = express.Router();
 const soloCoordinadora = requerirRol('coordinadora');
@@ -40,6 +41,7 @@ router.post('/zonas', soloCoordinadora, async (req, res, next) => {
   try {
     const resultado = await crearZona(req.body.nombre);
     if (resultado.error) return mostrarLista(req, res, { estado: 400, error: resultado.error, nombre: resultado.nombre });
+    await registrarAccion(req.session.usuario, 'Crear zona', `Creó la zona «${resultado.zona.nombre}».`);
     req.session.aviso = `Zona «${resultado.zona.nombre}» creada.`;
     res.redirect('/zonas');
   } catch (error) {
@@ -60,11 +62,19 @@ router.get('/zonas/:id(\\d+)/editar', soloCoordinadora, async (req, res, next) =
 // CA-09.4: renombrar.
 router.post('/zonas/:id(\\d+)', soloCoordinadora, async (req, res, next) => {
   try {
+    const anterior = await buscarZona(req.params.id); // CA-25.2: para registrar el nombre de antes
     const resultado = await renombrarZona(Number(req.params.id), req.body.nombre);
     if (resultado.noExiste) return noExiste(res);
     if (resultado.error) {
       const zona = await buscarZona(req.params.id);
       return res.status(400).render('zona-editar', { zona, nombre: resultado.nombre, error: resultado.error });
+    }
+    if (anterior.nombre !== resultado.zona.nombre) {
+      await registrarAccion(
+        req.session.usuario,
+        'Renombrar zona',
+        `Cambió el nombre de la zona «${anterior.nombre}» a «${resultado.zona.nombre}».`
+      );
     }
     req.session.aviso = `Zona renombrada a «${resultado.zona.nombre}».`;
     res.redirect('/zonas');
@@ -80,6 +90,11 @@ router.post('/zonas/:id(\\d+)/:accion(desactivar|activar)', soloCoordinadora, as
     const resultado = await cambiarActiva(req.params.id, activa);
     if (resultado.noExiste) return noExiste(res);
     if (resultado.error) return mostrarLista(req, res, { estado: 409, error: resultado.error });
+    await registrarAccion(
+      req.session.usuario,
+      activa ? 'Reactivar zona' : 'Desactivar zona',
+      `${activa ? 'Reactivó' : 'Desactivó'} la zona «${resultado.zona.nombre}».`
+    );
     req.session.aviso = `Zona «${resultado.zona.nombre}» ${activa ? 'activada' : 'desactivada'}.`;
     res.redirect('/zonas');
   } catch (error) {
