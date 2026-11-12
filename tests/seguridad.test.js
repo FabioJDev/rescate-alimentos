@@ -143,4 +143,14 @@ describe('T-SEG.2 · Registro de errores con código', () => {
     expect(linea.mensaje).toBe('falla interna de prueba');
     expect(new Date(linea.fecha).getTime()).not.toBeNaN();
   });
+
+  test('CA-SEG.6 · una dirección que no existe responde en español, no con la página del servidor en inglés', async () => {
+    for (const metodo of ['get', 'post']) {
+      const res = await request(app)[metodo]('/esta-pagina-no-existe');
+      expect(res.status).toBe(404);
+      expect(res.text).toContain('No encontramos esa página');
+      expect(res.text).toContain('lang="es"');
+      expect(res.text).not.toContain('Cannot ');
+    }
+  });
 });

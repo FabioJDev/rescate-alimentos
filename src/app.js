@@ -156,6 +156,15 @@ app.get('/', requerirSesion, async (req, res, next) => {
   }
 });
 
+// CA-SEG.6: ninguna ruta respondió. Sin esto Express muestra su página en inglés («Cannot GET …»).
+app.use((req, res) => {
+  if (req.path.startsWith('/api/')) return res.status(404).json({ estado: 'no_existe' });
+  res.status(404).render('error', {
+    titulo: 'No encontramos esa página',
+    mensaje: 'Revisa la dirección o vuelve al inicio.',
+  });
+});
+
 // Errores no previstos: el usuario ve un código y el registro guarda el detalle (T-SEG.2).
 app.use(manejarError);
 
