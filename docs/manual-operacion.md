@@ -75,7 +75,10 @@ Todo esto está en el inicio, en **Administración**. Solo la coordinadora lo ve
   alguna). Cada una muestra el nombre, el rol pedido, el teléfono y la zona u organización. Para aceptarla, pulsa
   **Aprobar**: se crea el usuario igual que si lo hubieras creado a mano y aparece el PIN temporal para dárselo a la
   persona. Para no aceptarla, pulsa **Rechazar** y escribe un motivo corto (lo puedes usar para explicárselo por
-  teléfono). Ninguna de las dos se puede repetir una vez resuelta.
+  teléfono). Ninguna de las dos se puede repetir una vez resuelta. Debajo están las **resueltas de los últimos 60
+  días**, con quién las resolvió, cuándo y el motivo del rechazo: sirve para responder si alguien llama a preguntar.
+  Desde una misma conexión se pueden enviar hasta 5 solicitudes por hora; si alguien no puede enviar la suya, que llame
+  y la coordinadora lo crea a mano.
 
 ### Donaciones del día a día
 

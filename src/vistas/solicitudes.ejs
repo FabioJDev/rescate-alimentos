@@ -32,5 +32,22 @@
       <% }) %>
     </ul>
   <% } %>
+
+  <%# CA-24.13: para responder si alguien llama a preguntar qué pasó con su solicitud. %>
+  <h2>Resueltas en los últimos 60 días</h2>
+  <% if (resueltas.length === 0) { %>
+    <p class="vacio">Todavía no hay solicitudes resueltas.</p>
+  <% } else { %>
+    <ul class="lista-donaciones">
+      <% resueltas.forEach((s) => { %>
+        <li class="tarjeta">
+          <p class="tarjeta-titulo"><%= s.nombre %> · <%= s.estado === 'aprobada' ? 'Aprobada' : 'Rechazada' %></p>
+          <p><%= nombresDeRol[s.rol] %><%= s.zona ? ' · zona ' + s.zona : '' %><%= s.organizacion_nombre ? ' · ' + s.organizacion_nombre : '' %> · teléfono <%= s.telefono %></p>
+          <p>Por <%= s.resuelta_por_nombre %>, el <%= s.resueltaTexto %></p>
+          <% if (s.motivo_rechazo) { %><p>Motivo: <%= s.motivo_rechazo %></p><% } %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
 </body>
 </html>

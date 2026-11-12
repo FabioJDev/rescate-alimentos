@@ -16,6 +16,38 @@ const MENSAJE_NOMBRE_EXISTE =
   'Ya existe una cuenta con ese nombre. Si es tuya, pide a la coordinadora que te restablezca el PIN.';
 const MENSAJE_SOLICITUD_PENDIENTE = 'Ya hay una solicitud con ese nombre esperando revisión. Espera la respuesta de la coordinadora.';
 
+// CA-24.12: el formulario es público; cada origen puede enviar pocas solicitudes por hora. Se reutiliza la tabla de
+// intentos de CMP-16 (vive en la base, así un reinicio de Render no borra el conteo) con otra clave; aquí «fallos»
+// cuenta solicitudes enviadas y «desde» es el inicio de la ventana.
+const LIMITE_SOLICITUDES_POR_ORIGEN = 5;
+const VENTANA_SOLICITUDES_MINUTOS = 60;
+const MENSAJE_DEMASIADAS_SOLICITUDES =
+  'Se enviaron demasiadas solicitudes desde esta conexión. Intenta en una hora o llama a la coordinadora.';
+
+function claveDeOrigen(origen) {
+  return `solicitud:${origen || 'desconocido'}`;
+}
+
+async function origenAlcanzoLimite(origen) {
+  const r = await consultar(
+    'SELECT 1 FROM intentos_ingreso WHERE clave = $1 AND desde > now() - make_interval(mins => $2) AND fallos >= $3',
+    [claveDeOrigen(origen), VENTANA_SOLICITUDES_MINUTOS, LIMITE_SOLICITUDES_POR_ORIGEN]
+  );
+  return r.rows.length > 0;
+}
+
+async function contarSolicitudDeOrigen(origen) {
+  await consultar(
+    `INSERT INTO intentos_ingreso (clave, fallos, desde) VALUES ($1, 1, now())
+     ON CONFLICT (clave) DO UPDATE SET
+       fallos = CASE WHEN intentos_ingreso.desde < now() - make_interval(mins => $2) THEN 1
+                     ELSE intentos_ingreso.fallos + 1 END,
+       desde  = CASE WHEN intentos_ingreso.desde < now() - make_interval(mins => $2) THEN now()
+                     ELSE intentos_ingreso.desde END`,
+    [claveDeOrigen(origen), VENTANA_SOLICITUDES_MINUTOS]
+  );
+}
+
 // CA-24.2 y CA-24.3: mismos datos y mismas reglas que crear un usuario (CMP-10), sin el rol coordinadora.
 function validarSolicitud(cuerpo, zonasActivas, organizacionesActivas = []) {
   const errores = {};
@@ -86,7 +118,7 @@ async function existeSolicitudPendienteConNombre(nombre) {
 }
 
 // CA-24.6: crea la solicitud pendiente. Devuelve { errores } si el nombre ya está en uso, o { solicitud }.
-async function crearSolicitud(datos) {
+async function crearSolicitud(datos, origen) {
   if (await existeUsuarioConNombre(datos.nombre)) return { errores: { nombre: MENSAJE_NOMBRE_EXISTE } };
   if (await existeSolicitudPendienteConNombre(datos.nombre)) return { errores: { nombre: MENSAJE_SOLICITUD_PENDIENTE } };
 
@@ -96,6 +128,7 @@ async function crearSolicitud(datos) {
        VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, nombre`,
       [datos.nombre, datos.telefono, datos.rol, datos.zona, datos.direccion, datos.organizacionId || null]
     );
+    await contarSolicitudDeOrigen(origen); // CA-24.12: solo cuentan las que sí se guardaron.
     return { solicitud: r.rows[0] };
   } catch (e) {
     // Carrera entre dos solicitudes con el mismo nombre al mismo instante (el índice único de pendientes).
@@ -112,6 +145,19 @@ async function listarPendientes() {
        LEFT JOIN organizaciones o ON o.id = s.organizacion_id
       WHERE s.estado = 'pendiente'
       ORDER BY s.creada_en ASC`
+  );
+  return r.rows;
+}
+
+// CA-24.13: las resueltas de los últimos 60 días, la más reciente primero, con quién la resolvió.
+async function listarResueltas() {
+  const r = await consultar(
+    `SELECT s.*, o.nombre AS organizacion_nombre, u.nombre AS resuelta_por_nombre
+       FROM solicitudes_acceso s
+       JOIN usuarios u ON u.id = s.resuelta_por_id
+       LEFT JOIN organizaciones o ON o.id = s.organizacion_id
+      WHERE s.estado <> 'pendiente' AND s.resuelta_en >= now() - interval '60 days'
+      ORDER BY s.resuelta_en DESC, s.id DESC`
   );
   return r.rows;
 }
@@ -180,9 +226,13 @@ async function rechazarSolicitud(id, coordinadora, motivoTexto) {
 module.exports = {
   ROLES_SOLICITABLES,
   NOMBRES_DE_ROL_SOLICITABLE,
+  LIMITE_SOLICITUDES_POR_ORIGEN,
+  MENSAJE_DEMASIADAS_SOLICITUDES,
+  origenAlcanzoLimite,
   validarSolicitud,
   crearSolicitud,
   listarPendientes,
+  listarResueltas,
   contarPendientes,
   buscarSolicitud,
   aprobarSolicitud,

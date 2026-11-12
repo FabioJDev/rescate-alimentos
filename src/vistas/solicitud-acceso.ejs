@@ -13,7 +13,9 @@
   <p class="nota">Deja tus datos. La coordinadora los revisa y, si todo está bien, te crea el usuario y te avisa el PIN
     temporal por teléfono.</p>
 
-  <% if (Object.keys(errores).length > 0) { %>
+  <% if (locals.errorGeneral) { %>
+    <p class="error" role="alert"><%= errorGeneral %></p>
+  <% } else if (Object.keys(errores).length > 0) { %>
     <p class="error" role="alert">No se envió la solicitud. Revisa los campos marcados.</p>
   <% } %>
 
