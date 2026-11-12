@@ -163,8 +163,9 @@ se guarda sin señal**: la página te avisa y la donación se envía sin ella.
 ## El voluntario
 
 1. **Donaciones disponibles.** Aparecen solo las que todavía sirven, de la más urgente a la menos urgente, con el tiempo que
-   queda. Por defecto se ve **tu zona**; se puede pulsar **Ver todas las zonas**. Las que tienen una hora o menos se
-   marcan en **rojo** con **Vence pronto**: es la señal de que hay que apurarse. Si una organización ya la pidió, dice
+   queda. Por defecto se ve **tu zona**; en el selector **Ver zona** puedes elegir **Todas las zonas** o cualquier otra
+   zona en particular (por ejemplo, si vas a estar de paso por otra parte de la ciudad). Las que tienen una hora o menos
+   se marcan en **rojo** con **Vence pronto**: es la señal de que hay que apurarse. Si una organización ya la pidió, dice
    **Llevar a:** con su nombre, dirección y teléfono. Si tiene foto, la puedes ver en **Ver detalle**.
 2. Pulsar **Tomar** y luego **Sí, tomar esta donación**. A partir de ahí es tuya y nadie más puede tomarla. La página muestra
    el **teléfono del comercio** por si necesitas llamarlo.

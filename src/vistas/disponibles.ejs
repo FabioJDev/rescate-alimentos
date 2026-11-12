@@ -11,15 +11,27 @@
   <%- include('_marca') %>
   <h1>Donaciones disponibles</h1>
 
-  <% if (zonaVoluntario) { %>
-    <p class="filtro">
-      <% if (verTodas) { %>
-        Mostrando todas las zonas · <a href="/disponibles">Ver solo mi zona (<%= zonaVoluntario %>)</a>
-      <% } else { %>
-        Mostrando tu zona (<%= zonaVoluntario %>) · <a href="/disponibles?zona=todas">Ver todas las zonas</a>
+  <%# CA-02.3 y CA-02.6: por defecto la zona propia; también se puede ver todas o elegir cualquier otra zona activa. %>
+  <p class="filtro">
+    <% if (verTodas) { %>
+      Mostrando todas las zonas.
+    <% } else { %>
+      Mostrando zona <strong><%= zonaElegida %></strong><%= zonaVoluntario && zonaElegida === zonaVoluntario ? ' (la tuya)' : '' %>.
+    <% } %>
+  </p>
+  <form method="get" action="/disponibles" class="filtro-zona">
+    <label for="zona">Ver zona</label>
+    <select id="zona" name="zona" onchange="this.form.submit()">
+      <% if (zonaVoluntario) { %>
+        <option value="<%= zonaVoluntario %>" <%= !verTodas && zonaElegida === zonaVoluntario ? 'selected' : '' %>>Mi zona (<%= zonaVoluntario %>)</option>
       <% } %>
-    </p>
-  <% } %>
+      <option value="todas" <%= verTodas ? 'selected' : '' %>>Todas las zonas</option>
+      <% zonasActivas.filter((z) => z !== zonaVoluntario).forEach((z) => { %>
+        <option value="<%= z %>" <%= !verTodas && zonaElegida === z ? 'selected' : '' %>><%= z %></option>
+      <% }) %>
+    </select>
+    <button type="submit">Ver</button>
+  </form>
 
   <% if (donaciones.length === 0) { %>
     <p class="vacio">No hay donaciones disponibles en este momento</p>

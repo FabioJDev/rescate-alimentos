@@ -56,6 +56,8 @@ async function crearDonacion({ punto, zona, minutos, estado = 'disponible', tipo
 
 beforeAll(async () => {
   await migrar();
+  // CA-02.6: para poder elegir una zona en particular, tiene que estar en el catálogo de zonas activas.
+  await consultar('INSERT INTO zonas (nombre) VALUES ($1), ($2), ($3)', [zonaPropia, zonaOtra, zonaVacia]);
   donante.id = await crearUsuario(donante, 'donante', zonaPropia);
   voluntario.id = await crearUsuario(voluntario, 'voluntario', zonaPropia);
   voluntarioSinDonaciones.id = await crearUsuario(voluntarioSinDonaciones, 'voluntario', zonaVacia);
@@ -125,7 +127,7 @@ describe('CMP-02 · Donaciones disponibles', () => {
 
     expect(lista.text).toContain(puntos.urgente);
     expect(lista.text).not.toContain(puntos.otraZona);
-    expect(lista.text).toContain('Ver todas las zonas');
+    expect(lista.text).toContain(`Mostrando zona <strong>${zonaPropia}</strong> (la tuya)`);
   });
 
   test('CA-02.3 · el voluntario puede cambiar a «Todas las zonas»', async () => {
@@ -134,7 +136,24 @@ describe('CMP-02 · Donaciones disponibles', () => {
 
     expect(lista.text).toContain(puntos.urgente);
     expect(lista.text).toContain(puntos.otraZona);
-    expect(lista.text).toContain('Ver solo mi zona');
+    expect(lista.text).toContain('Mostrando todas las zonas');
+  });
+
+  test('CA-02.6 · el voluntario puede elegir una zona en particular, distinta de la suya', async () => {
+    const agente = await ingresar(voluntario);
+    const lista = await agente.get(`/disponibles?zona=${encodeURIComponent(zonaOtra)}`);
+
+    expect(lista.text).toContain(puntos.otraZona);
+    expect(lista.text).not.toContain(puntos.urgente);
+    expect(lista.text).toContain(`Mostrando zona <strong>${zonaOtra}</strong>.`);
+  });
+
+  test('CA-02.6 · una zona que no existe en el catálogo se ignora y se usa la zona propia', async () => {
+    const agente = await ingresar(voluntario);
+    const lista = await agente.get('/disponibles?zona=NoExiste');
+
+    expect(lista.text).toContain(puntos.urgente);
+    expect(lista.text).not.toContain(puntos.otraZona);
   });
 
   test('CA-02.5 · si no hay donaciones disponibles se muestra «No hay donaciones disponibles en este momento»', async () => {

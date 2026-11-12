@@ -81,6 +81,9 @@ Donante (comercio), Voluntario y Coordinadora (Marcela y su equipo). Las organiz
   entonces ya no aparece, y en su detalle figura como «Vencida (no recogida)».
 - **CA-02.5** Dado que no hay donaciones disponibles, cuando el voluntario abre la lista, entonces se
   muestra «No hay donaciones disponibles en este momento».
+- **CA-02.6** Dado un voluntario, cuando abre la lista, entonces además de «mi zona» y «todas las zonas» puede
+  elegir una zona activa en particular (por ejemplo, para ver si hay algo que pueda recoger en una zona donde
+  va a estar de paso), y la lista se filtra solo por esa zona.
 
 ## CMP-03 · Tomar una donación, con bloqueo de una segunda toma
 
@@ -636,7 +639,7 @@ acceso desde la página de ingreso se agregó como CMP-24.
 | CMP | CA | Requerimiento de origen | Épica del Módulo 1 | Archivo de prueba |
 |---|---|---|---|---|
 | CMP-01 | CA-01.1 a CA-01.6 | RF-01, RNF-03 | 1 · Gestión de donaciones | `tests/cmp-01.test.js` |
-| CMP-02 | CA-02.1 a CA-02.5 | RF-02, RF-08 | 2 · Coordinación de recogida | `tests/cmp-02.test.js` |
+| CMP-02 | CA-02.1 a CA-02.6 | RF-02, RF-08 | 2 · Coordinación de recogida | `tests/cmp-02.test.js` |
 | CMP-03 | CA-03.1 a CA-03.6 | RF-03, RF-08, RNF-05 | 2 · Coordinación de recogida | `tests/cmp-03.test.js` |
 | CMP-04 | CA-04.1 a CA-04.6 | RF-06, RF-08, RF-09, RNF-05 | 4 y 5 · Trazabilidad / Responsabilidad sanitaria | `tests/cmp-04.test.js` |
 | CMP-05 | CA-05.1 a CA-05.6 | RF-08, RF-06, RNF-05 | 5 · Responsabilidad sanitaria | `tests/cmp-05.test.js` |
