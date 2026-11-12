@@ -92,7 +92,16 @@
     mensajeExito.insertAdjacentElement('afterend', copiar);
   }
 
-  // 6. Modo sin conexión (CMP-08): se carga aparte para que, si falla, lo demás siga funcionando igual.
+  // 6. CA-02.6: al elegir una zona, la lista se actualiza sola. La política de seguridad prohíbe el JavaScript en
+  //    línea (onchange="…"), por eso va aquí. Si este archivo no carga, el botón «Ver» hace lo mismo.
+  var selectorZona = document.querySelector('.filtro-zona select');
+  if (selectorZona) {
+    selectorZona.addEventListener('change', function () {
+      selectorZona.form.submit();
+    });
+  }
+
+  // 7. Modo sin conexión (CMP-08): se carga aparte para que, si falla, lo demás siga funcionando igual.
   var scriptSinConexion = document.createElement('script');
   scriptSinConexion.src = '/sin-conexion.js';
   scriptSinConexion.defer = true;

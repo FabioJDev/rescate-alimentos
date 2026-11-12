@@ -21,7 +21,7 @@
   </p>
   <form method="get" action="/disponibles" class="filtro-zona">
     <label for="zona">Ver zona</label>
-    <select id="zona" name="zona" onchange="this.form.submit()">
+    <select id="zona" name="zona">
       <% if (zonaVoluntario) { %>
         <option value="<%= zonaVoluntario %>" <%= !verTodas && zonaElegida === zonaVoluntario ? 'selected' : '' %>>Mi zona (<%= zonaVoluntario %>)</option>
       <% } %>
