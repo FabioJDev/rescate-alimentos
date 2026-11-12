@@ -127,8 +127,8 @@ describe('CMP-20 · Personas atendidas, sin doble conteo', () => {
     const csv = await agente.get(`/reporte/atenciones.csv?desde=${desde}&hasta=${hasta}`);
     expect(csv.headers['content-type']).toContain('text/csv');
     expect(csv.text.charCodeAt(0)).toBe(0xfeff);
-    expect(csv.text).toContain('Fecha,Organización,Personas atendidas,Registró,Corrigió');
-    expect(csv.text).toContain(`${haceDias(2)},Comedor ${marca},45,Comedor ${marca},Comedor ${marca}`);
+    expect(csv.text).toContain('Fecha;Organización;Personas atendidas;Registró;Corrigió');
+    expect(csv.text).toContain(`${haceDias(2)};Comedor ${marca};45;Comedor ${marca};Comedor ${marca}`);
   });
 
   test('CA-20.6 · nadie más registra, y una organización solo registra para sí misma', async () => {

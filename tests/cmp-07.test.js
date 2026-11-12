@@ -213,7 +213,7 @@ describe('CMP-07 · Reporte del periodo', () => {
     const texto = respuesta.text;
     expect(texto.charCodeAt(0)).toBe(0xfeff); // la marca para que Excel lea las tildes
     const lineas = texto.slice(1).trim().split('\r\n');
-    expect(lineas[0]).toContain('Código,Estado,Tipo de alimento');
+    expect(lineas[0]).toContain('Código;Estado;Tipo de alimento');
     expect(lineas).toHaveLength(1 + 8); // encabezado + 8 donaciones
 
     expect(texto).toContain('Panadería');
@@ -221,6 +221,33 @@ describe('CMP-07 · Reporte del periodo', () => {
     expect(texto).toContain('Vencida (no recogida)');
     // Lo que empieza con «=» se vuelve texto: Excel no lo ejecuta como fórmula.
     expect(texto).toContain(`"'=HYPERLINK(""http://x"")"`);
-    expect(texto).not.toMatch(/,=HYPERLINK/);
+    expect(texto).not.toMatch(/;=HYPERLINK/);
+  });
+
+  test('CA-07.7 · el CSV usa punto y coma y coma decimal, como Excel en español de Colombia', () => {
+    const { aCsv } = require('../src/servicios/reporte');
+    const texto = aCsv([
+      {
+        codigo: 'D-9999',
+        estado: 'disponible',
+        tipo_alimento: 'Panadería',
+        cantidad: '5.5',
+        unidad: 'kg',
+        kg_aproximados: null,
+        zona: 'Norte',
+        donante: 'Panadería; La Espiga',
+        voluntario: null,
+        organizacion: null,
+        recibido_por: null,
+        hora_limite: null,
+        creada_en: null,
+        tomada_en: null,
+        entregada_en: null,
+      },
+    ]);
+    const fila = texto.slice(1).trim().split('\r\n')[1];
+    expect(fila).toContain('D-9999;Disponible;Panadería;5,5;kg;5,5;Norte;');
+    // Un punto y coma dentro de un nombre no parte la columna.
+    expect(fila).toContain(';"Panadería; La Espiga";');
   });
 });

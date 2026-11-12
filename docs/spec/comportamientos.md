@@ -207,6 +207,8 @@ alimento) y por eso se dice así en el reporte y no se suman unidades distintas 
   quién recibió y las fechas de registro, toma y entrega) que se abre bien en Excel, con tildes y ñ.
   *(Cambio con CMP-22: el archivo agrega la columna «Kg aproximados», que trae la cantidad si la unidad es kg o el
   peso aproximado que declaró el comercio. Las personas atendidas tienen su propio CSV, CA-20.5.)*
+  *(Cambio: los dos archivos separan las columnas con punto y coma y escriben los decimales con coma («5,5»), como
+  los espera Excel configurado en español de Colombia. Con comas, Excel ponía cada fila completa en una sola columna.)*
 
 ## CMP-08 · Registrar una donación sin conexión
 
