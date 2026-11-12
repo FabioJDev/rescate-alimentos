@@ -220,7 +220,7 @@ async function rechazarSolicitud(id, coordinadora, motivoTexto) {
       WHERE id = $3`,
     [motivo, coordinadora.id, id]
   );
-  return { rechazada: true };
+  return { rechazada: true, solicitud, motivo };
 }
 
 module.exports = {

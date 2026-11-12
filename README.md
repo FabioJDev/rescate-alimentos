@@ -69,7 +69,7 @@ Para quien reciba el proyecto y quiera seguir construyéndolo.
 2. **Levántalo en tu computador** con los pasos de arriba y corre `npm test` (las pruebas necesitan un PostgreSQL real).
 3. **Ubícate en el código.** Cada petición va de una ruta (`src/rutas/`) a un servicio (`src/servicios/`, donde viven las reglas y
    el SQL) y de ahí a una vista (`src/vistas/`). Hay un archivo de pruebas por comportamiento en `tests/` (`cmp-01.test.js` …
-   `cmp-24.test.js`, más `seguridad.test.js`), y el nombre de cada prueba empieza con el ID de su criterio de aceptación
+   `cmp-25.test.js`, más `seguridad.test.js`), y el nombre de cada prueba empieza con el ID de su criterio de aceptación
    (por ejemplo, `CA-03.2`). `tests/preparar.js` corre antes de cada archivo: aplica las migraciones, limpia el conteo de
    intentos de ingreso y, **solo en la base de pruebas**, hace que los usuarios nazcan con el aviso de privacidad aceptado.
 4. **Trabaja así:** una tarea por rama, un pull request con la plantilla de `.github/`, el check «pruebas» en verde y la
@@ -80,7 +80,8 @@ Para quien reciba el proyecto y quiera seguir construyéndolo.
    corregir, cancelar e intervenir donaciones, teléfonos), la seguridad y los requerimientos que faltaban (CMP-16 a
    CMP-23 y T-SEG: límite de intentos, origen de los formularios y cabeceras, errores con código, nombres sin importar
    mayúsculas, aviso de privacidad, organizaciones con usuario, personas atendidas, por vencer con WhatsApp, kilos
-   aproximados y foto) y solicitar acceso desde la página de ingreso con aprobación de la coordinadora (CMP-24).
+   aproximados y foto), solicitar acceso desde la página de ingreso con aprobación de la coordinadora (CMP-24) y el
+   registro de las acciones de administración (CMP-25).
    Limitaciones conocidas: los recordatorios los envía la coordinadora (no hay envío automático), las
    personas atendidas son atenciones por día y no personas distintas, y el aviso de privacidad es un texto base que la
    fundación debe revisar con apoyo jurídico.

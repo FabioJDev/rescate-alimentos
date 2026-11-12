@@ -14,6 +14,7 @@ const {
 const { listarZonasActivas } = require('../servicios/zonas');
 const { listarOrganizaciones } = require('../servicios/entregas');
 const { formatearFechaHora } = require('../utilidades/fechas');
+const { registrarAccion } = require('../servicios/registro-administracion');
 
 const router = express.Router();
 const soloCoordinadora = requerirRol('coordinadora');
@@ -96,6 +97,12 @@ router.post('/usuarios', soloCoordinadora, async (req, res, next) => {
     const resultado = await crearUsuario(datos);
     if (resultado.errores) return mostrarFormulario(res, 400, { valores, errores: resultado.errores });
 
+    // CA-25.1: el PIN temporal nunca se registra.
+    await registrarAccion(
+      req.session.usuario,
+      'Crear usuario',
+      `Creó el usuario «${resultado.usuario.nombre}» (${NOMBRES_DE_ROL[resultado.usuario.rol]}).`
+    );
     res.status(201).render('usuario-pin', { usuario: resultado.usuario, pin: resultado.pin, nuevo: true });
   } catch (error) {
     next(error);
@@ -133,6 +140,11 @@ router.post('/usuarios/:id(\\d+)', soloCoordinadora, async (req, res, next) => {
     const resultado = await editarUsuario(usuario.id, datos, yo);
     if (resultado.errores) return mostrarFormulario(res, 400, { usuario, valores, errores: resultado.errores });
 
+    await registrarAccion(
+      yo,
+      'Editar usuario',
+      `Editó los datos de «${datos.nombre}»${usuario.nombre !== datos.nombre ? ` (antes «${usuario.nombre}»)` : ''}.`
+    );
     if (usuario.id === yo.id) req.session.usuario = { ...yo, nombre: datos.nombre, zona: datos.zona };
     req.session.aviso = `Datos de «${datos.nombre}» guardados.`;
     res.redirect('/usuarios');
@@ -148,6 +160,11 @@ router.post('/usuarios/:id(\\d+)/:accion(desactivar|activar)', soloCoordinadora,
     const resultado = await cambiarActivo(Number(req.params.id), activo, req.session.usuario);
     if (resultado.noExiste) return noExiste(res);
     if (resultado.error) return mostrarLista(req, res, { estado: 409, error: resultado.error });
+    await registrarAccion(
+      req.session.usuario,
+      activo ? 'Reactivar usuario' : 'Desactivar usuario',
+      `${activo ? 'Reactivó' : 'Desactivó'} el usuario «${resultado.usuario.nombre}».`
+    );
     req.session.aviso = `«${resultado.usuario.nombre}» ${activo ? 'activado' : 'desactivado'}.`;
     res.redirect('/usuarios');
   } catch (error) {

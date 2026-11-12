@@ -30,6 +30,7 @@ const rutasAtenciones = require('./rutas/atenciones');
 const rutasPorVencer = require('./rutas/por-vencer');
 const rutasFotos = require('./rutas/fotos');
 const rutasSolicitudes = require('./rutas/solicitudes');
+const rutasRegistroAdministracion = require('./rutas/registro-administracion');
 const { contarPorVencer } = require('./servicios/por-vencer');
 const { contarPendientes: contarSolicitudesPendientes } = require('./servicios/solicitudes');
 
@@ -134,6 +135,7 @@ app.use(rutasAtenciones);
 app.use(rutasPorVencer);
 app.use(rutasFotos);
 app.use(rutasSolicitudes);
+app.use(rutasRegistroAdministracion);
 
 // Pantalla de inicio: los accesos de cada rol. Muestra una vez el aviso de la última acción (por ejemplo, PIN cambiado).
 app.get('/', requerirSesion, async (req, res, next) => {

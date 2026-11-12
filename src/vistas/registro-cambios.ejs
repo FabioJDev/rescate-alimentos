@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registro de cambios · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca') %>
+  <h1>Registro de cambios</h1>
+  <p class="nota">Quién cambió usuarios, zonas, organizaciones y solicitudes de acceso, y cuándo. Se muestran las últimas
+    <%= ultimas %> acciones. Lo que pasa con cada donación está en su propio historial.</p>
+
+  <% if (acciones.length === 0) { %>
+    <p class="vacio">Todavía no hay cambios registrados.</p>
+  <% } else { %>
+    <ul class="lista-donaciones">
+      <% acciones.forEach((a) => { %>
+        <li class="tarjeta">
+          <p class="tarjeta-titulo"><%= a.accion %></p>
+          <p><%= a.detalle %></p>
+          <p class="nota">Por <%= a.usuario_nombre %>, el <%= a.fechaTexto %></p>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</body>
+</html>

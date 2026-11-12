@@ -79,6 +79,9 @@ Todo esto está en el inicio, en **Administración**. Solo la coordinadora lo ve
   días**, con quién las resolvió, cuándo y el motivo del rechazo: sirve para responder si alguien llama a preguntar.
   Desde una misma conexión se pueden enviar hasta 5 solicitudes por hora; si alguien no puede enviar la suya, que llame
   y la coordinadora lo crea a mano.
+- **Registro de cambios.** Muestra quién creó, editó, desactivó o reactivó usuarios, zonas y organizaciones, quién
+  restableció un PIN y quién aprobó o rechazó una solicitud, con la fecha y la hora (las últimas 100 acciones). Sirve
+  cuando varias personas coordinan y alguien pregunta «¿quién desactivó a tal voluntario?». Nunca muestra un PIN.
 
 ### Donaciones del día a día
 
