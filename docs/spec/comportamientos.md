@@ -592,16 +592,44 @@ donación antes de ir. Ver [ADR-007](../decisiones/ADR-007-fotos-en-la-base-de-d
 
 ---
 
+## CMP-24 · Solicitar acceso desde la página de ingreso
+
+**Origen:** tarjeta #107 · Hasta ahora los usuarios los crea la coordinadora a mano (ADR-005); esto abre una puerta de
+autoservicio sin perder el control: nadie entra a la aplicación sin que la coordinadora revise y apruebe primero.
+
+- **CA-24.1** Dado un visitante sin sesión, cuando abre «Ingresar», entonces ve un enlace «¿No tienes cuenta? Solicita
+  acceso» que lleva al formulario de solicitud.
+- **CA-24.2** Dado el formulario de solicitud, cuando se llena, entonces pide nombre, teléfono, el rol que necesita
+  (comercio, voluntario u organización receptora; la coordinadora no se solicita, se designa a mano) y, según el rol,
+  la zona o la organización a la que pertenece: los mismos datos obligatorios que ya exige crear ese rol (CMP-10).
+- **CA-24.3** Dado un campo obligatorio vacío o inválido, cuando se envía, entonces se rechaza con un mensaje
+  específico por campo (igual que el resto de los formularios) y no se guarda nada.
+- **CA-24.4** Dado un nombre que ya usa un usuario, cuando se envía la solicitud, entonces se rechaza indicando que ya
+  existe una cuenta con ese nombre y que, si es suya, le pida a la coordinadora que le restablezca el PIN (CMP-11).
+- **CA-24.5** Dado un nombre con una solicitud pendiente sin resolver, cuando se envía otra solicitud con el mismo
+  nombre, entonces se rechaza indicando que ya hay una solicitud esperando revisión.
+- **CA-24.6** Dada una solicitud válida, cuando se envía, entonces queda «pendiente» y se muestra un mensaje de
+  confirmación; no se crea ningún usuario todavía.
+- **CA-24.7** Dada la coordinadora, cuando abre «Solicitudes de acceso», entonces ve las pendientes (las más
+  antiguas primero) con sus datos, y desde «Inicio» ve cuántas hay pendientes (igual que «Por vencer», CA-21.1).
+- **CA-24.8** Dada una solicitud pendiente, cuando la coordinadora la aprueba, entonces se crea el usuario igual que
+  si lo hubiera creado a mano (CMP-10): activo, con un PIN temporal que se muestra una sola vez, y la solicitud pasa
+  a «aprobada» con quién y cuándo.
+- **CA-24.9** Dada una solicitud pendiente, cuando la coordinadora la rechaza, entonces pide un motivo breve, la
+  solicitud pasa a «rechazada» con ese motivo, y no se crea ningún usuario.
+- **CA-24.10** Dada una solicitud que ya fue aprobada o rechazada, cuando se intenta aprobarla o rechazarla de nuevo
+  (por ejemplo, dos pestañas abiertas), entonces se rechaza: ya está resuelta.
+- **CA-24.11** Dado alguien que no es coordinadora, cuando intenta abrir «Solicitudes de acceso» o resolver una,
+  entonces se rechaza (RNF-04). El formulario para solicitar, en cambio, no pide sesión: es antes de tener cuenta.
+
 ## Fuera del alcance del MVP
 
 Panel de indicadores, notificaciones automáticas por SMS o push (RF-10 se cubre con recordatorios por WhatsApp que
 envía la coordinadora, CMP-21) y asignación automática de destino (el destino lo pide la organización, CMP-19). Soltar
 una donación, el reporte del periodo (RF-07) y el modo sin conexión para registrar (RNF-01) quedaron fuera del MVP y
 se agregaron en la 3C como CMP-06, CMP-07 y CMP-08. La administración se agregó como CMP-09 a CMP-15, y la seguridad y
-los requerimientos que faltaban como CMP-16 a CMP-23 y T-SEG.1 y T-SEG.2: ver [plan técnico](plan-tecnico.md).
-
-Pendiente, todavía sin especificar: **solicitar acceso** desde la página de ingreso, con aprobación de la coordinadora
-(tarjeta #107; será CMP-24). Hasta entonces no hay registro libre: los usuarios los crea la coordinadora (ADR-005).
+los requerimientos que faltaban como CMP-16 a CMP-23 y T-SEG.1 y T-SEG.2: ver [plan técnico](plan-tecnico.md). Solicitar
+acceso desde la página de ingreso se agregó como CMP-24.
 
 ## Tabla de trazabilidad
 
@@ -631,3 +659,4 @@ Pendiente, todavía sin especificar: **solicitar acceso** desde la página de in
 | CMP-21 | CA-21.1 a CA-21.7 | RF-10 | 1 · Gestión de donaciones | `tests/cmp-21.test.js` |
 | CMP-22 | CA-22.1 a CA-22.4 | RF-07 | 4 · Trazabilidad y reportes | `tests/cmp-22.test.js` |
 | CMP-23 | CA-23.1 a CA-23.5 | RF-01, RNF-02 | 1 · Gestión de donaciones | `tests/cmp-23.test.js` |
+| CMP-24 | CA-24.1 a CA-24.11 | RNF-04, RNF-08 | 5 · Responsabilidad sanitaria | `tests/cmp-24.test.js` |

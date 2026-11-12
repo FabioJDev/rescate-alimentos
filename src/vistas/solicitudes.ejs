@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solicitudes de acceso · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca') %>
+  <h1>Solicitudes de acceso</h1>
+
+  <% if (aviso) { %><p class="exito" role="status"><%= aviso %></p><% } %>
+
+  <% if (pendientes.length === 0) { %>
+    <p class="vacio">No hay solicitudes pendientes.</p>
+  <% } else { %>
+    <ul class="lista-donaciones">
+      <% pendientes.forEach((s) => { %>
+        <li class="tarjeta">
+          <p class="tarjeta-titulo"><%= s.nombre %></p>
+          <p><%= nombresDeRol[s.rol] %><%= s.zona ? ' · zona ' + s.zona : '' %><%= s.organizacion_nombre ? ' · ' + s.organizacion_nombre : '' %></p>
+          <p>Teléfono: <%= s.telefono %></p>
+          <% if (s.direccion) { %><p>Dirección: <%= s.direccion %></p><% } %>
+          <p>Solicitada el <%= s.creadaTexto %></p>
+          <form method="post" action="/solicitudes/<%= s.id %>/aprobar">
+            <button type="submit">Aprobar</button>
+          </form>
+          <p><a class="boton boton-secundario" href="/solicitudes/<%= s.id %>/rechazar">Rechazar</a></p>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</body>
+</html>

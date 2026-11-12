@@ -29,7 +29,9 @@ const rutasRecepcion = require('./rutas/recepcion');
 const rutasAtenciones = require('./rutas/atenciones');
 const rutasPorVencer = require('./rutas/por-vencer');
 const rutasFotos = require('./rutas/fotos');
+const rutasSolicitudes = require('./rutas/solicitudes');
 const { contarPorVencer } = require('./servicios/por-vencer');
+const { contarPendientes: contarSolicitudesPendientes } = require('./servicios/solicitudes');
 
 const app = express();
 const enProduccion = process.env.NODE_ENV === 'production';
@@ -131,6 +133,7 @@ app.use(rutasRecepcion);
 app.use(rutasAtenciones);
 app.use(rutasPorVencer);
 app.use(rutasFotos);
+app.use(rutasSolicitudes);
 
 // Pantalla de inicio: los accesos de cada rol. Muestra una vez el aviso de la última acción (por ejemplo, PIN cambiado).
 app.get('/', requerirSesion, async (req, res, next) => {
@@ -139,8 +142,10 @@ app.get('/', requerirSesion, async (req, res, next) => {
     delete req.session.aviso;
     const usuario = req.session.usuario;
     // CA-21.1: la coordinadora ve cuántas donaciones están por vencer.
+    // CA-24.7: y cuántas solicitudes de acceso esperan revisión.
     const porVencer = usuario.rol === 'coordinadora' ? await contarPorVencer() : 0;
-    res.render('inicio', { usuario, aviso, porVencer });
+    const solicitudesPendientes = usuario.rol === 'coordinadora' ? await contarSolicitudesPendientes() : 0;
+    res.render('inicio', { usuario, aviso, porVencer, solicitudesPendientes });
   } catch (error) {
     next(error);
   }

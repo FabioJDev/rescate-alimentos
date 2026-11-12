@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rechazar solicitud · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/solicitudes', volverNombre: 'Solicitudes de acceso' }) %>
+  <h1>¿Rechazar la solicitud de «<%= solicitud.nombre %>»?</h1>
+
+  <% if (error) { %><p class="error" role="alert"><%= error %></p><% } %>
+
+  <form method="post" action="/solicitudes/<%= solicitud.id %>/rechazar" novalidate>
+    <label for="motivo">Motivo (se lo puedes explicar a la persona por teléfono)</label>
+    <input id="motivo" name="motivo" type="text" maxlength="200" value="<%= motivo %>" required>
+    <button type="submit">Rechazar</button>
+  </form>
+
+  <p><a class="boton boton-secundario" href="/solicitudes">No, volver</a></p>
+</body>
+</html>

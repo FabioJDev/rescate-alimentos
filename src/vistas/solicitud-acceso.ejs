@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solicitar acceso · Rescate de Alimentos</title>
+  <link rel="stylesheet" href="/estilos.css">
+  <script src="/interaccion.js" defer></script>
+</head>
+<body>
+  <%- include('_marca', { volverA: '/ingreso', volverNombre: 'Ingresar' }) %>
+  <h1>Solicitar acceso</h1>
+  <p class="nota">Deja tus datos. La coordinadora los revisa y, si todo está bien, te crea el usuario y te avisa el PIN
+    temporal por teléfono.</p>
+
+  <% if (Object.keys(errores).length > 0) { %>
+    <p class="error" role="alert">No se envió la solicitud. Revisa los campos marcados.</p>
+  <% } %>
+
+  <form method="post" action="/solicitar-acceso" novalidate>
+    <label for="nombre">Nombre y apellido (con este nombre vas a entrar)</label>
+    <input id="nombre" name="nombre" type="text" maxlength="80" value="<%= valores.nombre %>" required>
+    <% if (errores.nombre) { %><p class="error-campo" role="alert"><%= errores.nombre %></p><% } %>
+
+    <label for="telefono">Teléfono</label>
+    <input id="telefono" name="telefono" type="tel" inputmode="tel" maxlength="25" value="<%= valores.telefono %>" required>
+    <% if (errores.telefono) { %><p class="error-campo" role="alert"><%= errores.telefono %></p><% } %>
+
+    <label for="rol">¿Qué necesitas ser?</label>
+    <select id="rol" name="rol" required>
+      <option value="">Elige una opción</option>
+      <% roles.forEach((r) => { %>
+        <option value="<%= r %>" <%= valores.rol === r ? 'selected' : '' %>><%= nombresDeRol[r] %></option>
+      <% }) %>
+    </select>
+    <% if (errores.rol) { %><p class="error-campo" role="alert"><%= errores.rol %></p><% } %>
+
+    <label for="zona">Zona (para comercio o voluntario)</label>
+    <select id="zona" name="zona">
+      <option value="">Sin zona</option>
+      <% zonas.forEach((z) => { %>
+        <option value="<%= z %>" <%= valores.zona === z ? 'selected' : '' %>><%= z %></option>
+      <% }) %>
+    </select>
+    <% if (errores.zona) { %><p class="error-campo" role="alert"><%= errores.zona %></p><% } %>
+
+    <label for="organizacion_id">Organización a la que perteneces (solo si pides acceso como organización receptora)</label>
+    <select id="organizacion_id" name="organizacion_id">
+      <option value="">Ninguna</option>
+      <% organizaciones.forEach((o) => { %>
+        <option value="<%= o.id %>" <%= valores.organizacion_id === String(o.id) ? 'selected' : '' %>><%= o.nombre %></option>
+      <% }) %>
+    </select>
+    <% if (errores.organizacion_id) { %><p class="error-campo" role="alert"><%= errores.organizacion_id %></p><% } %>
+
+    <label for="direccion">Dirección del comercio (solo comercios; es el punto de recogida por defecto)</label>
+    <input id="direccion" name="direccion" type="text" maxlength="150" value="<%= valores.direccion %>">
+    <% if (errores.direccion) { %><p class="error-campo" role="alert"><%= errores.direccion %></p><% } %>
+
+    <button type="submit">Enviar solicitud</button>
+  </form>
+</body>
+</html>
