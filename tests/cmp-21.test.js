@@ -111,6 +111,27 @@ describe('CMP-21 · Donaciones por vencer y recordatorio por WhatsApp', () => {
     expect((await agente.get('/mis-recogidas')).text).toContain('Vence pronto');
   });
 
+  test('CA-21.5 · el tiempo restante de lo que vence pronto se pinta en rojo, y el de lo demás no', async () => {
+    const pronto = await crearDonacion(20);
+    const lejos = await crearDonacion(240);
+    await crearDonacion(35, u.Ana);
+    const agente = await ingresar('Ana');
+    const disponibles = (await agente.get('/disponibles')).text;
+    const tarjeta = (codigo) => disponibles.slice(disponibles.lastIndexOf('<li', disponibles.indexOf(`/donaciones/${codigo}/tomar`)), disponibles.indexOf(`/donaciones/${codigo}/tomar`));
+    expect(tarjeta(pronto)).toContain('class="restante vence-pronto"');
+    expect(tarjeta(lejos)).toContain('class="restante"');
+    expect(tarjeta(lejos)).not.toContain('vence-pronto');
+    expect((await agente.get('/mis-recogidas')).text).toContain('class="restante vence-pronto"');
+
+    // La clase «vence-pronto» es la que pinta en rojo (--remolacha), y va después de «restante» para ganarle al naranja.
+    const estilos = (await request(app).get('/estilos.css')).text;
+    const rojo = /--remolacha:\s*(#[0-9a-f]{6})/i.exec(estilos)[1];
+    expect(rojo.toLowerCase()).toBe('#a8283f');
+    const regla = /\.vence-pronto\s*\{([^}]*)\}/.exec(estilos)[1];
+    expect(regla).toContain('background: var(--remolacha)');
+    expect(estilos.indexOf('.vence-pronto {')).toBeGreaterThan(estilos.indexOf('.restante {'));
+  });
+
   test('CA-21.6 · sin teléfono registrado no hay botón, se dice', async () => {
     const codigo = await crearDonacion(20);
     const agente = await ingresar('Marcela');
