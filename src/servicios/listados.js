@@ -8,23 +8,33 @@ const COLUMNAS = `d.codigo, d.tipo_alimento, d.cantidad, d.unidad, d.estado, d.h
                   donante.nombre AS donante_nombre,
                   (d.estado = 'disponible' AND d.hora_limite <= now()) AS vencida`;
 
-// CA-05.5: todas las donaciones, de la más reciente a la más antigua, con filtro opcional por estado.
-// El filtro «disponible» deja fuera las vencidas, porque en pantalla figuran como «Vencida (no recogida)».
-async function listarTodas({ estado = null } = {}) {
+// CA-05.5: el filtro «disponible» deja fuera las vencidas, porque en pantalla figuran como «Vencida (no recogida)».
+const CONDICION_DE_ESTADO = `$1::text IS NULL
+         OR ($1 = 'vencida'    AND d.estado = 'disponible' AND d.hora_limite <= now())
+         OR ($1 = 'disponible' AND d.estado = 'disponible' AND d.hora_limite >  now())
+         OR ($1 IN ('asignada', 'entregada', 'cancelada') AND d.estado = $1)`;
+
+const POR_PAGINA = 50;
+
+// CA-05.5 y CA-05.7: todas las donaciones, de la más reciente a la más antigua, de 50 en 50, con filtro opcional por
+// estado. Una página fuera de rango se lleva a la última que tiene donaciones.
+async function listarTodas({ estado = null, pagina = 1 } = {}) {
   const filtro = FILTROS.includes(estado) ? estado : null;
+  const conteo = await consultar(`SELECT count(*)::int AS total FROM donaciones d WHERE ${CONDICION_DE_ESTADO}`, [filtro]);
+  const total = conteo.rows[0].total;
+  const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
+  const actual = Math.min(Math.max(1, pagina), paginas);
+
   const r = await consultar(
     `SELECT ${COLUMNAS}
        FROM donaciones d
        JOIN usuarios donante ON donante.id = d.donante_id
-      WHERE $1::text IS NULL
-         OR ($1 = 'vencida'    AND d.estado = 'disponible' AND d.hora_limite <= now())
-         OR ($1 = 'disponible' AND d.estado = 'disponible' AND d.hora_limite >  now())
-         OR ($1 IN ('asignada', 'entregada', 'cancelada') AND d.estado = $1)
+      WHERE ${CONDICION_DE_ESTADO}
       ORDER BY d.creada_en DESC, d.id DESC
-      LIMIT 200`,
-    [filtro]
+      LIMIT $2 OFFSET $3`,
+    [filtro, POR_PAGINA, (actual - 1) * POR_PAGINA]
   );
-  return r.rows;
+  return { donaciones: r.rows, total, pagina: actual, paginas };
 }
 
 // CA-05.6: las donaciones de un donante (las que él registró y las que la coordinadora registró a su nombre).
@@ -43,4 +53,4 @@ async function listarDeDonante(donanteId) {
   return r.rows;
 }
 
-module.exports = { FILTROS, listarTodas, listarDeDonante };
+module.exports = { FILTROS, POR_PAGINA, listarTodas, listarDeDonante };

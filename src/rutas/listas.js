@@ -21,8 +21,16 @@ function paraMostrar(donacion) {
 router.get('/todas', requerirRol('coordinadora'), async (req, res, next) => {
   try {
     const estado = FILTROS.includes(req.query.estado) ? req.query.estado : null;
-    const donaciones = (await listarTodas({ estado })).map(paraMostrar);
-    res.render('todas', { donaciones, estado, filtros: FILTROS });
+    const paginaPedida = Number.parseInt(req.query.pagina, 10);
+    const resultado = await listarTodas({ estado, pagina: Number.isInteger(paginaPedida) ? paginaPedida : 1 });
+    res.render('todas', {
+      donaciones: resultado.donaciones.map(paraMostrar),
+      total: resultado.total,
+      pagina: resultado.pagina,
+      paginas: resultado.paginas,
+      estado,
+      filtros: FILTROS,
+    });
   } catch (error) {
     next(error);
   }

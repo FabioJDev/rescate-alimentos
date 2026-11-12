@@ -20,10 +20,12 @@
     <a href="/todas?estado=cancelada" <%= estado === 'cancelada' ? 'class=filtro-activo' : '' %>>Canceladas</a>
   </nav>
 
+  <%# CA-05.7: de 50 en 50; los enlaces conservan el filtro por estado. %>
+  <% const conFiltro = (p) => '/todas?' + (estado ? 'estado=' + estado + '&' : '') + 'pagina=' + p; %>
   <% if (donaciones.length === 0) { %>
     <p class="vacio">No hay donaciones con ese estado.</p>
   <% } else { %>
-    <p><%= donaciones.length %> donación(es)</p>
+    <p><%= total %> donación(es)<% if (paginas > 1) { %> · página <%= pagina %> de <%= paginas %><% } %></p>
     <ul class="lista-donaciones">
       <% donaciones.forEach((d) => { %>
         <li class="tarjeta tarjeta-<%= d.estadoClase %>">
@@ -35,6 +37,12 @@
         </li>
       <% }) %>
     </ul>
+    <% if (paginas > 1) { %>
+      <nav class="fichas" aria-label="Páginas">
+        <% if (pagina > 1) { %><a href="<%= conFiltro(pagina - 1) %>">« Más recientes</a><% } %>
+        <% if (pagina < paginas) { %><a href="<%= conFiltro(pagina + 1) %>">Más antiguas »</a><% } %>
+      </nav>
+    <% } %>
   <% } %>
 
 </body>
