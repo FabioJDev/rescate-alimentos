@@ -4,7 +4,7 @@ Generado con `npm run cobertura:criterios` a partir de `docs/spec/comportamiento
 en `tests/`. Cada prueba empieza con el identificador del criterio que cubre (por ejemplo, `CA-03.2 · …`); esta tabla
 cuenta cuántas lo nombran y en qué archivo. No hay que editarla a mano: se vuelve a generar.
 
-**173 criterios, 173 con al menos una prueba que los nombra.**
+**174 criterios, 174 con al menos una prueba que los nombra.**
 
 
 ## CMP-01 · Registrar una donación
@@ -209,6 +209,7 @@ cuenta cuántas lo nombran y en qué archivo. No hay que editarla a mano: se vue
 |---|---|---|
 | CA-SEG.4 | 1 | `tests/seguridad.test.js` |
 | CA-SEG.5 | 1 | `tests/seguridad.test.js` |
+| CA-SEG.6 | 1 | `tests/seguridad.test.js` |
 
 ## CMP-17 · Nombres de usuario fáciles de distinguir y de escribir
 
