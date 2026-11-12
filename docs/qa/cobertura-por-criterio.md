@@ -262,7 +262,7 @@ cuenta cuántas lo nombran y en qué archivo. No hay que editarla a mano: se vue
 | CA-21.2 | 1 | `tests/cmp-21.test.js` |
 | CA-21.3 | 1 | `tests/cmp-21.test.js` |
 | CA-21.4 | 1 | `tests/cmp-21.test.js` |
-| CA-21.5 | 1 | `tests/cmp-21.test.js` |
+| CA-21.5 | 2 | `tests/cmp-21.test.js` |
 | CA-21.6 | 1 | `tests/cmp-21.test.js` |
 | CA-21.7 | 1 | `tests/cmp-21.test.js` |
 | CA-21.8 | 3 | `tests/cmp-21.test.js` |
