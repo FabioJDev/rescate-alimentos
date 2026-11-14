@@ -7,7 +7,7 @@ Este documento separa con cuidado **qué se ejecutó** y **quién lo verificó**
 automáticas las corre el CI; la verificación independiente a mano la tiene que hacer una persona distinta de quien
 escribió el código. La verificación independiente se hizo el 29 de octubre de 2026 y está en la sección 5, con lo que sí se probó y lo que no.
 
-La tabla completa de **los 173 criterios** (CMP-01 a CMP-25 y T-SEG), con qué archivo y cuántas pruebas nombran a cada uno, está
+La tabla completa de **los 174 criterios** (CMP-01 a CMP-25 y T-SEG), con qué archivo y cuántas pruebas nombran a cada uno, está
 en [`cobertura-por-criterio.md`](cobertura-por-criterio.md). No se edita a mano: se genera con `npm run cobertura:criterios`,
 que además falla si algún criterio se queda sin prueba.
 
@@ -220,6 +220,15 @@ desplegada:
 - CMP-24 y CMP-25, y los criterios nuevos o cambiados CA-01.3, CA-02.6, CA-05.7, CA-07.7, CA-21.8 y CA-21.9 (12 de noviembre).
 
 Quien los verifique agrega su fila en la tabla de la sección 5.
+
+## 5b. Las pruebas, probadas: quitar la protección y ver que fallan
+
+Una prueba que pasa siempre no prueba nada. Por eso dos pruebas se validaron viéndolas fallar:
+
+| Qué se hizo | Dónde | Resultado |
+|---|---|---|
+| Se quitó a propósito `AND estado = 'disponible'` de la toma atómica (ADR-001), la condición que impide la segunda toma | PR [#122](https://github.com/FabioJDev/rescate-alimentos/pull/122), cerrado sin integrar | El check «pruebas» **falló con 8 pruebas en rojo**, entre ellas las dos de concurrencia de CA-03.2 (dos tomas a la vez y 15 tomas simultáneas), CA-03.3, CA-03.5, CA-06.6 y CA-13.8 |
+| Se subió la prueba de CA-SEG.6 antes de su arreglo | PR [#121](https://github.com/FabioJDev/rescate-alimentos/pull/121), commit de la prueba | El check falló (1 prueba en rojo); con el commit del arreglo pasaron las 288 |
 
 ## 6. Riesgos y lo que este plan no cubre
 
